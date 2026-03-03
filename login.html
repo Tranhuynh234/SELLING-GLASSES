@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>EYEGLASSES - Login & Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *{ margin:0; padding:0; box-sizing:border-box; font-family:Segoe UI, Arial; }
+        body{
+            height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden;
+            background:linear-gradient(-45deg,#f5efe6,#e8dccb,#f3e7d3,#e6d3b3);
+            background-size:400% 400%; animation:bg 12s infinite ease;
+        }
+        @keyframes bg{ 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+        .circle{
+            position:absolute; border-radius:50%; background:rgba(255,255,255,0.35);
+            backdrop-filter:blur(10px); animation:float 8s infinite ease-in-out;
+        }
+        .c1{width:300px;height:300px;top:-80px;left:-80px;}
+        .c2{width:250px;height:250px;bottom:-60px;right:-60px;animation-delay:2s;}
+        .c3{width:150px;height:150px;top:60%;left:20%;animation-delay:4s;}
+        @keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-40px);} }
+        .card{
+            width:950px; height:560px; display:flex; border-radius:25px; overflow:hidden; position:relative;
+            background:rgba(255,255,255,0.35); backdrop-filter:blur(25px);
+            box-shadow: 0 0 40px rgba(0,0,0,0.2), 0 0 120px rgba(214,185,140,0.4);
+            animation:fade 1s ease;
+        }
+        .card::before{
+            content:""; position:absolute; inset:-2px; border-radius:25px;
+            background:linear-gradient(90deg,#d6b98c,#ffffff,#e6c79c);
+            background-size:300%; z-index:-1; animation:borderMove 6s linear infinite;
+        }
+        @keyframes borderMove{ 0%{background-position:0%;} 100%{background-position:300%;} }
+        @keyframes fade{ from{ opacity:0; transform:translateY(50px) scale(.95); } to{ opacity:1; transform:translateY(0) scale(1); } }
+        .left{ width:55%; padding:70px; color:#3b3b3b; display:flex; flex-direction:column; justify-content:center; }
+        .logo{ font-size:32px; font-weight:bold; letter-spacing:4px; margin-bottom:20px; color:#b08d57; }
+        .left h1{ font-size:42px; margin-bottom:20px; }
+        .left p{ opacity:.9; line-height:1.7; }
+        .right{ width:45%; background:white; padding:60px; display:flex; flex-direction:column; justify-content:center; border-top-left-radius:60px; transition: 0.5s; }
+        .right h2{ text-align:center; margin-bottom:35px; }
+        .input-box{ position:relative; margin-bottom:22px; }
+        .input-box input{ width:100%; padding:14px 45px; border-radius:12px; border:1px solid #ddd; font-size:15px; transition:.3s; outline:none; }
+        .input-box i{ position:absolute; left:15px; top:50%; transform:translateY(-50%); color:#b08d57; }
+        .input-box input:focus{ border:1px solid #d6b98c; box-shadow:0 0 15px rgba(214,185,140,.5); }
+        button{ padding:14px; border:none; border-radius:12px; background:#b08d57; color:white; font-size:16px; cursor:pointer; transition:.4s; width: 100%; font-weight: bold; }
+        button:hover{ background:#d6b98c; transform:translateY(-3px) scale(1.02); box-shadow:0 15px 30px rgba(214,185,140,.6); }
+        .extra{ text-align:center; margin-top:18px; color:#777; font-size: 14px; }
+        .extra a{ color:#b08d57; text-decoration:none; font-weight:bold; cursor: pointer; }
+
+        /* CSS BỔ SUNG CHO CÁC TRẠNG THÁI */
+        .hidden { display: none !important; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .badge-admin { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .badge-user { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .dashboard-ui { text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="circle c3"></div>
+
+    <div class="card">
+        <div class="left">
+            <div class="logo">EYEGLASSES</div>
+            <h1>Virtual Try-On</h1>
+            <p>
+                Trải nghiệm thử kính online với công nghệ AI nhận diện khuôn mặt.
+                Chọn phong cách phù hợp chỉ trong vài giây.
+            </p>
+        </div>
+
+        <div class="right">
+            
+            <div id="login-box">
+                <h2>Đăng nhập</h2>
+                <div class="input-box">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email" required>
+                </div>
+                <div class="input-box">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="password" placeholder="Mật khẩu" required>
+                </div>
+                <button onclick="handleLogin()">ĐĂNG NHẬP</button>
+                <div class="extra">
+                    Chưa có tài khoản? <a onclick="toggleForm()">Đăng ký</a>
+                </div>
+            </div>
+
+            <div id="register-box" class="hidden">
+                <h2>Đăng ký</h2>
+                <div class="input-box">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" placeholder="Họ và tên">
+                </div>
+                <div class="input-box">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" placeholder="Email">
+                </div>
+                <div class="input-box">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" placeholder="Mật khẩu">
+                </div>
+                <button onclick="alert('Đăng ký thành công!')">TẠO TÀI KHOẢN</button>
+                <div class="extra">
+                    Đã có tài khoản? <a onclick="toggleForm()">Đăng nhập</a>
+                </div>
+            </div>
+
+            <div id="dashboard" class="hidden dashboard-ui">
+                <div id="role-badge"></div>
+                <h2 id="welcome-text">Chào mừng!</h2>
+                <p id="role-desc" style="font-size: 14px; color: #666; margin-bottom: 25px;"></p>
+                
+                <div id="admin-btns" class="hidden">
+                    <button style="background: #333; margin-bottom: 10px;">QUẢN LÝ KHO HÀNG</button>
+                    <button style="background: #333;">QUẢN TRỊ VIÊN</button>
+                </div>
+                
+                <div id="user-btns" class="hidden">
+                    <button>BẮT ĐẦU THỬ KÍNH</button>
+                    <button style="background: white; color: #b08d57; border: 1px solid #b08d57; margin-top: 10px;">XEM SẢN PHẨM</button>
+                </div>
+
+                <button onclick="location.reload()" style="background: #777; margin-top: 30px; padding: 10px; font-size: 13px;">Đăng xuất</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Hàm chuyển đổi giữa Đăng ký và Đăng nhập
+        function toggleForm() {
+            document.getElementById('login-box').classList.toggle('hidden');
+            document.getElementById('register-box').classList.toggle('hidden');
+        }
+
+        // Hàm xử lý Đăng nhập và Phân quyền
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+
+            if(!email || !pass) {
+                alert("Vui lòng nhập đầy đủ email và mật khẩu!");
+                return;
+            }
+
+            // Ẩn các form cũ
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('register-box').classList.add('hidden');
+            
+            // Hiện dashboard
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            const badge = document.getElementById('role-badge');
+            const welcome = document.getElementById('welcome-text');
+            const desc = document.getElementById('role-desc');
+
+            // KIỂM TRA PHÂN QUYỀN
+            if(email.toLowerCase().endsWith('@admin.com')) {
+                // Là Admin
+                badge.innerHTML = '<span class="badge badge-admin">Quản trị viên</span>';
+                welcome.innerText = "Hệ thống Quản trị";
+                desc.innerText = "Bạn có toàn quyền chỉnh sửa sản phẩm và quản lý người dùng.";
+                document.getElementById('admin-btns').classList.remove('hidden');
+            } else {
+                // Là Khách hàng
+                badge.innerHTML = '<span class="badge badge-user">Khách hàng</span>';
+                welcome.innerText = "Chào mừng bạn!";
+                desc.innerText = "Hãy trải nghiệm công nghệ thử kính AI hiện đại nhất của chúng tôi.";
+                document.getElementById('user-btns').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
