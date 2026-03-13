@@ -1,0 +1,44 @@
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0c0a09; /* stone-950 */
+    color: #a8a29e; /* stone-400 */
+}
+
+/* Thẻ Deadline nhấp nháy màu đỏ cảnh báo */
+.urgent-deadline {
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.05);
+    animation: pulseBorder 2s infinite;
+}
+
+@keyframes pulseBorder {
+    0% { border-color: rgba(239, 68, 68, 0.2); }
+    50% { border-color: rgba(239, 68, 68, 0.6); }
+    100% { border-color: rgba(239, 68, 68, 0.2); }
+}
+
+/* Các thông số kỹ thuật Rx */
+.rx-table {
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.rx-row {
+    background-color: #1c1917; /* stone-900 */
+    transition: transform 0.2s;
+}
+
+.rx-row:hover {
+    transform: scale(1.01);
+    background-color: #292524;
+}
+
+/* Trạng thái máy móc */
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 12px currentColor;
+}
