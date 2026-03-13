@@ -1,5 +1,3 @@
 <?php
 
-require_once "../config/database.php";
-
-echo "Database connected successfully";
+require_once "../routes/web.php";
