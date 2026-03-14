@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Nhập thông số mắt - LENS</title>
+<title>Đơn kính - LENS</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,7 +52,7 @@ Trang chủ
 <div class="max-w-5xl mx-auto p-10">
 
 <h1 class="font-serif text-4xl mb-10">
-Nhập thông số mắt
+Nhập đơn kính
 </h1>
 
 
@@ -62,32 +62,52 @@ Nhập thông số mắt
 
 <div class="bg-stone-50 p-8 rounded-2xl shadow-sm">
 
+<h2 class="font-serif text-2xl mb-6">
+Thông số mắt
+</h2>
+
 <div class="grid grid-cols-2 gap-4">
 
 <div>
-<label class="text-sm text-stone-600">SPH</label>
-<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+<label class="text-sm text-stone-600">SPH (Mắt trái)</label>
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
+
+<div>
+<label class="text-sm text-stone-600">SPH (Mắt phải)</label>
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
 </div>
 
 <div>
 <label class="text-sm text-stone-600">CYL</label>
-<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
 </div>
 
 <div>
 <label class="text-sm text-stone-600">AXIS</label>
-<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
 </div>
 
 <div>
 <label class="text-sm text-stone-600">PD</label>
-<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
+
+<div>
+<label class="text-sm text-stone-600">ADD</label>
+<input type="text"
+class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
 </div>
 
 </div>
 
 
-<div class="mt-5">
+<div class="mt-6">
 
 <label class="text-sm text-stone-600">
 Upload đơn thuốc
@@ -102,7 +122,7 @@ class="mt-2 block w-full text-sm text-stone-600">
 <div class="mt-6">
 
 <label class="text-sm text-stone-600">
-Loại tròng
+Loại tròng kính
 </label>
 
 <select id="lens"
@@ -114,44 +134,83 @@ class="w-full mt-2 p-3 rounded-lg border border-stone-200">
 <option value="700000">Siêu mỏng</option>
 
 </select>
+
 </div>
+
 </div>
+
 
 <!-- PRICE BOX -->
 
 <div class="bg-stone-50 p-8 rounded-2xl shadow-sm h-fit">
 
 <h2 class="font-serif text-2xl mb-6">
-Chi phí
+Chi phí tròng kính
 </h2>
 
-<div class="flex justify-between text-lg">
+<div class="flex justify-between text-lg mb-4">
 
 <span>Giá tròng</span>
 
+<span>
 <span id="price">300000</span> đ
+</span>
 
 </div>
 
-<button
+<div class="flex justify-between text-sm text-stone-500 mb-6">
+
+<span>Phí gia công</span>
+<span>50.000 đ</span>
+
+</div>
+
+<div class="border-t pt-4 flex justify-between font-bold text-lg">
+
+<span>Tổng</span>
+
+<span id="total">350000</span> đ
+
+</div>
+
+
+<button onclick="confirmOrder()"
 class="mt-8 w-full py-4 bg-stone-900 text-white rounded-full text-sm font-bold tracking-widest uppercase hover:bg-stone-800 transition">
 
-Xác nhận
+Xác nhận đơn kính
 
 </button>
+
 </div>
+
 </div>
+
 </div>
+
 
 <script>
 
 function calcPrice(){
 
-let price=document.getElementById("lens").value;
+let price = document.getElementById("lens").value;
 
-document.getElementById("price").innerText=price;
+document.getElementById("price").innerText = price;
+
+let total = parseInt(price) + 50000;
+
+document.getElementById("total").innerText = total;
 
 }
+
+function confirmOrder(){
+
+alert("Đã lưu thông số mắt!");
+
+window.location.href="trangchu.html";
+
+}
+
 </script>
+
 </body>
 </html>
