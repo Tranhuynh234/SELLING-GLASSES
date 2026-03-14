@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Chủ - Website Mắt Kính</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        /* Ẩn thanh cuộn ngang nếu có */
+        html, body { overflow-x: hidden; }
+        
+        /* Hiệu ứng trỏ chuột cho icon chatbox */
+        #ai-icon {
+            touch-action: none; /* Tránh cuộn trang khi chạm kéo trên điện thoại */
+        }
+
+        /* Hiệu ứng Glow mượt cho Icon AI */
+        .glow-effect {
+            box-shadow: 0 0 15px 5px rgba(217, 119, 6, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 15px 5px rgba(217, 119, 6, 0.4); }
+            50% { box-shadow: 0 0 25px 10px rgba(217, 119, 6, 0.6); transform: scale(1.05); }
+            100% { box-shadow: 0 0 15px 5px rgba(217, 119, 6, 0.4); transform: scale(1); }
+        }
+
+        /* Hiệu ứng gõ chữ của AI (Typing dots) */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Cuộn mượt cho khu vực chat */
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 pt-[104px]">
+
+    <div class="fixed top-0 left-0 w-full z-50 shadow-sm flex flex-col">
+        <div class="bg-stone-900 text-stone-200 text-xs py-2 px-6 flex flex-col sm:flex-row justify-between items-center relative">
+            <div class="flex space-x-6 mb-2 sm:mb-0">
+                <span>📞 Hotline: 1900 xxxx</span>
+                <span class="hidden sm:inline">🚚 Giao hàng toàn quốc - Miễn phí đơn từ 500k</span>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-amber-500 transition">Đăng nhập</a>
+                <span>|</span>
+                <a href="#" class="hover:text-amber-500 transition">Đăng ký</a>
+            </div>
+        </div>
+
+        <header class="bg-white/95 backdrop-blur-md border-b border-stone-200 py-4 px-6 md:px-12 flex justify-between items-center transition-all">
+            <div class="font-bold text-3xl tracking-tighter text-stone-900 cursor-pointer">
+                LENS<span class="text-amber-700">.</span>
+            </div>
+            
+            <nav class="hidden lg:flex space-x-8 font-medium text-stone-600">
+                <a href="#" class="hover:text-amber-700 transition">Gọng kính</a>
+                <a href="#" class="hover:text-amber-700 transition">Tròng kính</a>
+                <a href="#" class="hover:text-amber-700 transition">Combo</a>
+                <a href="#" class="text-red-600 hover:text-red-800 transition font-semibold">Khuyến mãi</a>
+                <a href="#" class="hover:text-amber-700 transition">Try On</a>
+                <a href="#" class="hover:text-amber-700 transition">Tư vấn</a>
+            </nav>
+
+            <div class="flex space-x-5 text-xl text-stone-700 items-center">
+                <button title="Tìm kiếm" class="hover:text-amber-700 transition">🔍</button>
+                <button title="Tài khoản" class="hover:text-amber-700 transition hidden sm:block">👤</button>
+                <a href="cart.html" class="relative">
+🛒
+<span id="cart-count"
+class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+0
+</span>
+</a>
+                <button class="lg:hidden text-2xl">☰</button>
+            </div>
+        </header>
+    </div>
+
+    <section class="relative bg-[#F5F1E7] flex flex-col-reverse md:flex-row items-center justify-between overflow-hidden">
+        <div class="md:w-1/2 p-10 md:p-20 z-10 space-y-6">
+            <span class="uppercase text-amber-800 font-semibold tracking-wider text-sm">Bộ sưu tập mới 2026</span>
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+                Chọn Kính Phù Hợp <br> Ngay Tại Nhà
+            </h1>
+            <p class="text-lg text-stone-600">Trải nghiệm thử kính online thông minh, đặt làm tròng chuẩn xác theo đơn bác sĩ và nhận hàng tận tay.</p>
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                <button class="px-8 py-3 bg-stone-900 text-white font-semibold rounded-full shadow-lg hover:bg-stone-700 transition transform hover:-translate-y-1">Mua ngay</button>
+                <button class="px-8 py-3 border-2 border-stone-900 text-stone-900 font-semibold rounded-full hover:bg-stone-200 transition">Thử kính online</button>
+            </div>
+        </div>
+        <div class="md:w-1/2 w-full h-80 md:h-[600px] bg-stone-300 flex items-center justify-center text-stone-500 relative">
+            <div class="absolute inset-0 bg-stone-200 flex items-center justify-center">
+                <span class="text-center">[Ảnh Banner Lớn Người Mẫu] <br> Full Width / Kịch trần</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 max-w-7xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-center mb-10 text-stone-900">Khám Phá Danh Mục</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300 overflow-hidden">
+                    [Gọng Nam]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Gọng Nam</h3>
+            </div>
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300">
+                    [Gọng Nữ]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Gọng Nữ</h3>
+            </div>
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300">
+                    [Trẻ Em]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Gọng Trẻ Em</h3>
+            </div>
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300">
+                    [Tròng AS Xanh]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Chống Ánh Sáng Xanh</h3>
+            </div>
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300">
+                    [Đổi Màu]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Kính Đổi Màu</h3>
+            </div>
+            <div class="group cursor-pointer text-center">
+                <div class="w-full aspect-square bg-white rounded-2xl shadow-sm border border-stone-100 flex items-center justify-center text-sm text-stone-400 mb-3 group-hover:shadow-md group-hover:-translate-y-1 transition duration-300">
+                    [Siêu Mỏng]
+                </div>
+                <h3 class="font-medium text-stone-800 group-hover:text-amber-700 transition">Kính Siêu Mỏng</h3>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-white px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-stone-900">Sản Phẩm Bán Chạy</h2>
+                <a href="#" class="text-amber-700 font-medium hover:underline hidden sm:block">Xem tất cả →</a>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="group bg-stone-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-stone-100 flex flex-col">
+                    <div class="relative h-64 bg-stone-200 flex items-center justify-center text-stone-400">
+                        <span class="absolute top-3 left-3 bg-stone-900 text-white text-xs px-2 py-1 rounded font-semibold">Best Seller</span>
+                        [Ảnh Sản Phẩm]
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-lg text-stone-800 mb-1">Gọng Titan Classic</h3>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-amber-700 font-bold text-lg">750.000đ</span>
+                            </div>
+                        </div>
+                        <button onclick="addToCart('Gọng Titan Classic',750000,'in-stock')" 
+class="w-full py-2.5 border border-stone-900 text-stone-900 rounded-lg font-medium group-hover:bg-stone-900 group-hover:text-white transition">
+Thêm vào giỏ
+</button>
+                    </div>
+                </div>
+
+                <div class="group bg-stone-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-stone-100 flex flex-col">
+                    <div class="relative h-64 bg-stone-200 flex items-center justify-center text-stone-400">
+                        <span class="absolute top-3 left-3 bg-red-600 text-white text-xs px-2 py-1 rounded font-semibold">-20%</span>
+                        [Ảnh Sản Phẩm]
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-lg text-stone-800 mb-1">Gọng Nhựa Dẻo Tròn</h3>
+                            <div class="flex items-center space-x-2 mb-4">
+                                <span class="text-amber-700 font-bold text-lg">450.000đ</span>
+                                <span class="text-stone-400 line-through text-sm">560.000đ</span>
+                            </div>
+                        </div>
+                        <button onclick="addToCart('Gọng Nhựa Dẻo Tròn',450000,'in-stock')"
+class="w-full py-2.5 border border-stone-900 text-stone-900 rounded-lg font-medium">
+Thêm vào giỏ
+</button>
+                    </div>
+                </div>
+
+                <div class="group bg-stone-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-stone-100 flex flex-col">
+                    <div class="relative h-64 bg-stone-200 flex items-center justify-center text-stone-400"> [Ảnh Sản Phẩm] </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-lg text-stone-800 mb-1">Gọng Mắt Mèo Nữ</h3>
+                            <div class="text-amber-700 font-bold text-lg mb-4">520.000đ</div>
+                        </div>
+                        <button onclick="addToCart('Gọng Mắt Mèo Nữ',520000,'in-stock')"
+class="w-full py-2.5 border border-stone-900 text-stone-900 rounded-lg font-medium">
+Thêm vào giỏ
+</button>
+                    </div>
+                </div>
+
+                <div class="group bg-stone-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 border border-stone-100 flex flex-col">
+                    <div class="relative h-64 bg-stone-200 flex items-center justify-center text-stone-400">
+                        <span class="absolute top-3 left-3 bg-blue-600 text-white text-xs px-2 py-1 rounded font-semibold">New</span>
+                        [Ảnh Sản Phẩm] 
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-lg text-stone-800 mb-1">Gọng Kim Loại Mảnh</h3>
+                            <div class="text-amber-700 font-bold text-lg mb-4">680.000đ</div>
+                        </div>
+                        <button onclick="addToCart('Gọng Kim Loại Mảnh',680000,'in-stock')"
+class="w-full py-2.5 border border-stone-900 text-stone-900 rounded-lg font-medium">
+Thêm vào giỏ
+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 text-center sm:hidden">
+                <a href="#" class="text-amber-700 font-medium hover:underline">Xem tất cả sản phẩm →</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 max-w-7xl mx-auto">
+        <div class="bg-amber-800 text-white rounded-3xl p-8 md:p-12 mb-10 flex flex-col md:flex-row items-center justify-between shadow-lg">
+            <div class="md:w-2/3 space-y-4 text-center md:text-left">
+                <h2 class="text-3xl md:text-4xl font-bold">Combo Gọng + Tròng<br>Tiết Kiệm Đến 30%</h2>
+                <p class="text-amber-100 text-lg">Giải pháp hoàn hảo cho đôi mắt. Chọn gọng yêu thích, ghép tròng cao cấp với mức giá ưu đãi nhất.</p>
+            </div>
+            <div class="md:w-1/3 mt-6 md:mt-0 flex justify-center md:justify-end">
+                <button class="bg-white text-amber-900 font-bold px-8 py-4 rounded-full shadow-md hover:bg-stone-100 transition transform hover:scale-105">Khám phá Combo</button>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow border border-stone-100 text-center hover:shadow-lg transition">
+                <div class="h-40 bg-stone-100 rounded-xl mb-4 flex items-center justify-center text-stone-400">[Ảnh Combo 1]</div>
+                <h3 class="font-bold text-xl mb-2 text-stone-800">Combo Sinh Viên</h3>
+                <p class="text-stone-500 text-sm mb-4">Gọng Basic + Tròng chống xước</p>
+                <div class="text-amber-700 font-bold text-2xl mb-4">499.000đ</div>
+                <button class="w-full py-2 bg-stone-100 text-stone-800 font-medium rounded-lg hover:bg-stone-200 transition">Chọn combo này</button>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow border border-amber-500 text-center relative hover:shadow-lg transition transform md:-translate-y-2">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">HOT NHẤT</span>
+                <div class="h-40 bg-stone-100 rounded-xl mb-4 flex items-center justify-center text-stone-400">[Ảnh Combo 2]</div>
+                <h3 class="font-bold text-xl mb-2 text-stone-800">Combo Văn Phòng</h3>
+                <p class="text-stone-500 text-sm mb-4">Gọng Titan + Tròng chống AS Xanh</p>
+                <div class="text-amber-700 font-bold text-2xl mb-4">899.000đ</div>
+                <button class="w-full py-2 bg-stone-900 text-white font-medium rounded-lg hover:bg-stone-700 transition">Chọn combo này</button>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow border border-stone-100 text-center hover:shadow-lg transition">
+                <div class="h-40 bg-stone-100 rounded-xl mb-4 flex items-center justify-center text-stone-400">[Ảnh Combo 3]</div>
+                <h3 class="font-bold text-xl mb-2 text-stone-800">Combo Siêu Nét</h3>
+                <p class="text-stone-500 text-sm mb-4">Gọng Thời Trang + Tròng Siêu Mỏng</p>
+                <div class="text-amber-700 font-bold text-2xl mb-4">1.290.000đ</div>
+                <button class="w-full py-2 bg-stone-100 text-stone-800 font-medium rounded-lg hover:bg-stone-200 transition">Chọn combo này</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-stone-900 text-stone-100 py-20 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2 flex justify-center">
+                <div class="relative w-full max-w-sm aspect-[3/4] bg-stone-800 rounded-3xl border-8 border-stone-700 overflow-hidden shadow-2xl flex items-center justify-center text-stone-500">
+                    <span class="z-10 text-center">[Hình Demo Camera Điện Thoại] <br> Quét khuôn mặt AI</span>
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/20 to-transparent w-full h-1/2 animate-pulse top-1/4"></div>
+                </div>
+            </div>
+            <div class="md:w-1/2 space-y-6 text-center md:text-left">
+                <h2 class="text-3xl md:text-5xl font-bold text-white">Thử Kính Ảo Bằng AI</h2>
+                <p class="text-stone-400 text-lg">Chưa biết gọng nào hợp với khuôn mặt? Công nghệ AI của chúng tôi sẽ quét 3D khuôn mặt bạn, gợi ý kích thước và kiểu dáng hoàn hảo nhất.</p>
+                <ul class="space-y-3 text-stone-300 inline-block text-left">
+                    <li>✨ Nhận diện khuôn mặt chính xác</li>
+                    <li>📏 Gợi ý size kính vừa vặn</li>
+                    <li>🔄 So sánh hàng trăm mẫu cùng lúc</li>
+                </ul>
+                <div class="pt-6">
+                    <button class="px-8 py-4 bg-amber-600 text-white font-bold rounded-full hover:bg-amber-500 transition shadow-[0_0_15px_rgba(217,119,6,0.5)]">Bắt Đầu Thử Kính Ngay</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 bg-white border-b border-stone-100">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-2xl font-bold text-center mb-12 text-stone-900">Vì Sao Chọn Chúng Tôi?</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm">🛡️</div>
+                    <h4 class="font-semibold text-stone-800">Bảo hành 12 tháng</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm">🔄</div>
+                    <h4 class="font-semibold text-stone-800">Đổi trả 7 ngày</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm">🚚</div>
+                    <h4 class="font-semibold text-stone-800">Giao hàng toàn quốc</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm">⚙️</div>
+                    <h4 class="font-semibold text-stone-800">Gia công chuẩn xác</h4>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-2xl mb-4 shadow-sm">💬</div>
+                    <h4 class="font-semibold text-stone-800">Tư vấn miễn phí</h4>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 max-w-7xl mx-auto">
+        <h2 class="text-2xl md:text-3xl font-bold text-center mb-12 text-stone-900">Khách Hàng Nói Gì Về LENS?</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative">
+                <div class="text-amber-500 text-lg mb-3">⭐⭐⭐⭐⭐</div>
+                <p class="text-stone-600 italic mb-6">"Tính năng thử kính AI quá xịn! Mình đã chọn được gọng Titan rất vừa vặn mà không cần đến cửa hàng. Giao hàng cũng rất nhanh."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center text-xs">[Ảnh]</div>
+                    <div>
+                        <h4 class="font-bold text-stone-900">Minh Tú</h4>
+                        <p class="text-xs text-stone-500">Đã mua: Gọng Titan Classic</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative">
+                <div class="text-amber-500 text-lg mb-3">⭐⭐⭐⭐⭐</div>
+                <p class="text-stone-600 italic mb-6">"Mình bị cận nặng, mua combo tròng siêu mỏng ở đây giá tốt hơn hẳn bên ngoài. Đeo lên nhẹ mặt, kính trong vắt."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center text-xs">[Ảnh]</div>
+                    <div>
+                        <h4 class="font-bold text-stone-900">Hoàng Nam</h4>
+                        <p class="text-xs text-stone-500">Đã mua: Combo Siêu Nét</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 relative">
+                <div class="text-amber-500 text-lg mb-3">⭐⭐⭐⭐⭐</div>
+                <p class="text-stone-600 italic mb-6">"Đóng gói siêu cẩn thận, hộp kính xịn xò. Kính đẹp y hình, nhân viên tư vấn nhiệt tình đổi lại tròng cho mình."</p>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center text-xs">[Ảnh]</div>
+                    <div>
+                        <h4 class="font-bold text-stone-900">Thu Hương</h4>
+                        <p class="text-xs text-stone-500">Đã mua: Gọng Mắt Mèo Nữ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-[#F5F1E7] px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold text-stone-900">Góc Tư Vấn Mắt</h2>
+                <a href="#" class="text-amber-700 font-medium hover:underline">Xem thêm bài viết →</a>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="h-48 bg-stone-300 flex items-center justify-center text-stone-500">[Ảnh Thumbnail 1]</div>
+                    <div class="p-6">
+                        <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Mẹo hay</span>
+                        <h3 class="font-bold text-lg mt-2 mb-3 text-stone-900 hover:text-amber-700 cursor-pointer">Cách chọn gọng kính phù hợp với từng khuôn mặt</h3>
+                        <a href="#" class="text-stone-900 font-medium underline underline-offset-4 decoration-2 decoration-amber-300 hover:decoration-amber-700 transition">Đọc thêm</a>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="h-48 bg-stone-300 flex items-center justify-center text-stone-500">[Ảnh Thumbnail 2]</div>
+                    <div class="p-6">
+                        <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Kiến thức</span>
+                        <h3 class="font-bold text-lg mt-2 mb-3 text-stone-900 hover:text-amber-700 cursor-pointer">Hiểu đúng về độ cận và cách đọc đơn kính thuốc</h3>
+                        <a href="#" class="text-stone-900 font-medium underline underline-offset-4 decoration-2 decoration-amber-300 hover:decoration-amber-700 transition">Đọc thêm</a>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="h-48 bg-stone-300 flex items-center justify-center text-stone-500">[Ảnh Thumbnail 3]</div>
+                    <div class="p-6">
+                        <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Sản phẩm</span>
+                        <h3 class="font-bold text-lg mt-2 mb-3 text-stone-900 hover:text-amber-700 cursor-pointer">So sánh tròng kính chống ánh sáng xanh các hãng</h3>
+                        <a href="#" class="text-stone-900 font-medium underline underline-offset-4 decoration-2 decoration-amber-300 hover:decoration-amber-700 transition">Đọc thêm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-stone-950 text-stone-300 py-16 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div class="space-y-4">
+                <div class="font-bold text-3xl tracking-tighter text-white">LENS<span class="text-amber-600">.</span></div>
+                <p class="text-stone-400 text-sm leading-relaxed">Thương hiệu mắt kính hiện đại, mang đến giải pháp thị lực toàn diện kết hợp công nghệ AI. Mua sắm dễ dàng, tận tâm và chuyên nghiệp.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-5 uppercase tracking-wider text-sm">Liên Kết Nhanh</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-amber-500 transition">Tất cả sản phẩm</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Chương trình khuyến mãi</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Combo Gọng + Tròng</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Thử kính AI</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-5 uppercase tracking-wider text-sm">Chính Sách</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-amber-500 transition">Chính sách đổi trả</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Chính sách bảo hành</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Phương thức thanh toán</a></li>
+                    <li><a href="#" class="hover:text-amber-500 transition">Chính sách giao hàng</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-5 uppercase tracking-wider text-sm">Liên Hệ</h4>
+                <ul class="space-y-3 text-sm mb-6">
+                    <li>📞 Hotline: 1900 xxxx (8h-22h)</li>
+                    <li>✉️ Email: hello@lens.vn</li>
+                    <li>📍 Cửa hàng: 123 Đường ABC, Quận X, TP.HCM</li>
+                </ul>
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-amber-600 transition text-white">FB</a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-amber-600 transition text-white">IG</a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center hover:bg-amber-600 transition text-white">TT</a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-stone-800 text-center text-sm text-stone-500">
+            © 2026 LENS. All rights reserved.
+        </div>
+    </footer>
+
+    <div id="ai-chat-panel" class="fixed bottom-24 right-8 w-[90vw] sm:w-[400px] max-w-[400px] h-[80vh] max-h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-[100] transition-all duration-300 opacity-0 pointer-events-none translate-y-10 overflow-hidden border border-stone-200">
+        
+        <div class="bg-stone-900 text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-xl shadow-inner">🤖</div>
+                <div>
+                    <h4 class="font-bold text-[15px] leading-tight">Trợ lý kính thông minh</h4>
+                    <p class="text-xs text-green-400 flex items-center gap-1 mt-0.5">
+                        <span class="w-2 h-2 bg-green-400 rounded-full inline-block animate-pulse"></span> Online
+                    </p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-center">
+                <button id="minimize-chat" class="text-stone-400 hover:text-white transition text-2xl leading-none -mt-3">_</button>
+                <button id="close-chat" class="text-stone-400 hover:text-red-500 transition text-2xl leading-none">×</button>
+            </div>
+        </div>
+
+        <div id="chat-body" class="flex-1 bg-stone-50 p-4 overflow-y-auto chat-scroll flex flex-col gap-4 relative">
+            <div class="flex gap-2 w-full">
+                <div class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">🤖</div>
+                <div class="flex flex-col gap-1 max-w-[85%]">
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
+                        Xin chào 👋 <br><br>
+                        Tôi là trợ lý AI của LENS. Tôi có thể giúp bạn:
+                        <ul class="list-disc pl-4 mt-2 space-y-1">
+                            <li>Tìm gọng kính phù hợp</li>
+                            <li>Tư vấn tròng theo độ cận</li>
+                            <li>Hướng dẫn đặt làm tròng</li>
+                            <li>Tra cứu đơn hàng</li>
+                        </ul>
+                    </div>
+                    <span class="text-[10px] text-stone-400 ml-1">Vừa xong</span>
+                </div>
+            </div>
+
+            <div id="quick-actions" class="flex flex-wrap gap-2 pl-10 mb-2">
+                <button onclick="handleQuickAction('Tìm kính cho tôi', 'find_glasses')" class="text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm font-medium">🔎 Tìm kính cho tôi</button>
+                <button onclick="handleQuickAction('Tôi bị cận bao nhiêu độ?', 'prescription')" class="text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm font-medium">👓 Tư vấn độ cận</button>
+                <button onclick="handleQuickAction('Tra cứu đơn hàng', 'tracking')" class="text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm font-medium">📦 Tra cứu đơn hàng</button>
+                <button onclick="handleQuickAction('Kết nối nhân viên', 'human')" class="text-[13px] border border-stone-400 text-stone-600 bg-white px-3 py-1.5 rounded-full hover:bg-stone-100 transition shadow-sm font-medium">👨‍💻 Gặp nhân viên thật</button>
+            </div>
+            
+            <div id="chat-anchor"></div>
+        </div>
+
+        <div id="chat-footer" class="p-3 bg-white border-t border-stone-200 flex gap-2 items-center z-10">
+            <button class="text-stone-400 hover:text-amber-600 p-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a🛒 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg></button>
+            <input type="text" id="chat-input" placeholder="Nhập câu hỏi của bạn..." class="flex-1 bg-stone-100 rounded-full px-4 py-2 text-[14px] text-stone-800 focus:outline-none focus:ring-1 focus:ring-amber-500 border border-transparent focus:border-amber-500 transition" onkeypress="handleEnter(event)">
+            <button onclick="sendManualMessage()" id="send-btn" class="w-9 h-9 bg-amber-600 text-white rounded-full flex items-center justify-center hover:bg-amber-700 transition flex-shrink-0 shadow-md">
+                <svg class="w-4 h-4 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <div id="ai-icon" class="fixed bottom-8 right-8 w-16 h-16 bg-amber-600 text-white rounded-full flex items-center justify-center shadow-xl cursor-grab hover:bg-amber-500 transition-colors z-[101] text-3xl select-none glow-effect" title="Chat với AI (Kéo để di chuyển, Click để mở)">
+        🤖
+    </div>
+
+    <script>
+        const aiIcon = document.getElementById('ai-icon');
+        const chatPanel = document.getElementById('ai-chat-panel');
+        const closeChatBtn = document.getElementById('close-chat');
+        const minimizeChatBtn = document.getElementById('minimize-chat');
+        const chatBody = document.getElementById('chat-body');
+        const chatInput = document.getElementById('chat-input');
+        const quickActionsArea = document.getElementById('quick-actions');
+        
+        let isChatOpen = false;
+        let isDragging = false;
+        let startX, startY;
+        let offsetX, offsetY;
+
+        aiIcon.addEventListener('mousedown', (e) => {
+            isDragging = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            aiIcon.classList.remove('cursor-grab');
+            aiIcon.classList.add('cursor-grabbing');
+            
+            const rect = aiIcon.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            aiIcon.style.transition = 'none'; 
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (startX && startY) {
+                if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+                    isDragging = true;
+                }
+            }
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            let newX = e.clientX - offsetX;
+            let newY = e.clientY - offsetY;
+
+            aiIcon.style.bottom = 'auto';
+            aiIcon.style.right = 'auto';
+            aiIcon.style.left = `${newX}px`;
+            aiIcon.style.top = `${newY}px`;
+            
+            aiIcon.classList.remove('glow-effect');
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            aiIcon.classList.remove('cursor-grabbing');
+            aiIcon.classList.add('cursor-grab');
+            aiIcon.style.transition = 'background-color 0.3s, transform 0.3s';
+            aiIcon.classList.add('glow-effect');
+
+            if (!isDragging && startX !== undefined) {
+                toggleChatbox();
+            }
+            startX = undefined;
+            startY = undefined;
+            isDragging = false;
+        });
+
+        aiIcon.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            const rect = aiIcon.getBoundingClientRect();
+            offsetX = touch.clientX - rect.left;
+            offsetY = touch.clientY - rect.top;
+        }, {passive: false});
+
+        document.addEventListener('touchmove', (e) => {
+            if (!startX || !startY) return;
+            const touch = e.touches[0];
+            if (Math.abs(touch.clientX - startX) > 5 || Math.abs(touch.clientY - startY) > 5) {
+                isDragging = true;
+            }
+            if (!isDragging) return;
+            e.preventDefault();
+            aiIcon.style.bottom = 'auto';
+            aiIcon.style.right = 'auto';
+            aiIcon.style.left = `${touch.clientX - offsetX}px`;
+            aiIcon.style.top = `${touch.clientY - offsetY}px`;
+        }, {passive: false});
+
+        document.addEventListener('touchend', (e) => {
+            if (!isDragging && startX !== undefined) {
+                toggleChatbox();
+            }
+            startX = undefined;
+            startY = undefined;
+            isDragging = false;
+        });
+
+        function toggleChatbox() {
+            isChatOpen = !isChatOpen;
+            if (isChatOpen) {
+                chatPanel.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
+                scrollToBottom();
+            } else {
+                chatPanel.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
+            }
+        }
+
+        closeChatBtn.addEventListener('click', () => { toggleChatbox(); });
+        minimizeChatBtn.addEventListener('click', () => { toggleChatbox(); });
+
+        function scrollToBottom() {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function getTime() {
+            const now = new Date();
+            return `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+        }
+
+        function appendUserMessage(text) {
+            const msgHtml = `
+                <div class="flex gap-2 w-full justify-end mt-2 mb-2">
+                    <div class="flex flex-col gap-1 max-w-[85%] items-end">
+                        <div class="bg-amber-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-[14px]">
+                            ${text}
+                        </div>
+                        <span class="text-[10px] text-stone-400 mr-1">${getTime()}</span>
+                    </div>
+                </div>
+            `;
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = msgHtml;
+            chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const typingHtml = `
+                <div id="typing-indicator" class="flex gap-2 w-full mb-2">
+                    <div class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">🤖</div>
+                    <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-stone-100 flex gap-1 items-center h-10">
+                        <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
+                        <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = typingHtml;
+            chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
+            scrollToBottom();
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function appendAIMessage(textHtml, options = []) {
+            let optionsHtml = '';
+            if (options.length > 0) {
+                optionsHtml = `<div class="flex flex-wrap gap-2 mt-3">`;
+                options.forEach(opt => {
+                    optionsHtml += `<button onclick="handleQuickAction('${opt.label}', '${opt.action}')" class="text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">${opt.label}</button>`;
+                });
+                optionsHtml += `</div>`;
+            }
+
+            const msgHtml = `
+                <div class="flex gap-2 w-full mb-2">
+                    <div class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">🤖</div>
+                    <div class="flex flex-col gap-1 max-w-[85%]">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
+                            ${textHtml}
+                            ${optionsHtml}
+                        </div>
+                        <span class="text-[10px] text-stone-400 ml-1">${getTime()}</span>
+                    </div>
+                </div>
+            `;
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = msgHtml;
+            chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
+            scrollToBottom();
+        }
+
+        function handleQuickAction(text, actionType) {
+            if (quickActionsArea) quickActionsArea.style.display = 'none';
+
+            appendUserMessage(text);
+            showTypingIndicator();
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                if (actionType === 'find_glasses') {
+                    appendAIMessage("Dạ, để gợi ý chính xác nhất, bạn vui lòng cho AI biết bạn là <b>Nam</b> hay <b>Nữ</b> ạ?", [
+                        { label: '👨 Nam', action: 'gender_male' },
+                        { label: '👩 Nữ', action: 'gender_female' }
+                    ]);
+                } 
+                else if (actionType === 'gender_male' || actionType === 'gender_female') {
+                    appendAIMessage("Cảm ơn bạn. Bạn cảm thấy khuôn mặt mình thuộc dáng nào dưới đây?", [
+                        { label: '⚪ Mặt tròn', action: 'face_round' },
+                        { label: '🔲 Mặt vuông', action: 'face_square' },
+                        { label: '🥚 Oval', action: 'face_oval' }
+                    ]);
+                }
+                else if (actionType.startsWith('face_')) {
+                    appendAIMessage(`Dựa trên thông tin của bạn, hệ thống AI đã phân tích cơ sở dữ liệu và gợi ý 3 mẫu phù hợp nhất. <br><br>
+                    <div class="bg-stone-50 border border-stone-200 p-2 rounded-lg mt-2 mb-2 flex gap-3">
+                        <div class="w-16 h-16 bg-stone-200 rounded shrink-0 flex items-center justify-center text-[10px]">[Ảnh]</div>
+                        <div>
+                            <p class="font-bold text-sm">Gọng Vuông Titan</p>
+                            <p class="text-amber-600 font-bold text-sm">750.000đ</p>
+                            <a href="#" class="text-xs text-blue-600 hover:underline">Xem chi tiết -></a>
+                        </div>
+                    </div>
+                    Bạn có muốn AI bật camera để thử kính (Virtual Try-On) ngay bây giờ không?`, [
+                        { label: '📸 Thử kính ảo ngay', action: 'try_on' },
+                        { label: 'Xem thêm mẫu', action: 'more_models' }
+                    ]);
+                }
+                else if (actionType === 'prescription') {
+                    appendAIMessage("Bạn đã đi khám và có phiếu đo độ cận chưa ạ?", [
+                        { label: 'Mình có đơn rồi', action: 'has_presc' },
+                        { label: 'Chưa có, tư vấn giúp', action: 'no_presc' }
+                    ]);
+                }
+                else if (actionType === 'human') {
+                    appendAIMessage("Tôi đang kết nối bạn với chuyên viên tư vấn. Vui lòng giữ máy trong giây lát... 👨‍💻");
+                }
+                else {
+                    appendAIMessage("Dạ, AI đã nhận thông tin. Tính năng này hiện đang được kết nối với hệ thống Backend. Vui lòng đợi trong ít phút.");
+                }
+            }, 1200); 
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                sendManualMessage();
+            }
+        }
+
+        function sendManualMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            if (quickActionsArea) quickActionsArea.style.display = 'none';
+            appendUserMessage(text);
+            chatInput.value = '';
+            showTypingIndicator();
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                appendAIMessage("Xin lỗi, tôi là phiên bản demo AI. Đối với câu hỏi phức tạp: <i>'" + text + "'</i>, bạn có muốn tôi chuyển cho nhân viên thật hỗ trợ không?", [
+                    { label: 'Gặp nhân viên', action: 'human' },
+                    { label: 'Quay lại menu', action: 'menu' }
+                ]);
+            }, 1500);
+        }
+    </script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script></body>
+</html>
