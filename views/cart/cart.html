@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<title>Giỏ hàng</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 p-10">
+
+<h1 class="text-3xl font-bold mb-8">Giỏ hàng của bạn</h1>
+
+<table class="w-full text-center border">
+
+<thead>
+<tr>
+<th>Sản phẩm</th>
+<th>Loại</th>
+<th>Độ cận</th>
+<th>Giá</th>
+<th>Số lượng</th>
+<th>Tổng</th>
+<th>Xóa</th></tr>
+</thead>
+
+<tbody id="cart-items">
+
+</tbody>
+
+</table>
+<div class="mt-10 bg-white p-6 shadow rounded">
+
+<h2 class="text-xl font-bold mb-3">Thanh toán</h2>
+
+<p>Tạm tính: <span id="subtotal"></span> đ</p>
+
+<p>Phí ship: 30000 đ</p>
+
+<p>Thuế: 10%</p>
+
+<h3 class="text-2xl font-bold mt-3">
+Tổng: <span id="total"></span> đ
+</h3>
+
+<a href="checkout.html"
+class="mt-5 inline-block bg-black text-white px-6 py-3 rounded">
+Thanh toán
+</a>
+</div>
+
+<script src="js/cart.js"></script>
+
+</body>
+<div class="flex justify-between items-center p-4 bg-white shadow">
+
+<!-- Logo bên trái -->
+<div class="fixed top-5 right-5">
+<a href="trangchu.html"
+class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">
+ Trang chủ
+</a>
+</div>
+</html>
