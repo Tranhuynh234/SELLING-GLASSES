@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Operations - Lab & Warehouse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/ops/ops.css">
+</head>
+<body class="bg-stone-950 text-stone-400 p-8 min-h-screen">
+    <div class="max-w-7xl mx-auto space-y-10">
+        <header class="flex justify-between items-end border-b border-stone-800 pb-8">
+            <div>
+                <p class="text-amber-500 font-bold text-[10px] uppercase tracking-[0.4em]">Warehouse & Lab Console</p>
+                <h1 class="text-4xl font-bold text-white mt-2 italic">Ops Center.</h1>
+            </div>
+            <button onclick="window.location.href='../admindashboard.html'" class="text-stone-500 hover:text-white font-bold text-xs uppercase">🏠 Home</button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-stone-900 p-8 rounded-[2.5rem] border border-stone-800 shadow-2xl">
+                <h3 class="font-bold text-white mb-6 uppercase text-xs tracking-widest text-amber-500">Lệnh gia công Rx (Đơn Prescription)</h3>
+                <div class="space-y-4">
+                    <div class="p-4 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center group hover:bg-amber-500/10 transition">
+                        <span>#ORD-8810 - Mài lắp tròng Essilor</span>
+                        <span class="text-red-500 font-bold text-xs animate-pulse italic">GẤP: 15 PHÚT</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-stone-900 p-8 rounded-[2.5rem] border border-stone-800">
+                <h3 class="font-bold text-white mb-6 uppercase text-xs tracking-widest text-blue-400">Giao vận & Tracking</h3>
+                <div class="space-y-4">
+                    <div class="p-4 bg-white/5 rounded-2xl flex justify-between items-center">
+                        <p class="text-sm font-bold">#ORD-8825 - Giao Hàng Nhanh</p>
+                        <button class="bg-white text-stone-900 px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase">Tạo vận đơn</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../script.js"></script>
+</body>
+</html>

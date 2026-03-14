@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>LENS Sales & Support Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/sale/sale.css">
+</head>
+<body class="bg-stone-50 h-screen flex flex-col">
+    <header class="h-16 bg-white border-b px-8 flex items-center justify-between">
+        <h1 class="font-bold">🎧 Sales & Support Center</h1>
+        <button onclick="window.location.href='../admindashboard.html'" class="text-xs font-bold uppercase text-stone-500 hover:text-stone-900">🏠 Dashboard Tổng</button>
+    </header>
+    <main class="flex-1 flex overflow-hidden p-6 gap-6">
+        <div class="w-1/3 bg-white rounded-3xl border flex flex-col shadow-sm">
+            <div class="p-4 border-b font-bold text-[10px] uppercase text-stone-400">Tin nhắn & Đơn mới</div>
+            <div class="flex-1 overflow-y-auto" id="chat-list">
+                <div class="p-4 border-b bg-amber-50/50 cursor-pointer border-l-4 border-amber-500">
+                    <p class="font-bold text-sm">Nguyễn Văn Nam - #ORD-8826</p>
+                    <p class="text-xs text-stone-500">Cần kiểm tra thông số Prescription (Rx)...</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex-1 bg-white rounded-3xl border p-8 space-y-6 shadow-sm overflow-y-auto">
+            <h2 class="text-2xl font-bold">Xử lý nghiệp vụ Sales</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <button class="p-4 bg-stone-900 text-white rounded-2xl font-bold text-sm">✅ Xác nhận & Chuyển Ops</button>
+                <button class="p-4 bg-stone-100 text-stone-900 rounded-2xl font-bold text-sm">⚠️ Khiếu nại/Hoàn tiền</button>
+            </div>
+            <div class="bg-stone-50 p-6 rounded-2xl border">
+                <p class="text-[10px] font-bold uppercase text-stone-400 mb-4">Chi tiết Prescription</p>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div><b>SPH (Right):</b> -2.50</div>
+                    <div><b>SPH (Left):</b> -2.75</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="../script.js"></script>
+</body>
+</html>

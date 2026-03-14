@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Hub - Governance & Growth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/manager/mana.css">
+</head>
+<body class="bg-white text-stone-900 p-12 min-h-screen">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <header class="flex justify-between items-center border-b border-stone-100 pb-8">
+            <h1 class="text-4xl font-serif italic font-bold">Management Hub.</h1>
+            <button onclick="window.location.href='../admindashboard.html'" class="w-12 h-12 bg-stone-50 rounded-2xl flex items-center justify-center text-stone-400 hover:bg-stone-900 hover:text-white transition shadow-sm">✕</button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="lg:col-span-2 space-y-10">
+                <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest">Báo cáo doanh thu & Lợi nhuận</h3>
+                <div class="h-80 bg-stone-50 rounded-[3.5rem] border border-stone-100 shadow-inner flex items-end justify-around p-12 overflow-hidden">
+                    <div class="w-16 bg-stone-900 h-4/5 rounded-2xl shadow-xl"></div>
+                    <div class="w-16 bg-amber-500 h-3/5 rounded-2xl shadow-xl"></div>
+                </div>
+            </div>
+            <div class="bg-stone-50 p-10 rounded-[3.5rem] border shadow-sm space-y-8">
+                <h3 class="font-bold text-sm text-stone-400 uppercase tracking-widest">Chính sách & Nhân sự</h3>
+                <nav class="flex flex-col gap-4">
+                    <button class="text-left py-3 border-b border-stone-200 hover:text-amber-600 transition">⚙️ Cấu hình thuộc tính sản phẩm</button>
+                    <button class="text-left py-3 border-b border-stone-200 hover:text-amber-600 transition">🎟️ Quản lý giá & Khuyến mãi</button>
+                    <button class="text-left py-3 border-b border-stone-200 hover:text-amber-600 transition">👥 Quản lý người dùng/Nhân sự</button>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <script src="../script.js"></script>
+</body>
+</html>
