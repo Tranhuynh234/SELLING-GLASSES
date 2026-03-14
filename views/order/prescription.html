@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Đặt làm tròng kính</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="p-10 bg-gray-100">
+
+<h1 class="text-3xl font-bold mb-8">
+Nhập thông số mắt
+</h1>
+
+<div class="bg-white p-8 rounded shadow max-w-xl">
+
+<label>SPH</label>
+<input class="border p-2 w-full mb-3">
+
+<label>CYL</label>
+<input class="border p-2 w-full mb-3">
+
+<label>AXIS</label>
+<input class="border p-2 w-full mb-3">
+
+<label>PD</label>
+<input class="border p-2 w-full mb-3">
+
+<label>Upload đơn thuốc</label>
+<input type="file" class="mb-5">
+
+<label>Loại tròng</label>
+
+<select id="lens" onchange="calcPrice()" class="border p-2 w-full">
+
+<option value="300000">Chống ánh sáng xanh</option>
+
+<option value="500000">Đổi màu</option>
+
+<option value="700000">Siêu mỏng</option>
+
+</select>
+
+<h3 class="text-xl mt-5">
+Giá: <span id="price">300000</span> đ
+</h3>
+
+</div>
+
+<script>
+
+function calcPrice(){
+
+let price=document.getElementById("lens").value;
+
+document.getElementById("price").innerText=price;
+
+}
+
+</script>
+
+</body>
+
+</html>
