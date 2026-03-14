@@ -19,21 +19,17 @@ let row = `
 
 <td>Kính</td>
 
-<td>${item.power ? item.power : "Chưa chọn"}</td>
-
-<td>${item.price}đ</td>
+<td>${item.price.toLocaleString()}đ</td>
 
 <td>
-
 <button onclick="decreaseQuantity(${index})">-</button>
 
 ${item.quantity}
 
 <button onclick="increaseQuantity(${index})">+</button>
-
 </td>
 
-<td>${total}đ</td>
+<td>${(item.price * item.quantity).toLocaleString()}đ</td>
 
 <td>
 <button onclick="removeItem(${index})">Xóa</button>
@@ -48,13 +44,13 @@ subtotal += total;
 
 });
 
-document.getElementById("subtotal").innerText = subtotal + "đ";
+document.getElementById("subtotal").innerText = subtotal.toLocaleString() + "đ";
 
 let tax = subtotal * 0.1;
 
 let totalPrice = subtotal + tax + 30000;
 
-document.getElementById("total").innerText = totalPrice + "đ";
+document.getElementById("total").innerText = totalPrice.toLocaleString() + "đ";
 
 }
 
