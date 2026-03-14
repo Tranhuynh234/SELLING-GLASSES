@@ -1,55 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 
 <head>
 
 <meta charset="UTF-8">
+<title>Nhập thông số mắt - LENS</title>
 
-<title>Đặt làm tròng kính</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<script>
+tailwind.config = {
+theme:{
+extend:{
+fontFamily:{
+sans:['Inter','sans-serif'],
+serif:['Playfair Display','serif']
+}
+}
+}
+}
+</script>
+
 </head>
 
-<body class="p-10 bg-gray-100">
 
-<h1 class="text-3xl font-bold mb-8">
+<body class="bg-white font-sans text-stone-800">
+
+<!-- HEADER -->
+
+<div class="flex justify-between items-center p-6 border-b">
+
+<div class="font-serif italic text-3xl">
+Lens<span class="text-amber-600">.</span>
+</div>
+
+<a href="trangchu.html"
+class="text-sm font-bold uppercase tracking-widest text-stone-600 hover:text-amber-600 transition">
+Trang chủ
+</a>
+
+</div>
+
+
+<!-- PAGE -->
+
+<div class="max-w-5xl mx-auto p-10">
+
+<h1 class="font-serif text-4xl mb-10">
 Nhập thông số mắt
 </h1>
 
-<div class="bg-white p-8 rounded shadow max-w-xl">
 
-<label>SPH</label>
-<input class="border p-2 w-full mb-3">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-<label>CYL</label>
-<input class="border p-2 w-full mb-3">
+<!-- FORM -->
 
-<label>AXIS</label>
-<input class="border p-2 w-full mb-3">
+<div class="bg-stone-50 p-8 rounded-2xl shadow-sm">
 
-<label>PD</label>
-<input class="border p-2 w-full mb-3">
+<div class="grid grid-cols-2 gap-4">
 
-<label>Upload đơn thuốc</label>
-<input type="file" class="mb-5">
+<div>
+<label class="text-sm text-stone-600">SPH</label>
+<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
 
-<label>Loại tròng</label>
+<div>
+<label class="text-sm text-stone-600">CYL</label>
+<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
 
-<select id="lens" onchange="calcPrice()" class="border p-2 w-full">
+<div>
+<label class="text-sm text-stone-600">AXIS</label>
+<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
+
+<div>
+<label class="text-sm text-stone-600">PD</label>
+<input class="w-full mt-1 p-3 rounded-lg border border-stone-200 focus:border-amber-500 outline-none">
+</div>
+
+</div>
+
+
+<div class="mt-5">
+
+<label class="text-sm text-stone-600">
+Upload đơn thuốc
+</label>
+
+<input type="file"
+class="mt-2 block w-full text-sm text-stone-600">
+
+</div>
+
+
+<div class="mt-6">
+
+<label class="text-sm text-stone-600">
+Loại tròng
+</label>
+
+<select id="lens"
+onchange="calcPrice()"
+class="w-full mt-2 p-3 rounded-lg border border-stone-200">
 
 <option value="300000">Chống ánh sáng xanh</option>
-
 <option value="500000">Đổi màu</option>
-
 <option value="700000">Siêu mỏng</option>
 
 </select>
+</div>
+</div>
 
-<h3 class="text-xl mt-5">
-Giá: <span id="price">300000</span> đ
-</h3>
+<!-- PRICE BOX -->
 
+<div class="bg-stone-50 p-8 rounded-2xl shadow-sm h-fit">
+
+<h2 class="font-serif text-2xl mb-6">
+Chi phí
+</h2>
+
+<div class="flex justify-between text-lg">
+
+<span>Giá tròng</span>
+
+<span id="price">300000</span> đ
+
+</div>
+
+<button
+class="mt-8 w-full py-4 bg-stone-900 text-white rounded-full text-sm font-bold tracking-widest uppercase hover:bg-stone-800 transition">
+
+Xác nhận
+
+</button>
+</div>
+</div>
 </div>
 
 <script>
@@ -61,9 +152,6 @@ let price=document.getElementById("lens").value;
 document.getElementById("price").innerText=price;
 
 }
-
 </script>
-
 </body>
-
 </html>
