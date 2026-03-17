@@ -1,24 +1,35 @@
 <?php
 
-require_once "../config/database.php";
-require_once "../controllers/AuthController.php";
+require_once "../config/db_connect.php";
+require_once "../app/controllers/AuthController.php";
 
-header("Content-Type: application/json");
 $authController = new AuthController($conn);
 
-// Kiểm tra hành động của người dùng
 $action = $_GET['action'] ?? '';
-switch($action) {
-    case "register":
-        $authController->register();
-        break;
+
+switch ($action) {
+
     case "login":
         $authController->login();
-        break;
+        exit();
+
+    case "register":
+        $authController->register();
+        exit();
+
+    case "logout":
+        $authController->logout();
+        exit();
+    case "check":
+        $authController->check();
+        exit();
+// case "delete-product":
+// case "update-profile":
+// case "create-order":
+    // case "add-product":
     default:
-        echo json_encode ([
-            "status" => "error",
-            "message" => "Chức năng không tồn tại"
-        ]);
-        break;
+         echo "Invalid action";
+        exit();
+        
+
 }

@@ -1,138 +1,131 @@
 <?php
-
-require_once "../config/database.php";
+require_once __DIR__ . "/../../config/db_connect.php";
+require_once __DIR__ . "/../models/UserModel.php";
 
 class AuthController {
-    private $conn;
+
+    private $userModel;
+
     public function __construct($conn) {
-        $this->conn  = $conn;
+        $this->userModel = new UserModel($conn);
     }
 
-    // ĐĂNG KÝ
-    public function register() {
-        $data = json_decode(file_get_contents("php://input"), true);
-        $name = $data['name'] ?? '';
-        $email = $data['email'] ?? '';
-        $password = $data['password'] ?? '';
-        $phone = $data['phone'] ?? '';
-        $address = $data['address'] ?? '';
-
-        if (!$name || !$email || !$password) {
-            echo json_encode([
-                "status" => "error",
-                "message" => "Vui lòng nhập đủ tên, email, mật khẩu!"
-            ]);
-            return;
-        }
-
-        // Kiểm tra email tồn tại
-        $stmt = $this->conn->prepare(
-            "SELECT userId FROM users WHERE email=?"
-        );
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            echo json_encode([
-                "status" => "error",
-                "message" => "Email này đã tồn tại!"
-            ]);
-            return;
-        }
-
-        // Mã hóa mật khẩu và mặc định role là customer
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $role = "customer";
-
-        // Chèn vào bảng users
-        $stmt = $this->conn->prepare(
-            "INSERT INTO users(name, email, password, role, phone)
-            VALUES(?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssss",
-            $name,
-            $email,
-            $hashedPassword,
-            $role,
-            $phone
-        );
-        if(!$stmt->execute()) {
-            echo json_encode([
-                "status" => "error",
-                "message" => "Không thể tạo tài khoản!"
-            ]);
-            return;
-        }
-        $userId = $stmt->insert_id;
-
-        // Chèn vào bảng customers
-        $stmt2 = $this->conn->prepare(
-            "INSERT INTO customers(userId, address)
-            VALUES(?, ?)"
-        );
-        $stmt2->bind_param(
-            "is",
-            $userId,
-            $address
-        );
-        $stmt2->execute();
-        echo json_encode([
-            "status" => "success",
-            "message" => "Đăng ký thành công!",
-            "userId" => $userId
-        ]);
-    }
-
-    // ĐĂNG NHẬP
+    // LOGIN
     public function login() {
-        $data = json_decode(file_get_contents("php://input"), true);
-        $email = $data['email'] ?? '';
-        $password = $data['password'] ?? '';
 
-        if (!$email || !$password) {
-            echo json_encode ([
-                "status" => "error",
-                "message" => "Thiếu email hoặc mật khẩu!"
-            ]);
-            return;
+        session_start();
+
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        $user = $this->userModel->getUserByEmail($email);
+
+        if ($user && password_verify($password, $user['password'])) {
+
+            $_SESSION['userId'] = $user['userId'];
+            $_SESSION['name'] = $user['name'];
+            $_SESSION['role'] = $user['role'];
+
+            // trả về URL để JS redirect
+            switch ($user['role']) {
+
+                case 'manager':
+                    echo "/SELLING-GLASSES/app/views/admin/dashboard.php";
+                    break;
+
+                case 'staff':
+                    echo "/SELLING-GLASSES/app/views/staff/dashboard.php";
+                    break;
+
+                case 'sales':
+                    echo "/SELLING-GLASSES/app/views/sales/dashboard.php";
+                    break;
+
+                case 'customer':
+                    echo "/SELLING-GLASSES/public/index.php";
+                    break;
+
+                default:
+                    echo "Role not recognized";
+            }
+
+            exit();
+
+        } else {
+            echo "Invalid email or password";
+            exit();
         }
-
-        // Kiểm tra tài khoản tồn tại
-        $stmt = $this->conn->prepare(
-            "SELECT * FROM users WHERE email=?"
-        );
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows === 0) {
-            echo json_encode ([
-                "status" => "error",
-                "message" => "Tài khoản không tồn tại!"
-            ]);
-            return;
-        }
-
-        // Xác thực mật khẩu
-        $user = $result->fetch_assoc();
-        if (!password_verify($password, $user['password'])) {
-            echo json_encode ([
-                "status" => "error",
-                "message" => "Mật khẩu không chính xác!"
-            ]);
-            return;
-        }
-
-        // Phản hồi khi thành công
-        echo json_encode ([
-            "status" => "success",
-            "message" => "Đăng nhập thành công",
-            "user" => [
-                "userId" => $user['userId'],
-                "name" => $user['name'],
-                "email" => $user['email'],
-                "role" => $user['role']
-            ]
-        ]);
     }
+
+    // REGISTER
+    public function register(){
+
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if(empty($name) || empty($email) || empty($phone) || empty($password)){
+        echo "Please fill all fields";
+        exit();
+    }
+
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+    echo "Invalid email";
+    exit();
+    }
+
+    $existingUser = $this->userModel->getUserByEmail($email);
+
+    if($existingUser){
+        echo "Email already exists";
+        exit();
+    }
+
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+    $role = "customer";
+
+    $created = $this->userModel->createUser($name,$email,$passwordHash,$phone,$role);
+
+    if($created){
+        echo "/SELLING-GLASSES/app/views/auth/auth.html";
+    }else{
+        echo "Register failed";
+    }
+}
+
+    // LOGOUT
+    public function logout() {
+
+        session_start();
+          session_unset();
+        session_destroy();
+        // Xóa cookie session
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
+
+
+        echo "/SELLING-GLASSES/public/index.php";
+        exit();
+    }
+    public function check() {
+    session_start();
+
+    if (isset($_SESSION['userId'])) {
+        echo "logged_in";
+    } else {
+        echo "not_logged_in";
+    }
+}
 }
