@@ -1,8 +1,3 @@
-/**
- * 🛠 HỆ THỐNG QUẢN TRỊ GLASSES VIP 2026 - AMBER EDITION
- * Admin: Võ Huyền Trân
- */
-
 // 1. KHỞI TẠO DỮ LIỆU
 let products = JSON.parse(localStorage.getItem('products')) || [];
 let promos = JSON.parse(localStorage.getItem('promos')) || [];
