@@ -47,7 +47,7 @@ async function handleLogin(event) {
 
   try {
     const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/routes/web.php?action=login",
+      "/SELLING-GLASSES/routes/web.php?action=login",
       {
         method: "POST",
         body: formData,
@@ -80,7 +80,7 @@ async function handleRegister(event) {
   formData.append("password", password);
 
   const response = await fetch(
-    "http://localhost:8088/SELLING-GLASSES/routes/web.php?action=register",
+    "/SELLING-GLASSES/routes/web.php?action=register",
     {
       method: "POST",
       body: formData,
