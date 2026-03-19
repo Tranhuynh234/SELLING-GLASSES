@@ -9,7 +9,7 @@
    - Invalid email
    - Email already exists
    - Register failed
-1. Api login.
+2. Api login.
 
 - http://localhost:8088/SELLING-GLASSES/routes/web.php?action=login
 - dữ liệu nhập vào dạng form gồm: userName, password.
@@ -20,3 +20,9 @@
 - /SELLING-GLASSES/index.php
 - Role not recognized
 - Invalid email or password
+
+3. Api logout
+   -http://localhost:8088/SELLING-GLASSES/routes/web.php?action=logout
+   = kết quả trả về:
+   +/SELLING-GLASSES/public/index.php
+   +Invalid action
