@@ -1,0 +1,14 @@
+@keyframes scan {
+    0% {
+        transform: translateY(-100%);
+    }
+    100% {
+        transform: translateY(200%);
+    }
+}
+
+.animate-scan {
+    animation: scan 3s linear infinite;
+    /* Thêm một đường kẻ sáng ở dưới cùng của vùng gradient để rõ nét hơn */
+    border-bottom: 2px solid rgba(217, 119, 6, 0.4);
+}
