@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="/app/views/Dashboard/manager/mana.css">
+    <link rel="stylesheet" href="http://localhost/SELLING-GLASSES/public/assets/css/mana.css">
 </head>
 <body>
 
     <div id="modal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-glow"></div>
-            
             <div class="modal-head">
                 <div class="head-title">
                     <i class="fas fa-plus-circle"></i>
@@ -21,7 +19,6 @@
                 </div>
                 <span class="close-modal" onclick="closeModal()">&times;</span>
             </div>
-
             <div class="modal-body">
                 <div class="input-field">
                     <label id="lbl1">Tên mục</label>
@@ -30,7 +27,6 @@
                         <input type="text" id="input1" placeholder="Nhập thông tin...">
                     </div>
                 </div>
-
                 <div class="input-field">
                     <label id="lbl2">Giá trị</label>
                     <div class="input-wrapper">
@@ -39,7 +35,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-foot">
                 <button class="btn-ghost" onclick="closeModal()">
                     <i class="fas fa-times"></i> Hủy bỏ
@@ -71,19 +66,24 @@
                     <li onclick="showTab('policy')" class="nav-item" id="btn-policy">
                         <i class="fas fa-file-shield"></i> <span>Chính sách</span>
                     </li>
+                    <li class="nav-item" id="btn-user" onclick="showTab('user')">
+                        <i class="fas fa-users"></i> <span>Quản lý người dùng</span>
+                    </li>
+                    <li class="nav-item" id="btn-combo" onclick="showTab('combo')">
+                        <i class="fas fa-cubes"></i> <span>Quản lý combo</span>
+                    </li>
+                    <li class="nav-item" id="btn-permission" onclick="showTab('permission')">
+                        <i class="fas fa-user-shield"></i> <span>Phân quyền hạn</span>
+                    </li>
                 </ul>
             </nav>
-            <div class="sidebar-footer">
-                <p><strong></strong></p>
-                <p><small></small></p>
-            </div>
         </aside>
 
         <main class="main-content">
             <header class="top-bar">
                 <div class="welcome-text">
                     <h1>Hệ thống quản trị</h1>
-                    <p>Chào mừng trở lại <strong></strong></p>
+                    <p>Chào mừng trở lại!</p>
                 </div>
                 <div class="header-actions">
                     <div class="notif-box">
@@ -94,7 +94,6 @@
             </header>
 
             <div class="content-body">
-                
                 <section id="dashboard" class="tab-pane active">
                     <div class="stats-grid">
                         <div class="stat-card glass blue">
@@ -134,7 +133,6 @@
                                 <canvas id="revenueChart"></canvas>
                             </div>
                         </div>
-                        
                         <div class="recent-activities glass">
                             <h3><i class="fas fa-bolt"></i> Hoạt động mới</h3>
                             <div class="activity-list" id="logList">
@@ -152,12 +150,7 @@
                     <div class="table-wrapper glass">
                         <table class="vip-table">
                             <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tên mắt kính</th>
-                                    <th>Đơn giá</th>
-                                    <th>Hành động</th>
-                                </tr>
+                                <tr><th>STT</th><th>Tên mắt kính</th><th>Đơn giá</th><th>Hành động</th></tr>
                             </thead>
                             <tbody id="productTable"></tbody>
                         </table>
@@ -172,12 +165,7 @@
                     <div class="table-wrapper glass">
                         <table class="vip-table">
                             <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tên chương trình</th>
-                                    <th>Mức giảm</th>
-                                    <th>Hành động</th>
-                                </tr>
+                                <tr><th>STT</th><th>Tên chương trình</th><th>Mức giảm</th><th>Hành động</th></tr>
                             </thead>
                             <tbody id="promoTable"></tbody>
                         </table>
@@ -192,22 +180,62 @@
                     <div class="table-wrapper glass">
                         <table class="vip-table">
                             <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tiêu đề chính sách</th>
-                                    <th>Nội dung</th>
-                                    <th>Hành động</th>
-                                </tr>
+                                <tr><th>STT</th><th>Tiêu đề chính sách</th><th>Nội dung</th><th>Hành động</th></tr>
                             </thead>
                             <tbody id="policyTable"></tbody>
                         </table>
                     </div>
                 </section>
 
+                <section id="user" class="tab-pane">
+                    <div class="pane-header">
+                        <h2>Quản lý khách hàng</h2>
+                        <button class="btn-confirm" onclick="openModal('user')"><i class="fas fa-user-plus"></i> Thêm người dùng</button>
+                    </div>
+                    <div class="table-wrapper glass">
+                        <table class="vip-table">
+                            <thead>
+                                <tr><th>STT</th><th>Họ tên</th><th>Liên hệ</th><th>Hành động</th></tr>
+                            </thead>
+                            <tbody id="userTable"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="combo" class="tab-pane">
+                    <div class="pane-header">
+                        <h2>Quản lý Combo</h2>
+                        <button class="btn-confirm" onclick="openModal('combo')"><i class="fas fa-plus"></i> Thêm Combo</button>
+                    </div>
+                    <div class="table-wrapper glass">
+                        <table class="vip-table">
+                            <thead>
+                                <tr><th>STT</th><th>Tên Combo</th><th>Giá tiền</th><th>Hành động</th></tr>
+                            </thead>
+                            <tbody id="comboTable"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="permission" class="tab-pane">
+                    <div class="pane-header">
+                        <h2>Phân quyền nhân viên</h2>
+                        <button class="btn-confirm" onclick="openModal('permission')"><i class="fas fa-shield-alt"></i> Cấp quyền</button>
+                    </div>
+                    <div class="table-wrapper glass">
+                        <table class="vip-table">
+                            <thead>
+                                <tr><th>STT</th><th>Tên nhân viên</th><th>Quyền hạn</th><th>Hành động</th></tr>
+                            </thead>
+                            <tbody id="permissionTable"></tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <script src="/public/assets/js/mana.js"></script>
+   <script src="http://localhost/SELLING-GLASSES/public/assets/js/mana.js"></script>
+<script src="../../../../public/assets/js/mana.js"></script>
 </body>
 </html>
