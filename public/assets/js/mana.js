@@ -2,22 +2,27 @@
 let products = JSON.parse(localStorage.getItem('products')) || [];
 let promos = JSON.parse(localStorage.getItem('promos')) || [];
 let policies = JSON.parse(localStorage.getItem('policies')) || [];
+let users = JSON.parse(localStorage.getItem('users')) || [];
+let combos = JSON.parse(localStorage.getItem('combos')) || [];
+let permissions = JSON.parse(localStorage.getItem('permissions')) || [];
 let currentType = ""; 
 let mainChart = null; 
 
 // 2. ĐIỀU HƯỚNG TAB
 function showTab(tabId) {
+    // 1. Xóa tất cả trạng thái cũ
     document.querySelectorAll(".tab-pane").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
     
+    // 2. Hiển thị Tab được chọn
     const targetTab = document.getElementById(tabId);
     const targetBtn = document.getElementById("btn-" + tabId);
     
     if(targetTab) targetTab.classList.add("active");
     if(targetBtn) targetBtn.classList.add("active");
 
-    // Nếu quay lại Dashboard, vẽ lại biểu đồ với hiệu ứng mượt
-    if(tabId === 'dashboard') {
+    // 3. Vẽ lại biểu đồ nếu là Dashboard
+    if(tabId === 'dashboard' && typeof initChart === 'function') {
         setTimeout(initChart, 150); 
     }
 }
@@ -32,14 +37,22 @@ function openModal(t) {
     const configs = {
         product: { title: "THÊM MẮT KÍNH MỚI", l1: "Tên mắt kính", l2: "Giá bán niêm yết" },
         promo:   { title: "TẠO MÃ KHUYẾN MÃI", l1: "Tên mã / Sự kiện", l2: "Mức giảm (%)" },
-        policy:  { title: "THÊM CHÍNH SÁCH",   l1: "Tiêu đề quy định", l2: "Nội dung chi tiết" }
+        policy:  { title: "THÊM CHÍNH SÁCH",   l1: "Tiêu đề quy định", l2: "Nội dung chi tiết" },
+        user: { title: "THÊM NGƯỜI DÙNG", l1: "Họ tên khách", l2: "SĐT / Email" },
+        combo: { title: "THÊM COMBO", l1: "Tên combo", l2: "Giá combo" },
+        permission: { title: "CẤP QUYỀN", l1: "Tên nhân viên", l2: "Quyền hạn (all/tab_name)" }
     };
 
     title.innerText = configs[t].title;
     lbl1.innerText = configs[t].l1;
     lbl2.innerText = configs[t].l2;
 
+    const c = configs[t];
+    document.getElementById("modalTitle").innerText = c.title;
+    document.getElementById("lbl1").innerText = c.l1;
+    document.getElementById("lbl2").innerText = c.l2;
     document.getElementById("modal").style.display = "flex";
+
 }
 
 function closeModal() {
@@ -67,6 +80,9 @@ function saveData() {
     if (currentType === "product") products.push(entry);
     else if (currentType === "promo") promos.push(entry);
     else if (currentType === "policy") policies.push(entry);
+    else if (currentType === "user") users.push(entry);
+    else if (currentType === "combo") combos.push(entry);
+    else if (currentType === "permission") permissions.push(entry);
 
     syncData();
     closeModal();
@@ -82,10 +98,16 @@ function syncData() {
     localStorage.setItem('products', JSON.stringify(products));
     localStorage.setItem('promos', JSON.stringify(promos));
     localStorage.setItem('policies', JSON.stringify(policies));
+    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('combos', JSON.stringify(combos));
+    localStorage.setItem('permissions', JSON.stringify(permissions));
 
     renderTable("productTable", products);
     renderTable("promoTable", promos);
     renderTable("policyTable", policies);
+    renderTable("userTable", users);
+    renderTable("comboTable", combos);
+    renderTable("permissionTable", permissions);
     updateStats();
 }
 
@@ -108,12 +130,15 @@ function renderTable(tableId, data) {
 }
 
 function deleteItem(tableId, index) {
-    if (!confirm("Hệ thống: Manager xác nhận xóa mục này?")) return;
+    if(!confirm("Xác nhận xóa?")) return;
 
     if (tableId === "productTable") products.splice(index, 1);
     else if (tableId === "promoTable") promos.splice(index, 1);
     else if (tableId === "policyTable") policies.splice(index, 1);
-    
+    else if (tableId === "userTable") users.splice(index, 1);
+    else if (tableId === "comboTable") combos.splice(index, 1);
+    else if (tableId === "permissionTable") permissions.splice(index, 1);
+
     syncData();
     logActivity(`Hệ thống vừa xóa dữ liệu từ ${tableId.replace('Table', '')}`);
     showToast("Đã xóa mục thành công.", "info");
@@ -155,7 +180,9 @@ function initChart() {
     const chartElement = document.getElementById('revenueChart');
     if (!chartElement) return;
 
-    if (mainChart) mainChart.destroy(); 
+    if (mainChart) {
+        mainChart.destroy();
+    } 
 
     const ctx = chartElement.getContext('2d');
     // Gradient vàng hổ phách (Amber)
