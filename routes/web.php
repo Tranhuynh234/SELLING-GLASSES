@@ -3,7 +3,7 @@
 require_once "../config/db_connect.php";
 require_once "../app/controllers/AuthController.php";
 
-$authController = new AuthController($conn);
+$authController = new AuthController();
 
 $action = $_GET['action'] ?? '';
 
@@ -20,16 +20,12 @@ switch ($action) {
     case "logout":
         $authController->logout();
         exit();
-    case "check":
-        $authController->check();
-        exit();
-// case "delete-product":
-// case "update-profile":
-// case "create-order":
-    // case "add-product":
-    default:
-         echo "Invalid action";
-        exit();
-        
 
+    case "profile":
+        $authController->profile();
+        exit();
+
+    default:
+        echo "Invalid action";
+        exit();
 }

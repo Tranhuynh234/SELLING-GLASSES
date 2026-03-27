@@ -1,131 +1,115 @@
 <?php
-require_once __DIR__ . "/../../config/db_connect.php";
-require_once __DIR__ . "/../models/UserModel.php";
-
+require_once dirname(__DIR__) . "/services/UserServices.php";
 class AuthController {
+    private $userService;
 
-    private $userModel;
-
-    public function __construct($conn) {
-        $this->userModel = new UserModel($conn);
+    public function __construct() {
+        $this->userService = new UserService();
     }
 
-    // LOGIN
-    public function login() {
+    // =========================
+    // REGISTER
+    // =========================
+    public function register() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // thông báo trả về json
+            header("Content-Type: application/json");
+            $result = $this->userService->register($_POST);
 
-        session_start();
-
-        $email = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
-
-        $user = $this->userModel->getUserByEmail($email);
-
-        if ($user && password_verify($password, $user['password'])) {
-
-            $_SESSION['userId'] = $user['userId'];
-            $_SESSION['name'] = $user['name'];
-            $_SESSION['role'] = $user['role'];
-
-            // trả về URL để JS redirect
-            switch ($user['role']) {
-
-                case 'manager':
-                    echo "/SELLING-GLASSES/app/views/admin/dashboard.php";
-                    break;
-
-                case 'staff':
-                    echo "/SELLING-GLASSES/app/views/staff/dashboard.php";
-                    break;
-
-                case 'sales':
-                    echo "/SELLING-GLASSES/app/views/sales/dashboard.php";
-                    break;
-
-                case 'customer':
-                    echo "/SELLING-GLASSES/public/index.php";
-                    break;
-
-                default:
-                    echo "Role not recognized";
+            if ($result['success']) {
+                 echo json_encode([
+                "success" => true,
+                "message" => $result['message']
+            ]);
+            } else {
+               echo json_encode([
+                "success" => false,
+                "message" => $result['message']
+            ]);
             }
 
-            exit();
-
         } else {
-            echo "Invalid email or password";
-            exit();
+            // load view
+            require_once __DIR__ . "/../views/auth/register.php";
         }
     }
 
-    // REGISTER
-    public function register(){
-
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    if(empty($name) || empty($email) || empty($phone) || empty($password)){
-        echo "Please fill all fields";
-        exit();
-    }
-
-    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-    echo "Invalid email";
-    exit();
-    }
-
-    $existingUser = $this->userModel->getUserByEmail($email);
-
-    if($existingUser){
-        echo "Email already exists";
-        exit();
-    }
-
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-    $role = "customer";
-
-    $created = $this->userModel->createUser($name,$email,$passwordHash,$phone,$role);
-
-    if($created){
-        echo "/SELLING-GLASSES/app/views/auth/auth.html";
-    }else{
-        echo "Register failed";
-    }
-}
-
-    // LOGOUT
-    public function logout() {
-
+    // =========================
+    // LOGIN
+    // =========================
+    public function login() {
+        if (session_status() === PHP_SESSION_NONE) {
         session_start();
-          session_unset();
-        session_destroy();
-        // Xóa cookie session
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(
-            session_name(),
-            '',
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
     }
 
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // thông báo trả về json 
+             header("Content-Type: application/json");
+            $result = $this->userService->login(
+                $_POST['email'],    
+                $_POST['password']
+            );
 
-        echo "/SELLING-GLASSES/public/index.php";
-        exit();
+            if ($result['success']) {
+                // lưu session
+                $_SESSION['user'] = $result['data'];
+
+                 echo json_encode([
+                    "success" => true,
+                    "message" => "Login success",
+                    "redirect" => "/home"
+                    ]);
+            } else {
+                  echo json_encode([
+                    "success" => false,
+                    "message" => $result['message']
+                ]);
+             
+            }
+            exit;
+        } 
+            require_once __DIR__ . "/../views/auth/login.php";
+        
     }
-    public function check() {
-    session_start();
 
-    if (isset($_SESSION['userId'])) {
-        echo "logged_in";
-    } else {
-        echo "not_logged_in";
+    // =========================
+    // LOGOUT
+    // =========================
+  public function logout() {
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    session_unset();
+    session_destroy();
+
+    header("Content-Type: application/json");
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Logout success",
+        "redirect" => "/login"
+    ]);
+    exit;
+}
+
+    // =========================
+    // PROFILE (test session)
+    // =========================
+    public function profile() {
+          if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+        if (!isset($_SESSION['user'])) {
+            echo "Bạn chưa đăng nhập";
+            return;
+        }
+
+        $user = $_SESSION['user'];
+
+        echo "Xin chào: " . $user->name;
     }
 }
-}
+?>

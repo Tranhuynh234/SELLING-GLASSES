@@ -1,10 +1,34 @@
 <?php
-?>
 
-<a id="loginBtn" href="/SELLING-GLASSES/app/views/auth/auth.html">Login</a>
+require_once "../config/db_connect.php";
+require_once "../app/controllers/AuthController.php";
 
-<button id="logoutBtn" onclick="logout()" style="display:none;">
-    Logout
-</button>
+// tạo controller
+$authController = new AuthController($conn);
 
-<script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
+// lấy action từ URL
+$action = $_GET['action'] ?? 'login';
+
+// router (điều hướng)
+switch ($action) {
+
+    case "login":
+        $authController->login();
+        break;
+
+    case "register":
+        $authController->register();
+        break;
+
+    case "logout":
+        $authController->logout();
+        break;
+
+    case "profile":
+        $authController->profile();
+        break;
+
+    default:
+        echo "Invalid action";
+        break;
+}

@@ -1,18 +1,30 @@
 <?php
+class Database {
+    private static $host = "localhost";
+    private static $port = "3307";
+    private static $dbname = "selling_glasses";
+    private static $username = "root";
+    private static $password = "";
 
-$host = "localhost";
-$port = 3307;
-$dbname = "selling_glasses";
-$username = "root";
-$password = "";
+    private static $conn = null;
 
-// tạo kết nối
-$conn = new mysqli($host, $username, $password, $dbname, $port);
+    public static function connect() {
+        if (self::$conn === null) {
+            try {
+                self::$conn = new PDO(
+                    "mysql:host=" . self::$host . ";port=" . self::$port . ";dbname=" . self::$dbname . ";charset=utf8mb4",
+                    self::$username,
+                    self::$password
+                );
 
-// kiểm tra lỗi kết nối
-if ($conn->connect_error) {
-    die("Database connection failed: " . $conn->connect_error);
+                // bật lỗi exception
+                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            } catch (PDOException $e) {
+                die("Database connection failed: " . $e->getMessage());
+            }
+        }
+        return self::$conn;
+    }
 }
-
-// set charset
-$conn->set_charset("utf8mb4");
+?>

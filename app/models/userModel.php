@@ -1,42 +1,30 @@
 <?php
+require_once __DIR__ . "/../core/BaseModel.php";
+require_once __DIR__ . "/../entities/User.php";
 
-class UserModel {
+class UserModel extends BaseModel {
+    protected $table = "users";
 
-    private $conn;
-
-    public function __construct($conn){
-        $this->conn = $conn;
+    // override để trả về entity
+    public function findByEmail($email) {
+        $data = $this->findBy("email", $email);
+        return $data ? new User($data) : null;
     }
 
-    public function getUserByEmail($email){
-
-        $sql = "SELECT * FROM users WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
-
-        $stmt->bind_param("s",$email);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-        return $result->fetch_assoc();
-    }
- public function createUser($name,$email,$password,$phone,$role){
-
-    $sql = "INSERT INTO users (name,email,password,role,phone) 
-            VALUES (?,?,?,?,?)";
-
-    $stmt = $this->conn->prepare($sql);
-
-    $stmt->bind_param("sssss",$name,$email,$password,$role,$phone);
-
-    // execute và kiểm tra lỗi
-    if(!$stmt->execute()){
-        echo "SQL Error: " . $stmt->error;
-        return false;
+    public function findUser($id) {
+        $data = $this->find($id, "userId");
+        return $data ? new User($data) : null;
     }
 
-    $stmt->close();
+    public function getAllUsers() {
+        $rows = $this->all();
+        $users = [];
 
-    return true;
-}
+        foreach ($rows as $row) {
+            $users[] = new User($row);
+        }
+
+        return $users;
+    }
 }
 ?>
