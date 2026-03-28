@@ -6,13 +6,14 @@ require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // tạo controller
 //$conn = Database::connect();    //Yen themd
-$authController = new AuthController($conn);
+//$authController = new AuthController($conn);
 $productController = new ProductController();   //Yen them
+
 //$orderController = new OrderController(); // TRAN HUYNH
 require_once "../app/controllers/StaffController.php";
 
 $staffController = new StaffController();
-
+//$orderController = new OrderController(); // TRAN HUYNH  lỗi vì khong triển khai model. pull code về r sửa lạii
 $authController = new AuthController();
 
 $url = $_GET['url'] ?? '';
@@ -23,6 +24,7 @@ switch ($url) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->login();
         } 
+        exit();
 
     case "register":
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
