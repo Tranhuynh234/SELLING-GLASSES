@@ -1,0 +1,24 @@
+/* Font mặc định */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Smooth hover */
+a {
+    transition: 0.3s;
+}
+
+/* Input số lượng đẹp hơn */
+input[type="number"] {
+    border: 1px solid #e7e5e4;
+    padding: 4px;
+    border-radius: 6px;
+    width: 60px;
+    text-align: center;
+}
+
+/* Button xóa */
+button {
+    color: red;
+    font-size: 14px;
+}
