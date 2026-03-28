@@ -4,12 +4,10 @@ session_start();
 require_once __DIR__ . "/../../config/db_connect.php";
 require_once __DIR__ . "/../services/cartService.php";
 
-// 🔥 lấy PDO connection
 $conn = Database::connect();
 
 $cartService = new CartService($conn);
 
-// 🔥 check login
 $userId = $_SESSION['userId'] ?? null;
 
 if (!$userId) {
@@ -17,7 +15,6 @@ if (!$userId) {
     exit();
 }
 
-// 🔥 lấy customerId (PDO)
 $stmt = $conn->prepare("SELECT customerId FROM customers WHERE userId = ?");
 $stmt->execute([$userId]);
 $customer = $stmt->fetch(PDO::FETCH_ASSOC);
