@@ -20,16 +20,18 @@ class ProductController {
 
     // Thêm danh mục mới
     public function addCategory() {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $name = isset($_GET['name']) ? $_GET['name'] : 'Danh mục mới ' . time();
+        $data = ['name' => $name];
         $result = $this->productService->addCategory($data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // Cập nhật danh mục
     public function updateCategory($id) {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $name = isset($_GET['name']) ? $_GET['name'] : 'Tên cập nhật ' . time();
+        $data = ['name' => $name];
         $result = $this->productService->editCategory($id, $data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // Xóa danh mục
@@ -44,16 +46,28 @@ class ProductController {
 
     // Thêm sản phẩm mới
     public function addProduct() {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = [
+        'name'        => isset($_GET['name']) ? $_GET['name'] : 'Sản phẩm mới ' . time(),
+        'description' => isset($_GET['desc']) ? $_GET['desc'] : 'Mô tả mặc định',
+        'categoryId'  => isset($_GET['catId']) ? $_GET['catId'] : 1,
+        'imagePath'   => isset($_GET['img']) ? $_GET['img'] : 'default.jpg',
+        'staffId'     => isset($_GET['staffId']) ? $_GET['staffId'] : 1
+        ];
         $result = $this->productService->addProduct($data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // Chỉnh sửa sản phẩm
     public function updateProduct($id) {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = [
+            'name'        => isset($_GET['name']) ? $_GET['name'] : 'Tên SP cập nhật',
+            'description' => isset($_GET['desc']) ? $_GET['desc'] : 'Mô tả cập nhật',
+            'categoryId'  => isset($_GET['catId']) ? $_GET['catId'] : 1,
+            'imagePath'   => isset($_GET['img']) ? $_GET['img'] : 'updated.jpg',
+            'staffId'     => isset($_GET['staffId']) ? $_GET['staffId'] : 1
+        ];
         $result = $this->productService->editProduct($id, $data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // Xóa sản phẩm
@@ -68,16 +82,27 @@ class ProductController {
 
     // Thêm màu sắc, size, giá cho sản phẩm
     public function addVariant() {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = [
+            'productId' => isset($_GET['prodId']) ? $_GET['prodId'] : 1,
+            'color'     => isset($_GET['color']) ? $_GET['color'] : 'Đen',
+            'size'      => isset($_GET['size']) ? $_GET['size'] : 'M',
+            'price'     => isset($_GET['price']) ? $_GET['price'] : 0,
+            'stock'     => isset($_GET['stock']) ? $_GET['stock'] : 0
+        ];
         $result = $this->productService->addVariant($data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // Cập nhật thông tin biến thể
     public function updateVariant($variantId) {
-        $data = json_decode(file_get_contents("php://input"), true);
+        $data = [
+            'color' => isset($_GET['color']) ? $_GET['color'] : 'Màu mới',
+            'size'  => isset($_GET['size']) ? $_GET['size'] : 'L',
+            'price' => isset($_GET['price']) ? $_GET['price'] : 0,
+            'stock' => isset($_GET['stock']) ? $_GET['stock'] : 0
+        ];
         $result = $this->productService->updateVariant($variantId, $data);
-        echo json_encode($result);
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
     }
 
     // ================================

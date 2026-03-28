@@ -5,13 +5,19 @@ require_once "../app/controllers/ProductController.php";
 require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // tạo controller
+<<<<<<< Updated upstream
 //$conn = Database::connect();    //Yen themd
 //$authController = new AuthController($conn);
+=======
+// $conn = Database::connect();    //Yen them
+$authController = new AuthController();
+>>>>>>> Stashed changes
 $productController = new ProductController();   //Yen them
 
 //$orderController = new OrderController(); // TRAN HUYNH
 require_once "../app/controllers/StaffController.php";
 
+<<<<<<< Updated upstream
 $staffController = new StaffController();
 //$orderController = new OrderController(); // TRAN HUYNH  lỗi vì khong triển khai model. pull code về r sửa lạii
 $authController = new AuthController();
@@ -19,6 +25,14 @@ $authController = new AuthController();
 $url = $_GET['url'] ?? '';
 
 switch ($url) {
+=======
+// Lấy ID
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+$variantId = isset($_GET['variantId']) ? $_GET['variantId'] : null;
+
+// router (điều hướng)
+switch ($action) {
+>>>>>>> Stashed changes
 
     case "login":
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -50,26 +64,43 @@ switch ($url) {
         exit();
 
     // --- PHẦN QUẢN LÝ CỦA YẾN ---
-    case "get-all-products":
-        $productController->index();
+    // --- CATEGORY ---
+    case 'get-all-categories':
+        $productController->getAllCategories();
+        break;
+    case 'add-category':
+        $productController->addCategory();
+        break;
+    case 'update-category':
+        $productController->updateCategory($id);
+        break;
+    case 'delete-category':
+        $productController->deleteCategory($id);
         break;
 
-    case "get-product-detail":
-        $id = $_GET['id'] ?? null;
+    // --- PRODUCT ---
+    case 'get-all-products':
+        $productController->index();
+        break;
+    case 'add-product':
+        $productController->addProduct();
+        break;
+    case 'update-product':
+        $productController->updateProduct($id);
+        break;
+    case 'delete-product':
+        $productController->deleteProduct($id);
+        break;
+    case 'detail':
         $productController->detail($id);
         break;
 
-    case "get-categories":
-        $productController->getAllCategories();
+    // --- VARIANT ---
+    case 'add-variant':
+        $productController->addVariant();
         break;
-
-    case "add-product":
-        $productController->addProduct();
-        break;
-
-    case "delete-product":
-        $id = $_GET['id'] ?? null;
-        $productController->deleteProduct($id);
+    case 'update-variant':
+        $productController->updateVariant($variantId);
         break;
 
     //  case "create-order":

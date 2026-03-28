@@ -24,7 +24,7 @@ class ProductServices {
 
     public function addCategory($data) {
         $categoryId = $this->categoryModel->create(['name' => $data['name']]);
-        return $categoryId ? ['success' => true, 'message' => 'Thêm danh mục thành công'] : ['success' => false];
+        return $categoryId ? ['success' => true, 'message' => 'Them danh muc thanh cong'] : ['success' => false];
     }
 
     public function editCategory($id, $data) {
@@ -114,7 +114,7 @@ class ProductServices {
     // API: get product detail
     public function getProductDetail($id) {
         $product = $this->productModel->findProduct($id);
-        if (!$product) return ['success' => false, 'message' => 'Sản phẩm không tồn tại'];
+        if (!$product) return ['success' => false, 'message' => 'San pham khong ton tai'];
 
         $variants = $this->variantModel->getVariantsByProductId($id);
         $category = $this->categoryModel->findCategory($product->categoryId);
