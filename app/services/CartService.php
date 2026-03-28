@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../models/CartItem.php";
 class CartService {
 
     private $conn;
