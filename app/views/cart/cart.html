@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -5,23 +6,20 @@
 <meta charset="UTF-8">
 <title>Giỏ hàng - LENS</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/cart.css">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script>
 tailwind.config = {
-theme: {
-extend: {
-fontFamily: {
-sans: ['Inter', 'sans-serif'],
-serif: ['Playfair Display', 'serif'],
-}
-}
-}
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+      }
+    }
+  }
 }
 </script>
 
@@ -32,8 +30,8 @@ serif: ['Playfair Display', 'serif'],
 <!-- HEADER -->
 <div class="flex justify-between items-center p-6 border-b">
 
-<div class="font-serif italic text-3xl">
-Lens<span class="text-amber-600">.</span>
+<div class="font-serif text-3xl font-bold tracking-wide">
+EYESGLASS<span class="text-amber-600">.</span>
 </div>
 
 <a href="trangchu.html"
@@ -43,51 +41,44 @@ Trang chủ
 
 </div>
 
-
 <!-- PAGE -->
-<div class="max-w-6xl mx-auto p-10">
+<div class="max-w-7xl mx-auto px-12 py-12">
 
 <h1 class="font-serif text-4xl mb-10">
 Giỏ hàng của bạn
 </h1>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-16 items-start">
 
-<!-- DANH SÁCH SẢN PHẨM -->
-<div class="lg:col-span-2">
+<!-- DANH SÁCH -->
+<div class="lg:col-span-3">
 
-<table class="w-full text-left">
+<table class="w-full border-separate border-spacing-y-10">
 
-<thead class="border-b text-sm uppercase text-stone-500 tracking-wider">
-
-<tr>
-<th class="pb-3">Sản phẩm</th>
-<th>Loại</th>
-<th>Giá</th>
-<th>Số lượng</th>
-<th>Tổng</th>
-<th></th>
+<thead class="text-sm uppercase text-stone-500 tracking-wider">
+<tr class="text-left">
+<th class="w-32"></th>
+<th class="w-72">SẢN PHẨM</th>
+<th class="w-40">LOẠI</th>
+<th class="w-32">GIÁ</th>
+<th class="w-40 text-center">SỐ LƯỢNG</th>
+<th class="w-32">TỔNG</th>
+<th class="w-20"></th>
 </tr>
-
 </thead>
 
-<tbody id="cart-items" class="divide-y">
-
-</tbody>
+<tbody id="cart-items" class="divide-y"></tbody>
 
 </table>
 
 </div>
 
-
-<!-- BOX THANH TOÁN -->
+<!-- THANH TOÁN -->
 <div>
 
-<div class="bg-stone-50 p-8 rounded-2xl shadow-sm">
+<div class="bg-white p-10 rounded-3xl shadow-lg border border-stone-200 sticky top-24">
 
-<h2 class="font-serif text-2xl mb-6">
-Thanh toán
-</h2>
+<h2 class="font-serif text-2xl mb-6">Thanh toán</h2>
 
 <div class="space-y-3 text-sm">
 
@@ -109,10 +100,8 @@ Thanh toán
 </div>
 
 <div class="border-t mt-6 pt-6 flex justify-between font-bold text-lg">
-
 <span>Tổng</span>
 <span id="total"></span>
-
 </div>
 
 <a href="checkout.html"
@@ -129,7 +118,10 @@ Thanh toán
 </div>
 
 
-<script src="js/cart.js"></script>
+
+
+<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+
 
 </body>
 
