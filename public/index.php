@@ -2,12 +2,15 @@
 
 require_once "../config/db_connect.php";
 require_once "../app/controllers/AuthController.php";
-require_once "../app/controllers/ProductController.php";  // Yen them
+require_once "../app/controllers/ProductController.php";
+// Yen them
+require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // tạo controller
 $conn = Database::connect();    //Yen themd
 $authController = new AuthController($conn);
 $productController = new ProductController();   //Yen them
+$orderController = new OrderController(); // TRAN HUYNH
 
 // lấy action từ URL
 $action = $_GET['action'] ?? 'login';
@@ -52,6 +55,27 @@ switch ($action) {
     case "delete-product":
         $id = $_GET['id'] ?? null;
         $productController->deleteProduct($id);
+        break;
+
+
+// --- TRAN HUYNH ---
+     case "create-order":
+        $orderController->createOrder();
+        break;
+
+    case "get-order-detail":
+        $id = $_GET['id'] ?? null;
+        $orderController->getOrderDetail($id);
+        break;
+
+    case "payment":
+        $orderId = $_GET['orderId'] ?? null;
+        $orderController->payment($orderId);
+        break;
+
+    case "shipment-tracking":
+        $trackingNumber = $_GET['trackingNumber'] ?? null;
+        $orderController->shipmentTracking($trackingNumber);
         break;
 
     default:
