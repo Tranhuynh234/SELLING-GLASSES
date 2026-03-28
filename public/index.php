@@ -1,38 +1,51 @@
 <?php
-
-require_once "../config/db_connect.php";
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
 // Yen them
 require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // tạo controller
-$conn = Database::connect();    //Yen themd
+//$conn = Database::connect();    //Yen themd
 $authController = new AuthController($conn);
 $productController = new ProductController();   //Yen them
-$orderController = new OrderController(); // TRAN HUYNH
+//$orderController = new OrderController(); // TRAN HUYNH
+require_once "../app/controllers/StaffController.php";
 
-// lấy action từ URL
-$action = $_GET['action'] ?? 'login';
+$staffController = new StaffController();
 
-// router (điều hướng)
-switch ($action) {
+$authController = new AuthController();
+
+$url = $_GET['url'] ?? '';
+
+switch ($url) {
 
     case "login":
-        $authController->login();
-        break;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->login();
+        } 
 
     case "register":
-        $authController->register();
-        break;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->register();
+        } 
+        exit();
 
     case "logout":
         $authController->logout();
-        break;
+        exit();
 
     case "profile":
         $authController->profile();
-        break;
+        exit();
+    case "update-profile":
+        $authController->updateProfile();
+        exit();
+    case "staff-save":
+        $staffController->save();
+        exit();
+    case "delete-user":
+        $staffController->delete();
+        exit();
 
     // --- PHẦN QUẢN LÝ CỦA YẾN ---
     case "get-all-products":
@@ -57,28 +70,28 @@ switch ($action) {
         $productController->deleteProduct($id);
         break;
 
+    //  case "create-order":
+    //     $orderController->createOrder();
+    //     break;
 
-// --- TRAN HUYNH ---
-     case "create-order":
-        $orderController->createOrder();
-        break;
+    // case "get-order-detail":
+    //     $id = $_GET['id'] ?? null;
+    //     $orderController->getOrderDetail($id);
+    //     break;
 
-    case "get-order-detail":
-        $id = $_GET['id'] ?? null;
-        $orderController->getOrderDetail($id);
-        break;
+    // case "payment":
+    //     $orderId = $_GET['orderId'] ?? null;
+    //     $orderController->payment($orderId);
+    //     break;
 
-    case "payment":
-        $orderId = $_GET['orderId'] ?? null;
-        $orderController->payment($orderId);
-        break;
+    // case "shipment-tracking":
+    //     $trackingNumber = $_GET['trackingNumber'] ?? null;
+    //     $orderController->shipmentTracking($trackingNumber);
+    //     break;
 
-    case "shipment-tracking":
-        $trackingNumber = $_GET['trackingNumber'] ?? null;
-        $orderController->shipmentTracking($trackingNumber);
-        break;
-
+  
     default:
-        echo "Invalid action";
-        break;
+        http_response_code(404);
+        echo "404 Not Found";
+        exit();
 }

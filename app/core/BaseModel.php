@@ -8,6 +8,17 @@ class BaseModel {
     public function __construct() {
         $this->conn = Database::connect();
     }
+    public function beginTransaction() {
+    return $this->conn->beginTransaction();
+}
+
+public function commit() {
+    return $this->conn->commit();
+}
+
+public function rollBack() {
+    return $this->conn->rollBack();
+}
 
     // Lấy tất cả
     public function all() {
@@ -31,12 +42,12 @@ class BaseModel {
 
         $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
         $stmt = $this->conn->prepare($sql);
-
-        return $stmt->execute($data);
+        if (!$stmt->execute($data)) return false;
+        return $this->conn->lastInsertId();
     }
 
     //  Update
-    public function update($id, $data, $primaryKey = "id") {
+    public function update($id, $data, $primaryKey = "userId") {
         $fields = "";
 
         foreach ($data as $key => $value) {
@@ -53,7 +64,7 @@ class BaseModel {
     }
 
     //  Delete
-    public function delete($id, $primaryKey = "id") {
+    public function delete($id, $primaryKey = "userId") {
         $sql = "DELETE FROM {$this->table} WHERE {$primaryKey} = :id";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([':id' => $id]);

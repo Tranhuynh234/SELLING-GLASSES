@@ -16,17 +16,9 @@ class AuthController {
             header("Content-Type: application/json");
             $result = $this->userService->register($_POST);
 
-            if ($result['success']) {
-                 echo json_encode([
-                "success" => true,
-                "message" => $result['message']
-            ]);
-            } else {
-               echo json_encode([
-                "success" => false,
-                "message" => $result['message']
-            ]);
-            }
+            
+                 echo json_encode($result);
+          exit;
 
         } else {
             // load view
@@ -37,40 +29,33 @@ class AuthController {
     // =========================
     // LOGIN
     // =========================
-    public function login() {
-        if (session_status() === PHP_SESSION_NONE) {
+   public function login() {
+
+    if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // thông báo trả về json 
-             header("Content-Type: application/json");
-            $result = $this->userService->login(
-                $_POST['email'],    
-                $_POST['password']
-            );
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            if ($result['success']) {
-                // lưu session
-                $_SESSION['user'] = $result['data'];
+        header("Content-Type: application/json");
 
-                 echo json_encode([
-                    "success" => true,
-                    "message" => "Login success",
-                    "redirect" => "/home"
-                    ]);
-            } else {
-                  echo json_encode([
-                    "success" => false,
-                    "message" => $result['message']
-                ]);
-             
-            }
-            exit;
-        } 
-            require_once __DIR__ . "/../views/auth/login.php";
-        
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        $result = $this->userService->login($email, $password);
+
+        if ($result['success']) {
+            $_SESSION['user'] = $result['data'];
+            $result['redirect'] = "/home";
+        }
+
+        echo json_encode($result);
+        exit; 
     }
+
+    // 👉 CHỈ GET mới load view
+    require_once __DIR__ . "/../views/auth/login.php";
+}
 
     // =========================
     // LOGOUT
@@ -85,6 +70,18 @@ class AuthController {
     session_destroy();
 
     header("Content-Type: application/json");
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(), // PHPSESSID
+            '',
+            time() - 42000,
+            $params["path"],
+            $params["domain"],
+            $params["secure"],
+            $params["httponly"]
+        );
+    }
 
     echo json_encode([
         "success" => true,
@@ -92,6 +89,23 @@ class AuthController {
         "redirect" => "/login"
     ]);
     exit;
+}
+//  updateProfile
+public function updateProfile() {
+
+    require_once __DIR__ . "/../middleware/AuthMiddleware.php";
+
+    $user = AuthMiddleware::handle(); 
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        header("Content-Type: application/json");
+        $userId = $user['userId'];
+        $result = $this->userService->updateProfile($userId, $_POST);
+        echo json_encode($result);
+        exit;
+    }
+
+    require_once __DIR__ . "/../views/auth/profile.php";
 }
 
     // =========================
@@ -109,7 +123,7 @@ class AuthController {
 
         $user = $_SESSION['user'];
 
-        echo "Xin chào: " . $user->name;
+        echo "Xin chào: " . $user['name'];
     }
 }
 ?>

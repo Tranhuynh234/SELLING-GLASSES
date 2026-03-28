@@ -1,31 +1,38 @@
 <?php
-
-require_once "../config/db_connect.php";
 require_once "../app/controllers/AuthController.php";
 
 $authController = new AuthController();
 
-$action = $_GET['action'] ?? '';
+$url = $_GET['url'] ?? '';
 
-switch ($action) {
+switch ($url) {
 
     case "login":
-        $authController->login();
-        exit();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->login();
+        } else {
+            require_once "../app/views/auth/login.php";
+        }
+        break;
 
     case "register":
-        $authController->register();
-        exit();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->register();
+        } else {
+            require_once "../app/views/auth/register.php";
+        }
+        break;
 
     case "logout":
         $authController->logout();
-        exit();
+        break;
 
     case "profile":
         $authController->profile();
-        exit();
+        break;
 
     default:
-        echo "Invalid action";
-        exit();
+        http_response_code(404);
+        echo "404 Not Found";
+        break;
 }
