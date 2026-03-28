@@ -11,19 +11,32 @@ class CartService {
     // 🔹 GET CART
     public function getCart($customerId) {
 
-        $sql = "SELECT ci.cartItemId, ci.quantity, pv.price, p.name
-                FROM cart_item ci
-                JOIN product_variant pv ON ci.variantId = pv.variantId
-                JOIN product p ON pv.productId = p.productId
-                JOIN cart c ON ci.cartId = c.cartId
-                WHERE c.customerId = ?";
+    $sql = "SELECT ci.cartItemId, ci.quantity, pv.price, p.name
+            FROM cart_item ci
+            JOIN product_variant pv ON ci.variantId = pv.variantId
+            JOIN product p ON pv.productId = p.productId
+            JOIN cart c ON ci.cartId = c.cartId
+            WHERE c.customerId = ?";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$customerId]);
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$customerId]);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $data = [];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+        $item = new CartItem(
+            $row['cartItemId'],
+            $row['name'],
+            $row['price'],
+            $row['quantity']
+        );
+
+        $data[] = $item;
     }
 
+    return $data;
+}
     // 🔹 ADD
     public function addToCart($customerId, $variantId, $quantity) {
 
