@@ -1,113 +1,147 @@
-function loadCart(){
+document.addEventListener("DOMContentLoaded", () => {
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let buttons = document.querySelectorAll("button");
 
-let cartTable = document.getElementById("cart-items");
+    buttons.forEach((btn, index) => {
 
-let subtotal = 0;
+        if (btn.innerText.includes("Thêm vào giỏ")) {
 
-cartTable.innerHTML = "";
-
-cart.forEach((item,index)=>{
-
-let total = item.price * item.quantity;
-
-let row = `
-<tr>
-
-<td>${item.name}</td>
-
-<td>Kính</td>
-
-<td>${item.price.toLocaleString()}đ</td>
-
-<td>
-<button onclick="decreaseQuantity(${index})">-</button>
-
-${item.quantity}
-
-<button onclick="increaseQuantity(${index})">+</button>
-</td>
-
-<td>${(item.price * item.quantity).toLocaleString()}đ</td>
-
-<td>
-<button onclick="removeItem(${index})">Xóa</button>
-</td>
-
-</tr>
-`;
-
-cartTable.innerHTML += row;
-
-subtotal += total;
+            // gán tạm variantId theo index
+            btn.onclick = () => addToCart(index + 1);
+        }
+    });
 
 });
+document.addEventListener("DOMContentLoaded", function () {
+    loadCart();
+});
 
-document.getElementById("subtotal").innerText = subtotal.toLocaleString() + "đ";
 
-let tax = subtotal * 0.1;
+async function loadCart() {
 
-let totalPrice = subtotal + tax + 30000;
+    try {
+        let res = await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=getCart", {
+            credentials: "include" 
+        });
 
-document.getElementById("total").innerText = totalPrice.toLocaleString() + "đ";
+        let data = await res.json();
 
+        console.log("DATA:", data); 
+
+        let cartTable = document.getElementById("cart-items");
+        if (!cartTable) return;
+
+        let subtotal = 0;
+        cartTable.innerHTML = "";
+
+        data.forEach(item => {
+
+            let total = item.price * item.quantity;
+            subtotal += total;
+
+            let row = `
+            <tr>
+                <td>${item.name}</td>
+                <td>Kính</td>
+                <td>${Number(item.price).toLocaleString()}đ</td>
+
+                <td>
+                    <button onclick="decreaseQuantity(${item.cartItemId}, ${item.quantity})">-</button>
+                    ${item.quantity}
+                    <button onclick="increaseQuantity(${item.cartItemId}, ${item.quantity})">+</button>
+                </td>
+
+                <td>${total.toLocaleString()}đ</td>
+
+                <td>
+                    <button onclick="removeItem(${item.cartItemId})">Xóa</button>
+                </td>
+            </tr>
+            `;
+
+            cartTable.innerHTML += row;
+        });
+
+        let subEl = document.getElementById("subtotal");
+        let totalEl = document.getElementById("total");
+
+        if (subEl) subEl.innerText = subtotal.toLocaleString() + "đ";
+
+        let tax = subtotal * 0.1;
+        let totalPrice = subtotal + tax + 30000;
+
+        if (totalEl) totalEl.innerText = totalPrice.toLocaleString() + "đ";
+
+    } catch (err) {
+        console.error("Lỗi loadCart:", err);
+    }
 }
 
-function increaseQuantity(index){
 
-let cart = JSON.parse(localStorage.getItem("cart"));
+async function increaseQuantity(id, currentQty) {
 
-cart[index].quantity++;
+    let formData = new FormData();
+    formData.append("cartItemId", id);
+    formData.append("quantity", currentQty + 1);
 
-localStorage.setItem("cart",JSON.stringify(cart));
+    await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=update", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+    });
 
-loadCart();
-
+    loadCart();
 }
 
-function decreaseQuantity(index){
+async function decreaseQuantity(id, currentQty) {
 
-let cart = JSON.parse(localStorage.getItem("cart"));
+    if (currentQty <= 1) return;
 
-if(cart[index].quantity > 1){
-cart[index].quantity--;
+    let formData = new FormData();
+    formData.append("cartItemId", id);
+    formData.append("quantity", currentQty - 1);
+
+    await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=update", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+    });
+
+    loadCart();
 }
 
-localStorage.setItem("cart",JSON.stringify(cart));
 
-loadCart();
 
+async function removeItem(id) {
+
+    let formData = new FormData();
+    formData.append("cartItemId", id);
+
+    await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=remove", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+    });
+
+    loadCart();
 }
 
-function removeItem(index){
 
-let cart = JSON.parse(localStorage.getItem("cart"));
 
-cart.splice(index,1);
+window.addToCart = async function(variantId) {
 
-localStorage.setItem("cart",JSON.stringify(cart));
+    let formData = new FormData();
+    formData.append("variantId", variantId);
+    formData.append("quantity", 1);
 
-loadCart();
+    await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=add", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+    });
 
-}
+    alert("Đã thêm vào giỏ hàng");
 
-loadCart();
-function addToCart(name, price, powerId){
-
-let power = document.getElementById(powerId).value;
-
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-let product = {
-name: name,
-price: price,
-power: power,
-quantity: 1
+  
+    loadCart();
 };
-
-cart.push(product);
-
-localStorage.setItem("cart", JSON.stringify(cart));
-
-}
