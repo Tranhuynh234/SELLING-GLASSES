@@ -31,7 +31,6 @@ class OrderServices {
 
             // 2. Lưu vào bảng OrderItem (Mảng các sản phẩm)
             foreach ($data['items'] as $item) {
-                // Sử dụng BaseModel's insert logic (bạn tự custom theo core của nhóm)
                 $this->orderItemModel->insert([
                     'quantity' => $item['quantity'],
                     'price' => $item['price'],
@@ -69,7 +68,6 @@ class OrderServices {
 
     // Nghiệp vụ 3: Tracking vận chuyển
     public function trackShipment($trackingCode) {
-        // Tìm kiếm trong ShipmentModel bằng trackingCode
     }
 }
 ?>
