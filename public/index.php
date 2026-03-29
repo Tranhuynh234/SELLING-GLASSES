@@ -97,22 +97,26 @@ switch ($url) {
         $orderController->create();
         break;
 
-    // case "get-order-detail":
-    //     $id = $_GET['id'] ?? null;
-    //     $orderController->getOrderDetail($id);
-    //     break;
+    case "get-orders-by-status":
+    $orderController->getByStatus();
+    exit();
 
-    // case "payment":
-    //     $orderId = $_GET['orderId'] ?? null;
-    //     $orderController->payment($orderId);
-    //     break;
+    case "update-order-status":
+       $orderController->updateStatus();
+        exit();
 
-    // case "shipment-tracking":
-    //     $trackingNumber = $_GET['trackingNumber'] ?? null;
-    //     $orderController->shipmentTracking($trackingNumber);
-    //     break;
+    case "cancel-order":
+       $orderController->cancel();
+       exit();
 
-  
+    // case "return-order":
+    //   $orderController->return();
+    //    exit();
+
+   case "order-stats":
+      $orderController->stats();
+       exit();
+
     default:
         http_response_code(404);
         echo "404 Not Found";
