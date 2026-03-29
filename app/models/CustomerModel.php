@@ -29,8 +29,8 @@ class CustomerModel extends BaseModel {
         $data = $this->findBy("userId", $userId);
         return $data ? new Customer($data) : null;
     }
-    public function deleteCustomer($id) {
-        return $this->delete($id, "customerId");
+    public function deleteByUserId($id) {
+        return $this->delete($id, "userId");
     }
 }
 ?>

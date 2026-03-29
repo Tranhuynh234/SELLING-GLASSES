@@ -5,8 +5,6 @@ require_once "../app/controllers/ProductController.php";
 require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // tạo controller
-//$conn = Database::connect();    //Yen themd
-//$authController = new AuthController($conn);
 $productController = new ProductController();   //Yen them
 
 //$orderController = new OrderController(); // TRAN HUYNH
