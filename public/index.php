@@ -1,38 +1,23 @@
 <?php
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
-// Yen them
-require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
-// tạo controller
-<<<<<<< Updated upstream
-//$conn = Database::connect();    //Yen themd
-//$authController = new AuthController($conn);
-=======
-// $conn = Database::connect();    //Yen them
-$authController = new AuthController();
->>>>>>> Stashed changes
-$productController = new ProductController();   //Yen them
+// THIEN TRU
+require_once "../app/controllers/PromotionController.php";
 
+//require_once "../app/controllers/OrderController.php"; 
 //$orderController = new OrderController(); // TRAN HUYNH
 require_once "../app/controllers/StaffController.php";
-
-<<<<<<< Updated upstream
-$staffController = new StaffController();
-//$orderController = new OrderController(); // TRAN HUYNH  lỗi vì khong triển khai model. pull code về r sửa lạii
 $authController = new AuthController();
+$staffController = new StaffController();
+$productController = new ProductController();  
+//$orderController = new OrderController(); 
 
 $url = $_GET['url'] ?? '';
-
-switch ($url) {
-=======
-// Lấy ID
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 $variantId = isset($_GET['variantId']) ? $_GET['variantId'] : null;
 
-// router (điều hướng)
-switch ($action) {
->>>>>>> Stashed changes
+switch ($url) {
 
     case "login":
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
