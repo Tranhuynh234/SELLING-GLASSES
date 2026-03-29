@@ -18,7 +18,7 @@ class StaffController {
     // =========================
     public function save() {
 
-        $currentUser = AuthMiddleware::handle(['manager']);
+        $currentUser = AuthMiddleware::handle(['staff']);
 
         header("Content-Type: application/json");
 
@@ -67,7 +67,7 @@ class StaffController {
     // =========================
     public function delete() {
 
-        AuthMiddleware::handle(['manager']);
+        AuthMiddleware::handle(['staff']);
 
         header("Content-Type: application/json");
 

@@ -121,9 +121,10 @@ public function updateProfile() {
             return;
         }
 
-        $user = $_SESSION['user'];
+        $result = $this->userService->deleteUser(18);
 
-        echo "Xin chào: " . $user['name'];
+        var_dump($result);
+        die();
     }
 }
 ?>

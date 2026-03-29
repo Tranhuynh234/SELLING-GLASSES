@@ -47,9 +47,7 @@ class StaffModel extends BaseModel {
 
     // ===== XÓA THEO userId =====
     public function deleteByUserId($userId) {
-        $sql = "DELETE FROM {$this->table} WHERE userId = :userId";
-        $stmt = $this->conn->prepare($sql);
-        return $stmt->execute(['userId' => $userId]);
+        return $this->delete($userId, "userId");
     }
 }
 ?>

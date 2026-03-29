@@ -1,11 +1,22 @@
 <?php
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
+// Yen them
+require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
 
 // THIEN TRU
 require_once "../app/controllers/PromotionController.php";
 
-//require_once "../app/controllers/OrderController.php"; 
+// tạo controller
+<<<<<<< Updated upstream
+//$conn = Database::connect();    //Yen themd
+//$authController = new AuthController($conn);
+=======
+// $conn = Database::connect();    //Yen them
+$authController = new AuthController();
+>>>>>>> Stashed changes
+$productController = new ProductController();   //Yen them
+
 //$orderController = new OrderController(); // TRAN HUYNH
 require_once "../app/controllers/StaffController.php";
 $authController = new AuthController();

@@ -2,13 +2,15 @@
 require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../entities/User.php";
 require_once __DIR__ . "/../models/CustomerModel.php";
-
+require_once __DIR__ . "/../models/StaffModel.php";
 class UserService {
     private $userModel;
     private $customerModel;
+    private $staffModel;
     public function __construct() {
         $this->userModel = new UserModel();
         $this->customerModel = new CustomerModel();
+        $this->staffModel = new StaffModel();
     }
 
     // =========================
@@ -142,9 +144,34 @@ if (!$password) {
     // =========================
     // DELETE USER
     // ========================
-    public function deleteUser($id) {
-        return $this->userModel->delete($id, "userId");
+   public function deleteUser($id) {
+
+    try {
+        $this->userModel->beginTransaction();
+
+        // 1. xóa bảng con trước
+        $this->customerModel->deleteByUserId($id);
+        $this->staffModel->deleteByUserId($id);
+
+        // 2. xóa user
+        $result = $this->userModel->delete($id, "userId");
+
+        $this->userModel->commit();
+return [
+    "success" => $result > 0,
+    "message" => $result > 0 ? "Xóa user thành công" : "Không tìm thấy user để xóa"
+];
+
+    } catch (Exception $e) {
+
+        $this->userModel->rollBack();
+
+        return [
+            "success" => false,
+            "message" => $e->getMessage()
+        ];
     }
+}
     public function updateProfile($userId, $data) {
 
     try {
