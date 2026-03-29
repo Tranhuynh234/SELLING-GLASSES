@@ -1,13 +1,18 @@
 <?php
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
-
-require_once "../app/controllers/OrderController.php"; 
-$orderController = new OrderController(); // TRAN HUYNH
+// Yen them
+require_once "../app/controllers/OrderController.php"; // TRAN HUYNH
+// THIEN TRU
+require_once "../app/controllers/PromotionController.php";
 require_once "../app/controllers/StaffController.php";
+// tạo controller
+    //Yen them
 $authController = new AuthController();
-$staffController = new StaffController();
-$productController = new ProductController();   
+$productController = new ProductController();   //Yen them
+$orderController = new OrderController(); 
+
+$staffController = new StaffController(); 
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;

@@ -2,7 +2,7 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1:3307
+-- Máy chủ: 127.0.0.1:3306
 -- Thời gian đã tạo: Th3 26, 2026 lúc 01:59 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
