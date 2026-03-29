@@ -1,4 +1,5 @@
 <?php
+require_once "../app/controllers/CartController.php";
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
 
@@ -6,7 +7,7 @@ require_once "../app/controllers/OrderController.php";
 require_once "../app/controllers/StaffController.php";
 
 // tạo controller
-
+$cartController = new CartController(); 
 $authController = new AuthController();
 $productController = new ProductController();   //Yen them
 $orderController = new OrderController(); // TRAN HUYNH
@@ -138,7 +139,22 @@ switch ($url) {
     case 'request-return':
         $promotionController->requestReturn(); 
         break;
-        
+     // --- Cart---//
+     case 'get-cart':
+      $cartController->getCart();
+        exit();
+
+    case 'add-to-cart':
+      $cartController->add();
+        exit();
+
+    case 'update-cart':
+      $cartController->update();
+        exit();
+
+    case 'remove-cart-item':
+      $cartController->remove();
+        exit();
     default:
         http_response_code(404);
         echo "404 Not Found";
