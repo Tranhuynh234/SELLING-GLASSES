@@ -1,21 +1,15 @@
 <?php
-require_once __DIR__ . "/../../core/BaseModel.php";
-require_once __DIR__ . "/../../entities/order/Order.php";
+require_once __DIR__ . "/../../core/BaseModel.php"; 
 
 class OrderModel extends BaseModel {
-    protected $table = "Order";
+    protected $table = "orders";
+    protected $primaryKey = "orderId";
 
-    public function createAndReturnId($data) {
-        $sql = "INSERT INTO {$this->table} (orderDate, status, totalPrice, customerId) 
-                VALUES (:orderDate, :status, :totalPrice, :customerId)";
+    // có thể custom thêm nếu cần
+    public function findByCustomer($customerId) {
+        $sql = "SELECT * FROM {$this->table} WHERE customerId = :customerId";
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute([
-            ':orderDate' => $data['orderDate'],
-            ':status' => $data['status'],
-            ':totalPrice' => $data['totalPrice'],
-            ':customerId' => $data['customerId']
-        ]);
-        return $this->conn->lastInsertId(); 
+        $stmt->execute([':customerId' => $customerId]);
+        return $stmt->fetchAll();
     }
 }
-?>

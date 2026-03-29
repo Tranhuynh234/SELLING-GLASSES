@@ -1,10 +1,10 @@
 <?php
-class Order {
+class Orders {
     public $orderId;
+    public $customerId;
     public $orderDate;
     public $status;
     public $totalPrice;
-    public $customerId;
     public $staffId;
 
     public function __construct($data = []) {

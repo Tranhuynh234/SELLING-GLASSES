@@ -173,6 +173,7 @@ return [
     }
 }
     public function updateProfile($userId, $data) {
+        
 
     try {
         $this->userModel->beginTransaction();
