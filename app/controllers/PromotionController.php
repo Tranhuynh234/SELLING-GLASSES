@@ -5,48 +5,39 @@ require_once __DIR__ . "/../services/PromotionServices.php";
 class PromotionController {
     private $service;
 
-    public function __construct($conn) {
+    public function __construct() {
+          $conn = Database::connect(); 
         $this->service = new PromotionServices($conn);
     }
 
-    public function handleRequest() {
+    public function createPromotion() {
         header("Content-Type: application/json");
+        echo json_encode([
+            "success" => $this->service->createPromotion($_POST)
+        ]);
+    }
 
-        $action = $_GET['action'] ?? '';
+    public function applyPromotion() {
+        header("Content-Type: application/json");
+        echo json_encode([
+            "success" => $this->service->applyPromotion(
+                $_POST['promotionId'] ?? null,
+                $_POST['productId'] ?? null
+            )
+        ]);
+    }
 
-        switch ($action) {
+    public function uploadPrescription() {
+        header("Content-Type: application/json");
+        echo json_encode([
+            "success" => $this->service->uploadPrescription($_POST)
+        ]);
+    }
 
-            case 'create':
-                echo json_encode([
-                    "success" => $this->service->createPromotion($_POST)
-                ]);
-                break;
-
-            case 'apply':
-                echo json_encode([
-                    "success" => $this->service->applyPromotion(
-                        $_POST['promotionId'],
-                        $_POST['productId']
-                    )
-                ]);
-                break;
-
-            case 'prescription':
-                echo json_encode([
-                    "success" => $this->service->uploadPrescription($_POST)
-                ]);
-                break;
-
-            case 'return':
-                echo json_encode([
-                    "success" => $this->service->requestReturn($_POST)
-                ]);
-                break;
-
-            default:
-                echo json_encode([
-                    "error" => "Invalid action"
-                ]);
-        }
+    public function requestReturn() {
+        header("Content-Type: application/json");
+        echo json_encode([
+            "success" => $this->service->requestReturn($_POST)
+        ]);
     }
 }
