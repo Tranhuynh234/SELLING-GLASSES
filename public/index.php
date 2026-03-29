@@ -11,7 +11,7 @@
     $authController = new AuthController();
     $productController = new ProductController();   //Yen them
     $orderController = new OrderController(); 
-
+    $promotionController = new PromotionController();
     $staffController = new StaffController(); 
 
     $url = $_GET['url'] ?? '';
@@ -107,33 +107,6 @@
         //     $trackingNumber = $_GET['trackingNumber'] ?? null;
         //     $orderController->shipmentTracking($trackingNumber);
         //     break;
-
-    // --- VARIANT ---
-    case 'add-variant':
-        $productController->addVariant();
-        break;
-    case 'update-variant':
-        $productController->updateVariant($variantId);
-        break;
-
-     case "create-order":
-        $orderController->create();
-        break;
-
-    // case "get-order-detail":
-    //     $id = $_GET['id'] ?? null;
-    //     $orderController->getOrderDetail($id);
-    //     break;
-
-    // case "payment":
-    //     $orderId = $_GET['orderId'] ?? null;
-    //     $orderController->payment($orderId);
-    //     break;
-
-    // case "shipment-tracking":
-    //     $trackingNumber = $_GET['trackingNumber'] ?? null;
-    //     $orderController->shipmentTracking($trackingNumber);
-    //     break;
 
     // --- Promotion Module ---
     case 'create-promotion':
