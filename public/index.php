@@ -2,13 +2,12 @@
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
 
-//require_once "../app/controllers/OrderController.php"; 
-//$orderController = new OrderController(); // TRAN HUYNH
+require_once "../app/controllers/OrderController.php"; 
+$orderController = new OrderController(); // TRAN HUYNH
 require_once "../app/controllers/StaffController.php";
 $authController = new AuthController();
 $staffController = new StaffController();
-$productController = new ProductController();  
-//$orderController = new OrderController(); 
+$productController = new ProductController();   
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -85,24 +84,24 @@ switch ($url) {
         $productController->updateVariant($variantId);
         break;
 
-    //  case "create-order":
-    //     $orderController->createOrder();
-    //     break;
+     case "create-order":
+        $orderController->createOrder();
+        break;
 
-    // case "get-order-detail":
-    //     $id = $_GET['id'] ?? null;
-    //     $orderController->getOrderDetail($id);
-    //     break;
+    case "get-order-detail":
+        $id = $_GET['id'] ?? null;
+        $orderController->getOrderDetail($id);
+        break;
 
-    // case "payment":
-    //     $orderId = $_GET['orderId'] ?? null;
-    //     $orderController->payment($orderId);
-    //     break;
+    case "payment":
+        $orderId = $_GET['orderId'] ?? null;
+        $orderController->payment($orderId);
+        break;
 
-    // case "shipment-tracking":
-    //     $trackingNumber = $_GET['trackingNumber'] ?? null;
-    //     $orderController->shipmentTracking($trackingNumber);
-    //     break;
+    case "shipment-tracking":
+        $trackingNumber = $_GET['trackingNumber'] ?? null;
+        $orderController->shipmentTracking($trackingNumber);
+        break;
 
   
     default:
