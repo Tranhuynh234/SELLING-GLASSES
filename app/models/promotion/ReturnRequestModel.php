@@ -7,13 +7,13 @@ class ReturnRequestModel {
     }
 
     public function createRequest($data) {
-        $sql = "INSERT INTO ReturnRequest(reason, status, orderItemId, staffId)
-                VALUES (?, 'pending', ?, ?)";
+        $sql = "INSERT INTO ReturnRequest(reason, status, orderItemId)
+                VALUES (?, 'pending', ?)";
         $stmt = $this->conn->prepare($sql);
         return $stmt->execute([
             $data['reason'],
             $data['orderItemId'],
-            $data['staffId']
+            //$data['staffId']
         ]);
     }
 }
