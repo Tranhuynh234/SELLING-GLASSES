@@ -112,7 +112,23 @@ switch ($url) {
     //     $orderController->shipmentTracking($trackingNumber);
     //     break;
 
-  
+    // --- Promotion Module ---
+    case 'create-promotion':
+        $promotionController->createPromotion(); 
+        break;
+        
+    case 'apply-promotion':
+        $promotionController->applyPromotion(); 
+        break;
+        
+    case 'upload-prescription':
+        $promotionController->uploadPrescription(); 
+        break;
+        
+    case 'request-return':
+        $promotionController->requestReturn(); 
+        break;
+        
     default:
         http_response_code(404);
         echo "404 Not Found";
