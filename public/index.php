@@ -108,9 +108,52 @@
         //     $orderController->shipmentTracking($trackingNumber);
         //     break;
 
-    
-        default:
-            http_response_code(404);
-            echo "404 Not Found";
-            exit();
-    }
+    // --- VARIANT ---
+    case 'add-variant':
+        $productController->addVariant();
+        break;
+    case 'update-variant':
+        $productController->updateVariant($variantId);
+        break;
+
+     case "create-order":
+        $orderController->create();
+        break;
+
+    // case "get-order-detail":
+    //     $id = $_GET['id'] ?? null;
+    //     $orderController->getOrderDetail($id);
+    //     break;
+
+    // case "payment":
+    //     $orderId = $_GET['orderId'] ?? null;
+    //     $orderController->payment($orderId);
+    //     break;
+
+    // case "shipment-tracking":
+    //     $trackingNumber = $_GET['trackingNumber'] ?? null;
+    //     $orderController->shipmentTracking($trackingNumber);
+    //     break;
+
+    // --- Promotion Module ---
+    case 'create-promotion':
+        $promotionController->createPromotion(); 
+        break;
+        
+    case 'apply-promotion':
+        $promotionController->applyPromotion(); 
+        break;
+        
+    case 'upload-prescription':
+        $promotionController->uploadPrescription(); 
+        break;
+        
+    case 'request-return':
+        $promotionController->requestReturn(); 
+        break;
+        
+    default:
+        http_response_code(404);
+        echo "404 Not Found";
+        exit();
+}
