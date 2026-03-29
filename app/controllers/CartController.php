@@ -2,7 +2,8 @@
 session_start();
 
 require_once __DIR__ . "/../../config/db_connect.php";
-require_once __DIR__ . "/../services/cartService.php";
+
+require_once __DIR__ . "/../services/CartService.php";
 
 $conn = Database::connect();
 
@@ -31,7 +32,21 @@ $action = $_GET['action'] ?? '';
 switch ($action) {
 
     case 'getCart':
-        echo json_encode($cartService->getCart($customerId));
+
+        $items = $cartService->getCart($customerId);
+
+        $result = [];
+
+        foreach ($items as $item) {
+            $result[] = [
+                "cartItemId" => $item->getCartItemId(),
+                "name" => $item->getName(),
+                "price" => $item->getPrice(),
+                "quantity" => $item->getQuantity()
+            ];
+        }
+
+        echo json_encode($result);
         break;
 
     case 'add':
