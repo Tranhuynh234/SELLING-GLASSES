@@ -8,56 +8,48 @@ class OrderService {
         $this->orderModel = new OrderModel();
     }
 
-    // 🔥 Tạo order
     public function createOrder($data) {
-        try {
-            // ✅ validate
-            if (empty($data['customerId'])) {
-                return [
-                    "success" => false,
-                    "message" => "customerId không được để trống"
-                ];
-            }
-
-            // ✅ gán mặc định
-            $data['orderDate'] = date('Y-m-d H:i:s');
-            $data['status'] = $data['status'] ?? 'Pending';
-            $data['totalPrice'] = $data['totalPrice'] ?? 0;
-
-            // 🔥 insert DB
-            $orderId = $this->orderModel->create($data);
-
-            return [
-                "success" => $orderId ? true : false,
-                "message" => $orderId ? "Tạo order thành công" : "Tạo thất bại",
-                "orderId" => $orderId
-            ];
-
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => $e->getMessage()
-            ];
+        if (empty($data['customerId'])) {
+            return ["success" => false, "message" => "Thiếu customerId"];
         }
-    }
 
-    // 🔥 lấy tất cả order
-    public function getAllOrders() {
-        return $this->orderModel->all();
-    }
+        $data['orderDate'] = date('Y-m-d H:i:s');
+        $data['status'] = 'Pending';
+        $data['totalPrice'] = $data['totalPrice'] ?? 0;
 
-    // 🔥 lấy order theo customer
-    public function getOrdersByCustomer($customerId) {
-        return $this->orderModel->findByCustomer($customerId);
-    }
-
-    // 🔥 xóa order
-    public function deleteOrder($id) {
-        $result = $this->orderModel->delete($id);
+        $orderId = $this->orderModel->create($data);
 
         return [
-            "success" => $result,
-            "message" => $result ? "Xóa thành công" : "Xóa thất bại"
+            "success" => !!$orderId,
+            "orderId" => $orderId
+        ];
+    }
+
+    public function getOrdersByStatus($status) {
+        return [
+            "success" => true,
+            "data" => $this->orderModel->findByStatus($status)
+        ];
+    }
+
+    public function updateStatus($orderId, $status) {
+        return [
+            "success" => $this->orderModel->update($orderId, ['status' => $status])
+        ];
+    }
+
+    public function cancelOrder($orderId) {
+        return $this->updateStatus($orderId, 'Cancelled');
+    }
+
+    public function returnOrder($orderId) {
+        return $this->updateStatus($orderId, 'Returned');
+    }
+
+    public function getOrderStats() {
+        return [
+            "success" => true,
+            "data" => $this->orderModel->countByStatus()
         ];
     }
 }
