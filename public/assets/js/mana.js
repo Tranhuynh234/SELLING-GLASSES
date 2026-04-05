@@ -224,3 +224,33 @@ window.onload = function() {
     initChart();
     logActivity("Hệ thống quản trị trực tuyến.");
 };
+
+let promotions = [
+    {id:1, title:"Sale Tết", discount:20, active:true},
+    {id:2, title:"Black Friday", discount:50, active:false}
+];
+
+function renderPromotions() {
+    let html = "";
+
+    promotions.forEach((p, index) => {
+        html += `
+        <tr>
+            <td>${index + 1}</td>
+            <td>${p.title}</td>
+            <td>${p.discount}%</td>
+            <td>
+                <span class="badge ${p.active ? 'badge-active' : 'badge-off'}">
+                    ${p.active ? 'Hoạt động' : 'Tắt'}
+                </span>
+            </td>
+            <td>
+                <button class="btn-action btn-edit">Sửa</button>
+                <button class="btn-action btn-delete">Xóa</button>
+            </td>
+        </tr>
+        `;
+    });
+
+    document.getElementById("promoTable").innerHTML = html;
+}

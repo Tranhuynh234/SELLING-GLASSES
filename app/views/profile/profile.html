@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ</title>
+    <link rel="stylesheet" href="../../../public/assets/css/profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h3>Tài khoản cá nhân</h3>
+
+        <div class="menu-item active" onclick="showTab('profile')" id="btn-profile">
+            <i class="fas fa-user-circle"></i>
+            Hồ sơ của bạn
+        </div>
+
+        <div class="menu-item" onclick="showTab('payment')" id="btn-payment">
+            <i class="fas fa-credit-card"></i>
+            Thanh toán
+        </div>
+
+        <div class="menu-item" onclick="showTab('orders')" id="btn-orders">
+            <i class="fas fa-receipt"></i>
+            Đơn hàng
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <!-- ================= PROFILE ================= -->
+        <section id="profile" class="tab active">
+
+            <h1>Hồ sơ của bạn</h1>
+
+            <div class="profile-box glass">
+
+                <div class="row">
+                    <div>
+                        <label>Tên</label>
+                        <p id="nameText">Tran Huynh</p>
+                        <input id="nameInput" class="hidden">
+                    </div>
+                    <button onclick="edit('name')">Sửa</button>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label>Email</label>
+                        <p id="emailText">abc@gmail.com</p>
+                        <input id="emailInput" class="hidden">
+                    </div>
+                    <button onclick="edit('email')">Sửa</button>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label>Số điện thoại</label>
+                        <p id="phoneText">0123456789</p>
+                        <input id="phoneInput" class="hidden">
+                    </div>
+                    <button onclick="edit('phone')">Sửa</button>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label>Địa chỉ</label>
+                        <p id="addressText">TP.HCM</p>
+                        <input id="addressInput" class="hidden">
+                    </div>
+                    <button onclick="edit('address')">Sửa</button>
+                </div>
+
+            </div>
+
+            <!-- SECURITY -->
+            <div class="profile-box glass">
+                <h3>Bảo mật</h3>
+
+                <div class="row">
+                    <div>
+                        <label>Mật khẩu</label>
+                        <p>••••••••</p>
+                    </div>
+                    <button onclick="openPassword()">Đổi</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= PAYMENT ================= -->
+        <section id="payment" class="tab">
+
+            <h1>Thanh toán</h1>
+
+            <div class="profile-box glass">
+                <div class="row">
+                    <div>
+                        <label>Phương thức</label>
+                        <p>Chưa có</p>
+                    </div>
+                    <button>Thêm</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================= ORDERS ================= -->
+        <section id="orders" class="tab">
+
+            <h1>Đơn hàng</h1>
+
+            <div class="profile-box glass">
+                <h3>Đơn hàng gần đây</h3>
+
+                <div class="order">
+                    <p>#DH001 - Đã giao</p>
+                    <span>500.000đ</span>
+                </div>
+
+                <div class="order">
+                    <p>#DH002 - Đang xử lý</p>
+                    <span>1.200.000đ</span>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- MODAL -->
+<div id="passwordModal" class="modal">
+    <div class="modal-box">
+        <h3>Đổi mật khẩu</h3>
+
+        <input type="password" placeholder="Mật khẩu cũ">
+        <input type="password" placeholder="Mật khẩu mới">
+
+        <div class="modal-btn">
+            <button onclick="closePassword()">Hủy</button>
+            <button class="save">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<script src="../../../public/assets/js/profile.js"></script>
+
+</body>
+</html>

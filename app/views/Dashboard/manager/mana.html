@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manager System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="http://localhost/SELLING-GLASSES/public/assets/css/mana.css">
+    <link rel="stylesheet" href="../../../../public/assets/css/mana.css">
 </head>
 <body>
 
@@ -157,20 +157,33 @@
                     </div>
                 </section>
 
-                <section id="promo" class="tab-pane">
-                    <div class="pane-header">
-                        <h2>Chương trình khuyến mãi</h2>
-                        <button class="btn-confirm" onclick="openModal('promo')"><i class="fas fa-percent"></i> Tạo mã</button>
-                    </div>
-                    <div class="table-wrapper glass">
-                        <table class="vip-table">
-                            <thead>
-                                <tr><th>STT</th><th>Tên chương trình</th><th>Mức giảm</th><th>Hành động</th></tr>
-                            </thead>
-                            <tbody id="promoTable"></tbody>
-                        </table>
-                    </div>
-                </section>
+                 <section id="promo" class="tab-pane">
+    <div class="pane-header">
+        <h2>Chương trình khuyến mãi</h2>
+
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="searchPromo" placeholder=" Tìm kiếm...">
+            <button class="btn-confirm" onclick="openModal('promo')">
+                <i class="fas fa-percent"></i> Tạo mã
+            </button>
+        </div>
+    </div>
+
+    <div class="table-wrapper glass">
+        <table class="vip-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên chương trình</th>
+                    <th>Mức giảm</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="promoTable"></tbody>
+        </table>
+    </div>
+</section>
 
                 <section id="policy" class="tab-pane">
                     <div class="pane-header">
