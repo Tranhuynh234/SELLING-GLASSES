@@ -44,27 +44,30 @@ async function handleLogin(event) {
   const formData = new FormData();
   formData.append("email", email);
   formData.append("password", password);
-
   try {
-    const response = await fetch(
-      "/SELLING-GLASSES/routes/web.php?action=login",
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
+    const response = await fetch("/SELLING-GLASSES/public/login", {
+      method: "POST",
+      body: formData,
+    });
 
-    const result = await response.text();
+    const result = await response.json();
 
-    if (result.includes("Invalid") || result.includes("exists")) {
-      alert(result);
+    if (result.success) {
+      localStorage.setItem("user", JSON.stringify(result.data));
+
+      renderAuth(); // thêm dòng này
+
+      setTimeout(() => {
+        window.location.href = result.redirect;
+      }, 300);
     } else {
-      window.location.href = result;
+      alert(result.message);
     }
   } catch (error) {
     alert("Error connecting to server");
   }
 }
+
 async function handleRegister(event) {
   event.preventDefault();
 
@@ -72,69 +75,84 @@ async function handleRegister(event) {
   const email = document.getElementById("reg-email").value;
   const phone = document.getElementById("reg-phone").value;
   const password = document.getElementById("reg-password").value;
+  const confirmPassword = document.getElementById("reg-confirm").value;
+
+  // Kiểm tra xác nhận mật khẩu trước khi gửi lên server
+  if (password !== confirmPassword) {
+    alert("Mật khẩu xác nhận không khớp!");
+    return;
+  }
 
   const formData = new FormData();
   formData.append("name", name);
   formData.append("email", email);
-  formData.append("phone", phone);
   formData.append("password", password);
+  formData.append("phone", phone);
 
-  const response = await fetch(
-    "/SELLING-GLASSES/routes/web.php?action=register",
-    {
+  try {
+    const response = await fetch("/SELLING-GLASSES/public/register", {
       method: "POST",
       body: formData,
-    },
-  );
+    });
 
-  const result = await response.text();
+    const result = await response.json();
 
-  if (result.startsWith("/")) {
-    window.location.href = result;
-  } else {
-    alert(result);
+    if (result.success) {
+      alert("Đăng ký thành công!");
+      // Chuyển hướng về trang đăng nhập hoặc trang cá nhân
+      window.location.href = "/SELLING-GLASSES/public/auth";
+    } else {
+      alert(result.message || "Đăng ký thất bại, vui lòng thử lại.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Có lỗi xảy ra trong quá trình kết nối với máy chủ.");
   }
 }
-function logout() {
-  fetch("/SELLING-GLASSES/routes/web.php?action=logout", {
-    credentials: "include",
-  })
-    .then((res) => res.text())
-    .then((url) => {
-      window.location.href = url;
-    });
-}
-function checkLoginStatus() {
-  fetch("/SELLING-GLASSES/routes/web.php?action=check", {
-    credentials: "include",
-  })
-    .then((res) => res.text())
-    .then((status) => {
-      const loginBtn = document.getElementById("loginBtn");
-      const logoutBtn = document.getElementById("logoutBtn");
+//=========================
+function renderAuth() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const authBox = document.getElementById("auth-box");
 
-      if (status.trim() === "logged_in") {
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-      }
+  if (!authBox) return;
+
+  if (user) {
+    authBox.innerHTML = `
+      <span>Xin chào, ${user.name}</span>
+      <a href="#" onclick="logout()" class="ml-3 hover:text-amber-500">
+        Đăng xuất
+      </a>
+    `;
+  } else {
+    authBox.innerHTML = `
+      <a href="/SELLING-GLASSES/public/auth">Đăng nhập</a>
+      <span>|</span>
+      <a href="/SELLING-GLASSES/public/auth">Đăng ký</a>
+    `;
+  }
+}
+
+function logout() {
+  fetch("/SELLING-GLASSES/public/logout", {
+    credentials: "include",
+  })
+    .then((res) => res.text())
+    .then(() => {
+      localStorage.removeItem("user");
+      window.location.href = "/SELLING-GLASSES/public/home";
     });
 }
 
 // chạy khi load trang
 document.addEventListener("DOMContentLoaded", function () {
-  // check login
-  checkLoginStatus();
-
-  // login form
+  renderAuth();
+  // LOGIN FORM
   const loginForm = document.querySelector("#login-view form");
   if (loginForm) {
     loginForm.addEventListener("submit", handleLogin);
   }
 
-  // register form
+  // REGISTER FORM
   const registerForm = document.querySelector("#register-view form");
   if (registerForm) {
     registerForm.addEventListener("submit", handleRegister);

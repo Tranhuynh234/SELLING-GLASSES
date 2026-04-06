@@ -77,5 +77,18 @@ public function rollBack() {
         $stmt->execute([':value' => $value]);
         return $stmt->fetch();
     }
+        // SELECT nhiều dòng
+    public function queryAll($sql, $params = []) {
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // SELECT 1 dòng
+    public function queryOne($sql, $params = []) {
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

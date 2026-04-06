@@ -24,4 +24,14 @@ class ProductModel extends BaseModel {
         }
         return $products;
     }
+   public function getProducts($limit, $offset) {
+    $sql = "SELECT * FROM product LIMIT $limit OFFSET $offset";
+    return $this->queryAll($sql);
+}
+
+   public function countProducts() {
+    $sql = "SELECT COUNT(*) AS total FROM product";
+    $result = $this->queryOne($sql);
+    return $result['total'];
+}
 }

@@ -46,7 +46,7 @@ class AuthController {
 
         if ($result['success']) {
             $_SESSION['user'] = $result['data'];
-            $result['redirect'] = "/home";
+            $result['redirect'] = "/SELLING-GLASSES/public/home";
         }
 
         echo json_encode($result);
@@ -126,5 +126,8 @@ public function updateProfile() {
         var_dump($result);
         die();
     }
+    public function showLogin() {
+    require_once __DIR__ . "/../views/auth/auth.php";
+}
 }
 ?>
