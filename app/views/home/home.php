@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LENS - Hệ thống mắt kính AI</title>
+    <title>EYESGLASS - Hệ thống mắt kính AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/home.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/chatbox.css" />
 </head>
@@ -14,8 +15,8 @@
     <div class="fixed top-0 left-0 w-full z-50 shadow-sm flex flex-col">
         <div class="bg-[#111] text-white text-[11px] py-2 px-6 flex justify-between items-center font-medium">
             <div class="flex space-x-6">
-                <span>📞 Hotline: 1900 xxxx</span>
-                <span>🚚 Giao hàng toàn quốc - Miễn phí đơn từ 500k</span>
+                <span> <i class="fa-solid fa-phone text-amber-500"></i> Hotline: 1900 1234</span>
+                <span> <i class="fa-solid fa-truck text-amber-500"></i> Giao hàng toàn quốc - Miễn phí đơn từ 500k</span>
             </div>
             <div id="auth-box" class="flex space-x-4">
                 <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
@@ -31,16 +32,17 @@
                 <a href="#" class="hover:text-amber-700">Gọng kính</a>
                 <a href="#" class="hover:text-amber-700">Tròng kính</a>
                 <a href="#" class="hover:text-amber-700">Combo</a>
-                <a href="#" class="text-red-600 font-bold">Khuyến mãi</a>
+                <a href="#" class="hover:text-amber-700">Khuyến mãi</a>
                 <a href="#" class="hover:text-amber-700">Try On</a>
                 <a href="#" class="hover:text-amber-700">Tư vấn</a>
             </nav>
             <div class="flex space-x-5 text-xl text-stone-700 items-center">
-                <button>🔍</button>
-                <button>👤</button>
+                <button><i class="fas fa-search"></i></button>
+                <button><i class="fas fa-user"></i></button>
                 <button class="relative">
-                    🛒<span
-                        class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                    <i class="fas fa-shopping-cart"></i>
+                    <span
+                        class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
                 </button>
             </div>
         </header>
@@ -79,42 +81,42 @@
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Gọng Nam]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/gongnam.jpg" alt="Gọng Nam" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Gọng Nam</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Gọng Nữ]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/gongnu.jpg" alt="Gọng Nữ" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-amber-700">Gọng Nữ</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Trẻ Em]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/gongtrem.jpg" alt="Gọng Trẻ Em" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Gọng Trẻ Em</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Tròng AS Xanh]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/anhsangxanh.jpg" alt="Tròng AS Xanh" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Chống Ánh Sáng Xanh</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Đổi Màu]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/doimau.jpg" alt="Kính Đổi Màu" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Kính Đổi Màu</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <span class="text-stone-300">[Siêu Mỏng]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/sieumong.jpg" alt="Kính Siêu Mỏng" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Kính Siêu Mỏng</p>
             </div>
@@ -124,21 +126,22 @@
     <section class="py-20 px-6 max-w-7xl mx-auto">
         <div class="flex justify-between items-end mb-10">
             <h2 class="text-4xl font-bold">Sản Phẩm Bán Chạy</h2>
-            <a href="#" class="text-amber-700 font-bold hover:underline">Xem tất cả →</a>
+            <a href="#" class="text-amber-700 font-bold flex items-center gap-2 group">
+                Xem tất cả
+                <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
                 <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span
-                        class="absolute top-4 left-4 bg-black text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Best
-                        Seller</span>
-                    <span class="text-stone-300">[Ảnh Sản Phẩm]</span>
+                    <span class="absolute top-4 left-4 bg-black text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Best Seller</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/titanclassic.jpg" alt="Gọng Titan Classic" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <div class="p-6">
                     <h3 class="font-bold text-lg mb-2 text-stone-800">
                         Gọng Titan Classic
                     </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">750.000đ</p>
+                    <p class="text-amber-700 font-bold text-xl mb-4">250.000đ</p>
                     <button
                         class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
                         Thêm vào giỏ
@@ -147,17 +150,16 @@
             </div>
             <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
                 <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span
-                        class="absolute top-4 left-4 bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">-20%</span>
-                    <span class="text-stone-300">[Ảnh Sản Phẩm]</span>
+                    <span class="absolute top-4 left-4 bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">-20%</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/nhuadeotron.jpg" alt="Gọng Nhựa Dẻo Tròn" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <div class="p-6">
                     <h3 class="font-bold text-lg mb-2 text-stone-800">
                         Gọng Nhựa Dẻo Tròn
                     </h3>
                     <div class="flex space-x-3 items-center mb-4">
-                        <p class="text-amber-700 font-bold text-xl">450.000đ</p>
-                        <p class="text-stone-400 line-through text-sm">560.000đ</p>
+                        <p class="text-amber-700 font-bold text-xl">200.000đ</p>
+                        <p class="text-stone-400 line-through text-sm">250.000đ</p>
                     </div>
                     <button
                         class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
@@ -167,13 +169,13 @@
             </div>
             <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
                 <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span class="text-stone-300">[Ảnh Sản Phẩm]</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/matmeonu.jpg" alt="Gọng Mắt Mèo Nữ" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <div class="p-6">
                     <h3 class="font-bold text-lg mb-2 text-stone-800">
                         Gọng Mắt Mèo Nữ
                     </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">520.000đ</p>
+                    <p class="text-amber-700 font-bold text-xl mb-4">220.000đ</p>
                     <button
                         class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
                         Thêm vào giỏ
@@ -182,15 +184,14 @@
             </div>
             <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
                 <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span
-                        class="absolute top-4 left-4 bg-blue-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">New</span>
-                    <span class="text-stone-300">[Ảnh Sản Phẩm]</span>
+                    <span class="absolute top-4 left-4 bg-blue-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">New</span>
+                    <img src="/SELLING-GLASSES/public/assets/images/kimloaimanh.jpg" alt="Gọng Kim Loại Mảnh" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <div class="p-6">
                     <h3 class="font-bold text-lg mb-2 text-stone-800">
                         Gọng Kim Loại Mảnh
                     </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">680.000đ</p>
+                    <p class="text-amber-700 font-bold text-xl mb-4">320.000đ</p>
                     <button
                         class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
                         Thêm vào giỏ
@@ -221,7 +222,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    [Ảnh Combo 1]
+                    <img src="/SELLING-GLASSES/public/assets/images/combo_sinhvien.jpg" alt="Combo Sinh Viên" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Sinh Viên</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -238,7 +239,7 @@
                     class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase">Hot
                     nhất</span>
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    [Ảnh Combo 2]
+                    <img src="/SELLING-GLASSES/public/assets/images/combo_vanphong.jpg" alt="Combo Văn Phòng" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Văn Phòng</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -251,7 +252,7 @@
             </div>
             <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    [Ảnh Combo 3]
+                    <img src="/SELLING-GLASSES/public/assets/images/combo_sieunet.jpg" alt="Combo Siêu Nét" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Siêu Nét</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -288,13 +289,13 @@
                 </p>
                 <ul class="space-y-4 font-medium">
                     <li class="flex items-center space-x-3">
-                        ✨ <span>Nhận diện khuôn mặt chính xác</span>
+                        <i class="fa-solid fa-face-smile text-amber-500"></i> <span>Nhận diện khuôn mặt chính xác</span>
                     </li>
                     <li class="flex items-center space-x-3">
-                        📏 <span>Gợi ý size kính vừa vặn</span>
+                        <i class="fa-solid fa-ruler text-amber-500"></i> <span>Gợi ý size kính vừa vặn</span>
                     </li>
                     <li class="flex items-center space-x-3">
-                        🔄 <span>So sánh hàng trăm mẫu cùng lúc</span>
+                        <i class="fa-solid fa-sync-alt text-amber-500"></i> <span>So sánh hàng trăm mẫu cùng lúc</span>
                     </li>
                 </ul>
                 <button
@@ -311,31 +312,31 @@
             <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-24">
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-2xl">
-                        🛡️
+                        <i class="fa-solid fa-shield-halved text-blue-500"></i>
                     </div>
                     <p class="font-bold text-sm">Bảo hành 12 tháng</p>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-2xl">
-                        🔄
+                        <i class="fa-solid fa-rotate-left text-blue-500"></i>
                     </div>
                     <p class="font-bold text-sm">Đổi trả 7 ngày</p>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-2xl">
-                        🚚
+                        <i class="fa-solid fa-truck text-blue-500"></i>
                     </div>
                     <p class="font-bold text-sm">Giao hàng toàn quốc</p>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-2xl">
-                        ⚙️
+                        <i class="fa-solid fa-gear text-blue-500"></i>
                     </div>
                     <p class="font-bold text-sm">Gia công chuẩn xác</p>
                 </div>
                 <div class="flex flex-col items-center gap-3">
                     <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-2xl">
-                        💬
+                        <i class="fa-solid fa-comment text-blue-500"></i>
                     </div>
                     <p class="font-bold text-sm">Tư vấn miễn phí</p>
                 </div>
@@ -346,7 +347,13 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
                 <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100">
-                    <div class="text-amber-500 mb-4">⭐⭐⭐⭐⭐</div>
+                    <div class="text-amber-500 mb-4">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
                     <p class="text-stone-600 italic mb-8">
                         "Tính năng thử kính AI quá xịn! Mình đã chọn được gọng Titan rất
                         vừa vặn mà không cần đến cửa hàng."
@@ -367,21 +374,20 @@
         <div class="max-w-7xl mx-auto px-6">
             <div class="flex justify-between items-end mb-12">
                 <h2 class="text-4xl font-bold">Góc Tư Vấn Mắt</h2>
-                <a href="#" class="text-amber-800 font-bold hover:underline">Xem thêm bài viết →</a>
+                <a href="#" class="text-amber-800 font-bold hover:underline">Xem thêm bài viết 
+                    <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i></a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-[32px] overflow-hidden group shadow-sm">
                     <div class="h-64 bg-stone-200 flex items-center justify-center text-stone-400">
-                        [Ảnh Thumbnail 1]
+                        <img src="/SELLING-GLASSES/public/assets/images/thumbnail1.jpg" alt="Cách chọn gọng kính" class="w-full h-full object-cover transition duration-300 hover:scale-105">
                     </div>
                     <div class="p-8">
                         <span class="text-amber-700 font-bold text-xs uppercase tracking-widest">Mẹo hay</span>
                         <h3 class="font-bold text-xl mt-3 mb-6 leading-snug">
                             Cách chọn gọng kính phù hợp với từng khuôn mặt
                         </h3>
-                        <a href="#"
-                            class="text-stone-900 font-bold border-b-2 border-amber-300 pb-1 hover:border-amber-700 transition">Đọc
-                            thêm</a>
+                        <a href="#" class="text-stone-900 font-bold border-b-2 border-amber-300 pb-1 hover:border-amber-700 transition">Đọc thêm</a>
                     </div>
                 </div>
             </div>
@@ -443,13 +449,13 @@
                 </h4>
                 <ul class="space-y-4 text-sm">
                     <li class="flex items-center gap-3">
-                        📞 <span>Hotline: 1900 xxxx (8h-22h)</span>
+                        <i class="fa-solid fa-phone text-amber-500"></i> <span>Hotline: 1900 1234 (8h-22h)</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        ✉️ <span>Email: hello@lens.vn</span>
+                        <i class="fa-solid fa-envelope text-amber-500"></i> <span>Email: hello@lens.vn</span>
                     </li>
                     <li class="flex items-center gap-3">
-                        📍 <span>Cửa hàng: 123 Đường ABC, Quận X, TP.HCM</span>
+                        <i class="fa-solid fa-location-dot text-amber-500"></i> <span>Cửa hàng: 123 Đường ABC, Quận X, TP.HCM</span>
                     </li>
                 </ul>
                 <div class="flex space-x-4 mt-8">
@@ -468,12 +474,13 @@
         </div>
     </footer>
 
-    <div id="ai-chat-panel"
+    <!-- CHATBOX -->
+    <div id="ai-chat-panel" 
         class="fixed bottom-24 right-8 w-[90vw] sm:w-[400px] max-w-[400px] h-[80vh] max-h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-[100] transition-all duration-300 opacity-0 pointer-events-none translate-y-10 overflow-hidden border border-stone-200">
         <div class="bg-stone-900 text-white p-4 flex justify-between items-center shadow-md z-10">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-xl">
-                    🤖
+                    <i class="fa-solid fa-robot text-white"></i>
                 </div>
                 <div>
                     <h4 class="font-bold text-[15px] leading-tight">
@@ -488,10 +495,10 @@
             <div class="flex gap-4 items-center">
                 <button id="minimize-chat"
                     class="text-stone-400 hover:text-white transition text-2xl leading-none -mt-3">
-                    _
+                    <i class="fa-solid fa-minus"></i>
                 </button>
                 <button id="close-chat" class="text-stone-400 hover:text-red-500 transition text-2xl leading-none">
-                    ×
+                    <i class="fa-solid fa-times"></i>
                 </button>
             </div>
         </div>
@@ -500,16 +507,41 @@
             <div class="flex gap-2 w-full">
                 <div
                     class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">
-                    🤖
+                    <i class="fa-solid fa-robot text-white"></i>
                 </div>
+
                 <div class="flex flex-col gap-1 max-w-[85%]">
-                    <div
-                        class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
-                        Ngày mới tốt lành 👋 Tôi là trợ lý Kính sành điệu của EYESGLASS.
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
+                        Ngày mới tốt lành 
+                        <i class="fa-solid fa-hand text-amber-500"></i> 
+                        Tôi là trợ lý Kính sành điệu của EYESGLASS.
                         Tôi có thể giúp gì cho baby nò?
+
+                        <!-- QUICK OPTIONS-->
+                         <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="handleQuickAction('Tư vấn chọn kính', 'find_glasses')"
+                                 class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
+                                <i class="fa-solid fa-glasses"></i>
+                                Tư vấn chọn kính
+                            </button>
+
+                            <button onclick="handleQuickAction('Xem sản phẩm hot', 'hot_products')"
+                                class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
+                                <i class="fa-solid fa-fire"></i>
+                                Xem sản phẩm hot
+                            </button>
+
+                            <button onclick="handleQuickAction('Liên hệ nhân viên', 'human')"
+                                class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
+                                <i class="fa-solid fa-headset"></i>
+                                Liên hệ nhân viên
+                            </button>
+
+                        </div>
                     </div>
                 </div>
             </div>
+            
             <div id="chat-anchor"></div>
         </div>
 
@@ -519,14 +551,14 @@
                 onkeypress="handleEnter(event)" />
             <button onclick="sendManualMessage()" id="send-btn"
                 class="w-9 h-9 bg-amber-600 text-white rounded-full flex items-center justify-center hover:bg-amber-700 transition flex-shrink-0 shadow-md">
-                ➤
+                <i class="fa-solid fa-paper-plane"></i>
             </button>
         </div>
     </div>
 
     <div id="ai-icon"
         class="fixed bottom-8 right-8 w-16 h-16 bg-amber-600 text-white rounded-full flex items-center justify-center shadow-xl cursor-grab z-[101] text-3xl glow-effect">
-        🤖
+        <i class="fa-solid fa-robot text-white"></i>
     </div>
 
     <script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>

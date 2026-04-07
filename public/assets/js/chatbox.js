@@ -8,192 +8,207 @@ const quickActionsArea = document.getElementById('quick-actions');
 
 let isChatOpen = false;
 let isDragging = false;
-let startX, startY;
-let offsetX, offsetY;
+let startX = null, startY = null;
+let offsetX = 0, offsetY = 0;
 
-// --- Logic Kéo Thả (Mouse) ---
+// ICON SVG 
+const maleIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M16 3h5v5M21 3l-7 7"/><circle cx="10" cy="14" r="5"/></svg>`;
+
+const femaleIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="10" r="5"/><path d="M12 15v6M9 18h6"/></svg>`;
+
+// DRAG MOUSE 
 aiIcon.addEventListener('mousedown', (e) => {
     isDragging = false;
     startX = e.clientX;
     startY = e.clientY;
-    aiIcon.classList.remove('cursor-grab');
-    aiIcon.classList.add('cursor-grabbing');
+
     const rect = aiIcon.getBoundingClientRect();
     offsetX = e.clientX - rect.left;
     offsetY = e.clientY - rect.top;
-    aiIcon.style.transition = 'none'; 
+
+    aiIcon.style.transition = 'none';
 });
 
 document.addEventListener('mousemove', (e) => {
-    if (startX && startY) {
-        if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
-            isDragging = true;
-        }
+    if (startX === null || startY === null) return;
+
+    if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+        isDragging = true;
     }
+
     if (!isDragging) return;
+
     e.preventDefault();
-    aiIcon.style.bottom = 'auto';
-    aiIcon.style.right = 'auto';
     aiIcon.style.left = `${e.clientX - offsetX}px`;
     aiIcon.style.top = `${e.clientY - offsetY}px`;
-    aiIcon.classList.remove('glow-effect');
+    aiIcon.style.right = 'auto';
+    aiIcon.style.bottom = 'auto';
 });
 
-document.addEventListener('mouseup', (e) => {
-    aiIcon.classList.remove('cursor-grabbing');
-    aiIcon.classList.add('cursor-grab');
-    aiIcon.style.transition = 'background-color 0.3s, transform 0.3s';
-    aiIcon.classList.add('glow-effect');
-    if (!isDragging && startX !== undefined) toggleChatbox();
-    startX = undefined; startY = undefined; isDragging = false;
+document.addEventListener('mouseup', () => {
+    if (!isDragging && startX !== null) toggleChatbox();
+    startX = null;
+    startY = null;
+    isDragging = false;
+    aiIcon.style.transition = '';
 });
 
-// --- Logic Mobile Touch ---
+// TOUCH MOBILE 
 aiIcon.addEventListener('touchstart', (e) => {
     const touch = e.touches[0];
-    startX = touch.clientX; startY = touch.clientY;
+    startX = touch.clientX;
+    startY = touch.clientY;
+
     const rect = aiIcon.getBoundingClientRect();
     offsetX = touch.clientX - rect.left;
     offsetY = touch.clientY - rect.top;
-}, {passive: false});
+}, { passive: false });
 
 document.addEventListener('touchmove', (e) => {
-    if (!startX || !startY) return;
+    if (startX === null || startY === null) return;
+
     const touch = e.touches[0];
-    if (Math.abs(touch.clientX - startX) > 5 || Math.abs(touch.clientY - startY) > 5) isDragging = true;
+
+    if (Math.abs(touch.clientX - startX) > 5 || Math.abs(touch.clientY - startY) > 5) {
+        isDragging = true;
+    }
+
     if (!isDragging) return;
+
     e.preventDefault();
-    aiIcon.style.bottom = 'auto';
-    aiIcon.style.right = 'auto';
     aiIcon.style.left = `${touch.clientX - offsetX}px`;
     aiIcon.style.top = `${touch.clientY - offsetY}px`;
-}, {passive: false});
+}, { passive: false });
 
-document.addEventListener('touchend', (e) => {
-    if (!isDragging && startX !== undefined) toggleChatbox();
-    startX = undefined; startY = undefined; isDragging = false;
+document.addEventListener('touchend', () => {
+    if (!isDragging && startX !== null) toggleChatbox();
+    startX = null;
+    startY = null;
+    isDragging = false;
 });
 
-// --- Logic Chat UI ---
+// CHAT UI
 function toggleChatbox() {
     isChatOpen = !isChatOpen;
-    if (isChatOpen) {
-        chatPanel.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
-        scrollToBottom();
-    } else {
-        chatPanel.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
-    }
+
+    chatPanel.classList.toggle('opacity-0');
+    chatPanel.classList.toggle('pointer-events-none');
+    chatPanel.classList.toggle('translate-y-10');
+
+    if (isChatOpen) scrollToBottom();
 }
 
 closeChatBtn.addEventListener('click', toggleChatbox);
 minimizeChatBtn.addEventListener('click', toggleChatbox);
 
-function scrollToBottom() { chatBody.scrollTop = chatBody.scrollHeight; }
+function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
 
 function getTime() {
     const now = new Date();
-    return `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+    return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
 }
 
+// MESSAGE 
 function appendUserMessage(text) {
-    const msgHtml = `
-        <div class="flex gap-2 w-full justify-end mt-2 mb-2">
-            <div class="flex flex-col gap-1 max-w-[85%] items-end">
-                <div class="bg-amber-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-[14px]">
-                    ${text}
-                </div>
-                <span class="text-[10px] text-stone-400 mr-1">${getTime()}</span>
-            </div>
-        </div>`;
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = msgHtml;
-    chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
+    const msg = `
+    <div class="flex justify-end mt-2">
+        <div class="bg-amber-600 text-white p-3 rounded-2xl">${text}</div>
+    </div>`;
+    chatBody.insertAdjacentHTML('beforeend', msg);
     scrollToBottom();
 }
 
 function showTypingIndicator() {
-    const typingHtml = `
-        <div id="typing-indicator" class="flex gap-2 w-full mb-2">
-            <div class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">🤖</div>
-            <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-stone-100 flex gap-1 items-center h-10">
-                <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
-                <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
-                <div class="w-2 h-2 bg-stone-400 rounded-full typing-dot"></div>
-            </div>
-        </div>`;
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = typingHtml;
-    chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
-    scrollToBottom();
+    const html = `
+    <div id="typing">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-robot text-white text-sm"></i></div>
+            <div class="bg-white px-3 py-2 rounded-xl">...</div>
+        </div>
+    </div>`;
+    chatBody.insertAdjacentHTML('beforeend', html);
 }
 
 function removeTypingIndicator() {
-    const indicator = document.getElementById('typing-indicator');
-    if (indicator) indicator.remove();
+    document.getElementById('typing')?.remove();
 }
 
-function appendAIMessage(textHtml, options = []) {
+function appendAIMessage(text, options = []) {
     let optionsHtml = '';
+
     if (options.length > 0) {
-        optionsHtml = `<div class="flex flex-wrap gap-2 mt-3">`;
+        optionsHtml = `<div class="flex gap-2 mt-2 flex-wrap">`;
         options.forEach(opt => {
-            optionsHtml += `<button onclick="handleQuickAction('${opt.label}', '${opt.action}')" class="text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">${opt.label}</button>`;
+            optionsHtml += `
+            <button onclick="handleQuickAction('${opt.action}')"
+            class="px-3 py-1 border border-amber-600 text-amber-700 rounded-full hover:bg-amber-600 hover:text-white transition">
+                ${opt.label}
+            </button>`;
         });
         optionsHtml += `</div>`;
     }
 
-    const msgHtml = `
-        <div class="flex gap-2 w-full mb-2">
-            <div class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">🤖</div>
-            <div class="flex flex-col gap-1 max-w-[85%]">
-                <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
-                    ${textHtml}
-                    ${optionsHtml}
-                </div>
-                <span class="text-[10px] text-stone-400 ml-1">${getTime()}</span>
-            </div>
-        </div>`;
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = msgHtml;
-    chatBody.insertBefore(wrapper.firstElementChild, document.getElementById('chat-anchor'));
+    const msg = `
+    <div class="mt-2 flex gap-2">
+        <div class="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-robot text-white text-sm"></i>
+        </div>
+        <div class="bg-white p-3 rounded-xl border">
+            ${text}
+            ${optionsHtml}
+        </div>
+    </div>`;
+
+    chatBody.insertAdjacentHTML('beforeend', msg);
     scrollToBottom();
 }
 
-function handleQuickAction(text, actionType) {
-    if (quickActionsArea) quickActionsArea.style.display = 'none';
-    appendUserMessage(text);
+// QUICK ACTION 
+function handleQuickAction(actionType) {
+    appendUserMessage(actionType);
     showTypingIndicator();
+
     setTimeout(() => {
         removeTypingIndicator();
+
         if (actionType === 'find_glasses') {
-            appendAIMessage("Dạ, để gợi ý chính xác nhất, bạn vui lòng cho AI biết bạn là <b>Nam</b> hay <b>Nữ</b> ạ?", [
-                { label: '👨 Nam', action: 'gender_male' },
-                { label: '👩 Nữ', action: 'gender_female' }
+            appendAIMessage("Bạn chọn giới tính để mình tư vấn chính xác hơn:", [
+                { label: `${maleIcon} Nam`, action: 'male' },
+                { label: `${femaleIcon} Nữ`, action: 'female' }
             ]);
-        } else if (actionType === 'human') {
-            appendAIMessage("Tôi đang kết nối bạn với chuyên viên tư vấn. Vui lòng giữ máy trong giây lát... 👨‍💻");
-        } else {
-            appendAIMessage("Dạ, AI đã nhận thông tin. Tính năng này hiện đang được kết nối với hệ thống.");
         }
-    }, 1200); 
+        else if (actionType === 'human') {
+            appendAIMessage("Đang kết nối với nhân viên tư vấn...");
+        }
+        else {
+            appendAIMessage("Tính năng đang phát triển thêm!");
+        }
+
+    }, 1000);
 }
 
+// INPUT 
 function handleEnter(e) {
-    if (e.key === 'Enter' && chatInput.value.trim() !== '') sendManualMessage();
+    if (e.key === 'Enter') sendManualMessage();
 }
 
 function sendManualMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
-    if (quickActionsArea) quickActionsArea.style.display = 'none';
+
     appendUserMessage(text);
     chatInput.value = '';
+
     showTypingIndicator();
+
     setTimeout(() => {
         removeTypingIndicator();
-        appendAIMessage("Xin lỗi, tôi là phiên bản demo AI. Đối với câu hỏi phức tạp: <i>'" + text + "'</i>, bạn có muốn tôi chuyển cho nhân viên thật hỗ trợ không?", [
-            { label: 'Gặp nhân viên', action: 'human' },
-            { label: 'Quay lại menu', action: 'menu' }
+        appendAIMessage(`Mình đã nhận câu hỏi: "<b>${text}</b>" <br>
+        Bạn muốn được hỗ trợ theo cách nào?`, [
+            { label: '<i class="fa-solid fa-phone-volume text-amber-500"></i> Gặp tư vấn viên', action: 'human' },
+            { label: '<i class="fa-solid fa-robot text-amber-500"></i> Tiếp tục AI', action: 'ai' }
         ]);
-    }, 1500);
+    }, 1200);
 }
