@@ -119,8 +119,7 @@ class AuthController {
             header("Location: /SELLING-GLASSES/public/auth");
             exit();
         }
-
-        // Gọi file giao diện HTML/PHP của trang Profile ra hiển thị
+        
         require_once __DIR__ . "/../views/auth/profile.php";
     }
 

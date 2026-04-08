@@ -1,19 +1,16 @@
 // ==========================
-// TAB SYSTEM (FIX)
+// TAB SYSTEM 
 // ==========================
 function showTab(tab) {
-
     // 1. Ẩn toàn bộ tab
     document.querySelectorAll(".tab").forEach(t => {
         t.classList.remove("active");
     });
 
-    // 2. Hiện tab (có check tránh lỗi)
+    // 2. Hiện tab
     const currentTab = document.getElementById(tab);
     if (currentTab) {
         currentTab.classList.add("active");
-    } else {
-        console.warn("Không tìm thấy tab:", tab);
     }
 
     // 3. Active sidebar
@@ -28,141 +25,165 @@ function showTab(tab) {
 }
 
 // ==========================
-// EDIT PROFILE (FIX VIP)
+// EDIT PROFILE (SMOOTH & API)
 // ==========================
 function edit(field) {
-
     const text = document.getElementById(field + "Text");
     const input = document.getElementById(field + "Input");
 
-    if (!text || !input) {
-        console.warn("Thiếu field:", field);
-        return;
-    }
-
-    // Nếu đang mở rồi thì không làm lại
+    if (!text || !input) return;
     if (!input.classList.contains("hidden")) return;
 
-    input.value = text.innerText;
+    // Lọc giá trị rỗng mặc định
+    const oldValue = (text.innerText === 'Chưa cập nhật' || text.innerText === 'Chưa có địa chỉ') ? '' : text.innerText;
+    input.value = oldValue;
 
-    text.classList.add("hidden");
-    input.classList.remove("hidden");
+    // Hiệu ứng mờ chữ -> Hiện Input
+    text.style.opacity = '0';
+    setTimeout(() => {
+        text.classList.add("hidden");
+        input.classList.remove("hidden");
+        input.style.opacity = '1';
+        input.focus();
+    }, 150);
 
-    input.focus();
-
-    // ENTER để lưu
+    // Bấm Enter để lưu
     input.onkeydown = (e) => {
-        if (e.key === "Enter") {
-            input.blur();
-        }
+        if (e.key === "Enter") input.blur();
     };
 
-    // BLUR để lưu
-    input.onblur = () => {
-        text.innerText = input.value.trim() || text.innerText;
+    // Click ra ngoài (Blur) để chạy lệnh lưu
+    input.onblur = async () => {
+        const newValue = input.value.trim();
 
-        text.classList.remove("hidden");
-        input.classList.add("hidden");
+        // Hiệu ứng mờ Input -> Hiện lại chữ
+        input.style.opacity = '0';
+        setTimeout(() => {
+            input.classList.add("hidden");
+            text.classList.remove("hidden");
+            text.style.opacity = '1';
+        }, 150);
 
-        showToast("Đã cập nhật " + field);
+        // Kiểm tra nếu có thay đổi thì gửi API
+        if (newValue !== "" && newValue !== oldValue) {
+            
+            text.innerText = newValue; // Update giao diện tạm
+
+            // Đóng gói dữ liệu gửi lên PHP
+            const formData = new FormData();
+            formData.append(field, newValue);
+
+            try {
+                const response = await fetch('/SELLING-GLASSES/public/update-profile', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("Cập nhật " + field + " thành công!");
+                    
+                    // Update LocalStorage để thanh Header đổi tên theo
+                    let user = JSON.parse(localStorage.getItem('user'));
+                    if(user && (field === 'name' || field === 'email' || field === 'phone')) {
+                        user[field] = newValue;
+                        localStorage.setItem('user', JSON.stringify(user));
+                    }
+                } else {
+                    showToast("Lỗi: " + (result.message || "Không thể cập nhật"));
+                    text.innerText = oldValue || (field === 'phone' ? 'Chưa cập nhật' : field === 'address' ? 'Chưa có địa chỉ' : ''); // Rollback
+                }
+            } catch (error) {
+                showToast("Lỗi kết nối máy chủ");
+                text.innerText = oldValue || (field === 'phone' ? 'Chưa cập nhật' : field === 'address' ? 'Chưa có địa chỉ' : ''); // Rollback
+            }
+        } else if (newValue === "") {
+            // Nếu xóa trắng thì trả về text cũ
+            text.innerText = oldValue || (field === 'phone' ? 'Chưa cập nhật' : field === 'address' ? 'Chưa có địa chỉ' : oldValue);
+        }
     };
 }
 
 // ==========================
-// MODAL (FIX AN TOÀN)
-// ==========================
-// ==========================
-// MODAL PASSWORD (FULL FIX)
+// MODAL PASSWORD
 // ==========================
 function openPassword() {
     const modal = document.getElementById("passwordModal");
-    if (modal) {
-        modal.style.display = "flex";
-    }
+    if (modal) modal.style.display = "flex";
 }
 
 function closePassword() {
     const modal = document.getElementById("passwordModal");
     if (modal) {
         modal.style.display = "none";
-
-        // reset input
         modal.querySelectorAll("input").forEach(i => i.value = "");
     }
 }
 
-// CLICK NGOÀI ĐỂ ĐÓNG
 window.addEventListener("click", function(e) {
     const modal = document.getElementById("passwordModal");
-    if (e.target === modal) {
-        closePassword();
-    }
+    if (e.target === modal) closePassword();
 });
 
 // ==========================
-// SAVE PASSWORD (NEW)
+// SAVE PASSWORD (Fake UI - Sau này ráp API tương tự edit)
 // ==========================
 function savePassword() {
-
     const inputs = document.querySelectorAll("#passwordModal input");
-
     const oldPass = inputs[0].value.trim();
     const newPass = inputs[1].value.trim();
+    const confirmPass = inputs[2].value.trim(); // Xác nhận MK
 
-    // validate
-    if (!oldPass || !newPass) {
+    if (!oldPass || !newPass || !confirmPass) {
         showToast("Vui lòng nhập đầy đủ");
         return;
     }
 
     if (newPass.length < 6) {
-        showToast("Mật khẩu phải >= 6 ký tự");
+        showToast("Mật khẩu mới phải >= 6 ký tự");
+        return;
+    }
+    
+    if (newPass !== confirmPass) {
+        showToast("Xác nhận mật khẩu không khớp");
         return;
     }
 
-    // fake success (sau này call API PHP)
-    showToast("Đổi mật khẩu thành công 🔥");
-
+    showToast("Đổi mật khẩu thành công (Test UI)");
     closePassword();
 }
 
 // ==========================
-// CLICK NGOÀI MODAL ĐỂ TẮT
-// ==========================
-window.onclick = function(e) {
-    const modal = document.getElementById("passwordModal");
-    if (e.target === modal) {
-        modal.style.display = "none";
-    }
-};
-
-// ==========================
-// TOAST VIP (NHẸ)
+// TOAST THÔNG BÁO
 // ==========================
 function showToast(msg) {
-
     const toast = document.createElement("div");
     toast.innerText = msg;
-
-    toast.style.position = "fixed";
-    toast.style.bottom = "30px";
-    toast.style.right = "30px";
-    toast.style.background = "#1c1917";
-    toast.style.color = "#fff";
-    toast.style.padding = "10px 18px";
-    toast.style.borderRadius = "10px";
-    toast.style.opacity = "0";
-    toast.style.transition = "0.3s";
-    toast.style.zIndex = "9999";
+    
+    // Đảm bảo không bị đè CSS
+    Object.assign(toast.style, {
+        position: "fixed",
+        bottom: "30px",
+        right: "30px",
+        background: "#d97706", // Chuyển qua màu cam cho nổi
+        color: "#fff",
+        padding: "12px 20px",
+        borderRadius: "10px",
+        opacity: "0",
+        transition: "0.3s ease-in-out",
+        zIndex: "9999",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        fontWeight: "bold",
+        fontFamily: "'Inter', sans-serif"
+    });
 
     document.body.appendChild(toast);
 
-    setTimeout(() => {
-        toast.style.opacity = "1";
-    }, 100);
+    setTimeout(() => { toast.style.opacity = "1"; }, 100);
 
     setTimeout(() => {
         toast.style.opacity = "0";
         setTimeout(() => toast.remove(), 300);
-    }, 2000);
+    }, 2500);
 }

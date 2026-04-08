@@ -116,30 +116,45 @@ function renderAuth() {
 
   if (!authBox) return;
 
+  // Nếu có user trong localStorage thì in ra giao diện có kèm link Profile
   if (user) {
     authBox.innerHTML = `
-      <span>Xin chào, ${user.name}</span>
-      <a href="#" onclick="logout()" class="ml-3 hover:text-amber-500">
+      <span class="flex items-center gap-2 cursor-default">
+          <i class="fa-solid fa-user"></i> Xin chào, ${user.name}
+      </span>
+      <span>|</span>
+      <a href="#" onclick="logout(event)" class="hover:text-amber-500">
         Đăng xuất
       </a>
     `;
   } else {
     authBox.innerHTML = `
-      <a href="/SELLING-GLASSES/public/auth">Đăng nhập</a>
+      <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
       <span>|</span>
-      <a href="/SELLING-GLASSES/public/auth">Đăng ký</a>
+      <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng ký</a>
     `;
   }
 }
 
-function logout() {
+function logout(event) {
+  if(event) event.preventDefault(); // Ngăn chặn trang bị reload khi bấm thẻ <a>
+
   fetch("/SELLING-GLASSES/public/logout", {
+    method: "POST", // Gọi POST vì AuthController có thể yêu cầu, hoặc an toàn hơn
     credentials: "include",
   })
-    .then((res) => res.text())
-    .then(() => {
+    .then((res) => res.json()) // Trong AuthController bạn trả về JSON
+    .then((result) => {
+      // Xóa dữ liệu local
       localStorage.removeItem("user");
-      window.location.href = "/SELLING-GLASSES/public/home";
+      // Chuyển hướng theo Backend báo về (hoặc tự về home)
+      window.location.href = result.redirect || "/SELLING-GLASSES/public/home";
+    })
+    .catch((err) => {
+        console.error("Lỗi đăng xuất:", err);
+        // Nếu lỗi mạng vẫn ép xóa local và về home
+        localStorage.removeItem("user");
+        window.location.href = "/SELLING-GLASSES/public/home";
     });
 }
 
