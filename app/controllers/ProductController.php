@@ -8,6 +8,13 @@ class ProductController {
         $this->productService = new ProductServices();
     }
 
+    // Hàm hỗ trợ trả về JSON chuẩn cho Frontend
+    private function sendResponse($data) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     // ================================
     // QUẢN LÝ DANH MỤC (CATEGORY)
     // ================================
@@ -15,94 +22,86 @@ class ProductController {
     // Lấy toàn bộ danh mục
     public function getAllCategories() {
         $result = $this->productService->getAllCategories();
-        echo json_encode($result);
+        $this->sendResponse($result);
     }
 
-    // Thêm danh mục mới
     public function addCategory() {
-        $name = isset($_GET['name']) ? $_GET['name'] : 'Danh mục mới ' . time();
-        $data = ['name' => $name];
+        $data = ['name' => $_POST['name'] ?? '']; 
         $result = $this->productService->addCategory($data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        $this->sendResponse($result);
     }
 
-    // Cập nhật danh mục
     public function updateCategory($id) {
-        $name = isset($_GET['name']) ? $_GET['name'] : 'Tên cập nhật ' . time();
-        $data = ['name' => $name];
+        $data = ['name' => $_POST['name'] ?? ''];
         $result = $this->productService->editCategory($id, $data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        $this->sendResponse($result);
     }
 
-    // Xóa danh mục
     public function deleteCategory($id) {
         $result = $this->productService->deleteCategory($id);
-        echo json_encode($result);
+        $this->sendResponse($result);
     }
 
     // ================================
     // QUẢN LÝ SẢN PHẨM (PRODUCT)
     // ================================
 
-    // Thêm sản phẩm mới
     public function addProduct() {
+        // Thu thập dữ liệu từ FormData (bao gồm cả mảng variants)
         $data = [
-        'name'        => isset($_GET['name']) ? $_GET['name'] : 'Sản phẩm mới ' . time(),
-        'description' => isset($_GET['desc']) ? $_GET['desc'] : 'Mô tả mặc định',
-        'categoryId'  => isset($_GET['catId']) ? $_GET['catId'] : 1,
-        'imagePath'   => isset($_GET['img']) ? $_GET['img'] : 'default.jpg',
-        'staffId'     => isset($_GET['staffId']) ? $_GET['staffId'] : 1
+            'name'        => $_POST['name'] ?? '',
+            'description' => $_POST['description'] ?? '', 
+            'categoryId'  => $_POST['categoryId'] ?? 1,
+            'staffId'     => $_POST['staffId'] ?? 1,
+            'variants'    => $_POST['variants'] ?? [] 
         ];
-        $result = $this->productService->addProduct($data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+
+        // Truyền $_FILES để Service xử lý upload ảnh
+        $result = $this->productService->addFullProductAndVariants($data, $_FILES);
+        $this->sendResponse($result);
     }
 
-    // Chỉnh sửa sản phẩm
     public function updateProduct($id) {
         $data = [
-            'name'        => isset($_GET['name']) ? $_GET['name'] : 'Tên SP cập nhật',
-            'description' => isset($_GET['desc']) ? $_GET['desc'] : 'Mô tả cập nhật',
-            'categoryId'  => isset($_GET['catId']) ? $_GET['catId'] : 1,
-            'imagePath'   => isset($_GET['img']) ? $_GET['img'] : 'updated.jpg',
-            'staffId'     => isset($_GET['staffId']) ? $_GET['staffId'] : 1
+            'name'        => $_POST['name'] ?? '',
+            'description' => $_POST['description'] ?? '',
+            'categoryId'  => $_POST['categoryId'] ?? 1,
+            'imagePath'   => $_POST['imagePath'] ?? null
         ];
         $result = $this->productService->editProduct($id, $data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        $this->sendResponse($result);
     }
 
-    // Xóa sản phẩm
     public function deleteProduct($id) {
         $result = $this->productService->deleteProduct($id);
-        echo json_encode($result);
+        $this->sendResponse($result);
     }
 
     // ================================
-    // QUẢN LÝ BIẾN THỂ SẢN PHẨM 
+    // QUẢN LÝ BIẾN THỂ (VARIANT)
     // ================================
 
-    // Thêm màu sắc, size, giá cho sản phẩm
     public function addVariant() {
         $data = [
-            'productId' => isset($_GET['prodId']) ? $_GET['prodId'] : 1,
-            'color'     => isset($_GET['color']) ? $_GET['color'] : 'Đen',
-            'size'      => isset($_GET['size']) ? $_GET['size'] : 'M',
-            'price'     => isset($_GET['price']) ? $_GET['price'] : 0,
-            'stock'     => isset($_GET['stock']) ? $_GET['stock'] : 0
+            'productId' => $_POST['prodId'] ?? 0,
+            'color'     => $_POST['color'] ?? '',
+            'size'      => $_POST['size'] ?? '',
+            'price'     => $_POST['price'] ?? 0,
+            'stock'     => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->addVariant($data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        $this->sendResponse($result);
     }
 
-    // Cập nhật thông tin biến thể
     public function updateVariant($variantId) {
         $data = [
-            'color' => isset($_GET['color']) ? $_GET['color'] : 'Màu mới',
-            'size'  => isset($_GET['size']) ? $_GET['size'] : 'L',
-            'price' => isset($_GET['price']) ? $_GET['price'] : 0,
-            'stock' => isset($_GET['stock']) ? $_GET['stock'] : 0
+            'color' => $_POST['color'] ?? '',
+            'size'  => $_POST['size'] ?? '',
+            'price' => $_POST['price'] ?? 0,
+            'stock' => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->updateVariant($variantId, $data);
-        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        $this->sendResponse($result);
     }
 
     // ================================
@@ -112,13 +111,27 @@ class ProductController {
     // Hiển thị danh sách sản phẩm đầy đủ
     public function index() {
         $result = $this->productService->getAllProductsWithDetails();
-        echo json_encode($result);
+        $this->sendResponse($result);
     }
 
-    // Hiển thị chi tiết 1 sản phẩm cụ thể
+    // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
-        $result = $this->productService->getProductDetail($id);
-        echo json_encode($result);
+    // 1. Xóa bỏ mọi ký tự lạ hoặc khoảng trắng thừa ở đầu file PHP nếu có
+    
+    // 2. Kiểm tra ID
+    if (!$id || !is_numeric($id)) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+        exit;
     }
-}
 
+    // 3. Gọi Service (Hãy chắc chắn tên hàm trong Service là getProductDetail)
+    // Nếu em đổi tên hàm ở Service thì ở đây cũng phải đổi theo nhé
+    $result = $this->productService->getProductDetail($id);
+    
+    // 4. Trả về JSON
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+}

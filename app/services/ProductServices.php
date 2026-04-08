@@ -41,13 +41,8 @@ class ProductServices {
     // CRUD SẢN PHẨM (Product)
     // ===============================
     public function addProduct($data) {
-        $productId = $this->productModel->create([
-            'name' => $data['name'],
-            'description' => $data['description'],
-            'categoryId' => $data['categoryId'],
-            'imagePath' => $data['imagePath'] ?? null,
-            'staffId' => $data['staffId']
-        ]);
+        // Đồng bộ: Gọi trực tiếp hàm addProduct của Model
+        $productId = $this->productModel->addProduct($data);
         return $productId ? ['success' => true, 'productId' => $productId] : ['success' => false];
     }
 
@@ -62,8 +57,8 @@ class ProductServices {
     }
 
     public function deleteProduct($id) {
-        $this->variantModel->delete($id, "productId"); 
-        $res = $this->productModel->delete($id, "productId");
+        // Đồng bộ: Gọi hàm xóa Transaction trong Model
+        $res = $this->productModel->deleteProductComplete($id);
         return $res ? ['success' => true] : ['success' => false];
     }
 
@@ -71,13 +66,8 @@ class ProductServices {
     // QUẢN LÝ BIẾN THỂ SẢN PHẨM
     // ===============================
     public function addVariant($data) {
-        $res = $this->variantModel->create([
-            'productId' => $data['productId'],
-            'color' => $data['color'],
-            'size' => $data['size'],
-            'price' => $data['price'],
-            'stock' => $data['stock']
-        ]);
+        // Đồng bộ: Gọi hàm createVariant của Model
+        $res = $this->productModel->createVariant($data);
         return $res ? ['success' => true] : ['success' => false];
     }
 
@@ -94,38 +84,83 @@ class ProductServices {
     // ================================
     // HIỂN THỊ DANH SÁCH SẢN PHẨM
     // ================================
-    
-    // API: get product list
     public function getAllProductsWithDetails() {
-        $products = $this->productModel->getAllProducts();
-        $result = [];
-        foreach ($products as $product) {
-            $variants = $this->variantModel->getVariantsByProductId($product->productId);
-            $category = $this->categoryModel->findCategory($product->categoryId);
-            $result[] = [
-                'product' => $product,
-                'category_name' => $category ? $category->name : 'N/A',
-                'variants' => $variants
-            ];
-        }
-        return ['success' => true, 'data' => $result];
+        $data = $this->productModel->getAllProductsWithVariants(); 
+        return ['success' => true, 'data' => $data];
     }
 
-    // API: get product detail
+    // ProductServices.php
     public function getProductDetail($id) {
         $product = $this->productModel->findProduct($id);
-        if (!$product) return ['success' => false, 'message' => 'San pham khong ton tai'];
+        if (!$product) return ['success' => false, 'message' => 'Sản phẩm không tồn tại'];
 
         $variants = $this->variantModel->getVariantsByProductId($id);
+        // Đảm bảo variants luôn là mảng để Frontend không bị crash
+        if (!$variants) $variants = []; 
+
         $category = $this->categoryModel->findCategory($product->categoryId);
 
         return [
             'success' => true,
             'data' => [
-                'product' => $product,
-                'category' => $category,
-                'variants' => $variants
+                'productId'   => $product->productId,
+                'name'        => $product->name,
+                'description' => $product->description,
+                'imagePath'   => $product->imagePath,
+                'categoryName'=> $category ? $category->name : 'Mắt kính',
+                'variants'    => $variants
             ]
         ];
     }
-}
+
+    // Hàm "Tổng lực": Xử lý Upload Ảnh + Lưu Sản phẩm + Lưu Biến thể
+    public function addFullProductAndVariants($postData, $fileData) {
+        // 1. Xử lý Upload ảnh
+        $imageName = null; 
+        if (isset($fileData['image']) && $fileData['image']['error'] === 0) {
+            $ext = strtolower(pathinfo($fileData['image']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (in_array($ext, $allowed)) {
+                $imageName = "glass_" . time() . "_" . uniqid() . "." . $ext;
+                $targetDir = __DIR__ . "/../../public/assets/images/products/";
+                
+                if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
+
+                $targetFile = $targetDir . $imageName;
+                if (!move_uploaded_file($fileData['image']['tmp_name'], $targetFile)) {
+                    $imageName = null; 
+                }
+            }
+        }
+
+        // 2. Lưu sản phẩm chính
+        $postData['imagePath'] = $imageName;
+        $postData['staffId'] = $postData['staffId'] ?? 1;
+        
+        $resProduct = $this->addProduct($postData);
+
+        if ($resProduct['success']) {
+            $newProductId = $resProduct['productId'];
+
+            // 3. Xử lý danh sách biến thể
+            if (!empty($postData['variants']) && is_array($postData['variants'])) {
+                foreach ($postData['variants'] as $variantString) {
+                    $parts = explode('|', $variantString);
+                    if (count($parts) === 4) {
+                        $this->addVariant([
+                            'productId' => $newProductId,
+                            'color'     => trim($parts[0]),
+                            'size'      => trim($parts[1]),
+                            'price'     => (float)preg_replace('/[^0-9.]/', '', $parts[2]), 
+                            'stock'     => (int)$parts[3]
+                        ]);
+                    }
+                }
+            }
+            return ['success' => true, 'message' => 'Thêm sản phẩm thành công!'];
+        }
+
+        return ['success' => false, 'message' => 'Lỗi: Không thể tạo sản phẩm.'];
+    } 
+} 
