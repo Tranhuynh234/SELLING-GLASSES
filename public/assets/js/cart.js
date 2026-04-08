@@ -1,82 +1,31 @@
-document.addEventListener("DOMContentLoaded", () => {
+//document.addEventListener("DOMContentLoaded", () => {
+//   let buttons = document.querySelectorAll("button");
+//    buttons.forEach((btn, index) => {
+ //       if (btn.innerText.includes("Thêm vào giỏ")) {
+   //         // gán tạm variantId theo index
+     //       btn.onclick = () => addToCart(index + 1);
+       // }
+    //});
 
-    let buttons = document.querySelectorAll("button");
-
-    buttons.forEach((btn, index) => {
-
-        if (btn.innerText.includes("Thêm vào giỏ")) {
-
-            // gán tạm variantId theo index
-            btn.onclick = () => addToCart(index + 1);
-        }
-    });
-
-});
+//});
 document.addEventListener("DOMContentLoaded", function () {
     loadCart();
 });
 
 
 async function loadCart() {
-
     try {
-        let res = await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=getCart", {
-            credentials: "include" 
-        });
-
-        let data = await res.json();
-
-        console.log("DATA:", data); 
-
-        let cartTable = document.getElementById("cart-items");
-        if (!cartTable) return;
-
-        let subtotal = 0;
-        cartTable.innerHTML = "";
-
-        data.forEach(item => {
-
-            let total = item.price * item.quantity;
-            subtotal += total;
-
-            let row = `
-            <tr>
-                <td>${item.name}</td>
-                <td>Kính</td>
-                <td>${Number(item.price).toLocaleString()}đ</td>
-
-                <td>
-                    <button onclick="decreaseQuantity(${item.cartItemId}, ${item.quantity})">-</button>
-                    ${item.quantity}
-                    <button onclick="increaseQuantity(${item.cartItemId}, ${item.quantity})">+</button>
-                </td>
-
-                <td>${total.toLocaleString()}đ</td>
-
-                <td>
-                    <button onclick="removeItem(${item.cartItemId})">Xóa</button>
-                </td>
-            </tr>
-            `;
-
-            cartTable.innerHTML += row;
-        });
-
-        let subEl = document.getElementById("subtotal");
-        let totalEl = document.getElementById("total");
-
-        if (subEl) subEl.innerText = subtotal.toLocaleString() + "đ";
-
-        let tax = subtotal * 0.1;
-        let totalPrice = subtotal + tax + 30000;
-
-        if (totalEl) totalEl.innerText = totalPrice.toLocaleString() + "đ";
-
-    } catch (err) {
-        console.error("Lỗi loadCart:", err);
+        // Sửa đường dẫn từ /cart/getCart thành index.php?url=get-cart
+        const response = await fetch('index.php?url=get-cart'); 
+        const data = await response.json();
+        
+        if (data && !data.error) {
+            updateCartCount(data);
+        }
+    } catch (error) {
+        console.error("Lỗi loadCart:", error);
     }
 }
-
 
 async function increaseQuantity(id, currentQty) {
 
@@ -128,20 +77,46 @@ async function removeItem(id) {
 
 
 
-window.addToCart = async function(variantId) {
-
+window.addToCart = async function(productId) {
     let formData = new FormData();
-    formData.append("variantId", variantId);
+    formData.append("variantId", productId);
     formData.append("quantity", 1);
 
-    await fetch("/SELLING-GLASSES/app/controllers/cartController.php?action=add", {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-    });
+    try {
+        // Sửa đường dẫn thành index.php?url=add-to-cart
+        const response = await fetch('index.php?url=add-to-cart', {
+            method: 'POST',
+            body: formData
+        });
 
-    alert("Đã thêm vào giỏ hàng");
+        const data = await response.json();
+        console.log("Dữ liệu sau khi thêm:", data);
 
-  
-    loadCart();
+        if (data.error) {
+            alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+            return;
+        }
+
+        alert("Đã thêm vào giỏ hàng thành công!");
+        
+        // Sau khi thêm xong, gọi hàm cập nhật lại con số trên Header
+        updateCartCount(data); 
+
+    } catch (error) {
+        console.error("Lỗi khi thêm vào giỏ:", error);
+    }
 };
+
+// --- CẬP NHẬT SÓ LƯỢNG SẢN PHẨM TRONG GIỎ HÀNG ---
+function updateCartCount(data) {
+    const badge = document.getElementById("cart-count");
+    if (!badge) return;
+
+    if (Array.isArray(data) && data.length > 0) {
+        // Chỉ cần dùng reduce để tính tổng quantity của tất cả các dòng
+        const totalQty = data.reduce((total, item) => total + parseInt(item.quantity), 0);
+        badge.innerText = totalQty;
+    } else {
+        badge.innerText = 0;
+    }
+}

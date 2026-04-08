@@ -26,7 +26,12 @@ class ProductModel extends BaseModel {
     }
    public function getProducts($limit, $offset) {
     $sql = "SELECT * FROM product LIMIT $limit OFFSET $offset";
-    return $this->queryAll($sql);
+    $rows = $this->queryAll($sql); // Lấy mảng dữ liệu thô
+    $products = [];
+    foreach ($rows as $row) {
+        $products[] = new Product($row); // Chuyển từng mảng dữ liệu thành đối tượng Product
+    }
+    return $products;   
 }
 
    public function countProducts() {

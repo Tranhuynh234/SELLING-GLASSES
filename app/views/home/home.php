@@ -41,8 +41,7 @@
                 <button><i class="fas fa-user"></i></button>
                 <button class="relative">
                     <i class="fas fa-shopping-cart"></i>
-                    <span
-                        class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
                 </button>
             </div>
         </header>
@@ -90,7 +89,7 @@
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                     <img src="/SELLING-GLASSES/public/assets/images/gongnu.jpg" alt="Gọng Nữ" class="w-full h-full object-cover rounded-[32px]">
                 </div>
-                <p class="font-bold text-amber-700">Gọng Nữ</p>
+                <p class="font-bold text-stone-600">Gọng Nữ</p>
             </div>
             <div class="group cursor-pointer">
                 <div
@@ -132,72 +131,33 @@
             </a>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
-                <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span class="absolute top-4 left-4 bg-black text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Best Seller</span>
-                    <img src="/SELLING-GLASSES/public/assets/images/titanclassic.jpg" alt="Gọng Titan Classic" class="w-full h-full object-cover rounded-[32px]">
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg mb-2 text-stone-800">
-                        Gọng Titan Classic
-                    </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">250.000đ</p>
-                    <button
-                        class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
-                        Thêm vào giỏ
-                    </button>
-                </div>
-            </div>
-            <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
-                <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span class="absolute top-4 left-4 bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">-20%</span>
-                    <img src="/SELLING-GLASSES/public/assets/images/nhuadeotron.jpg" alt="Gọng Nhựa Dẻo Tròn" class="w-full h-full object-cover rounded-[32px]">
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg mb-2 text-stone-800">
-                        Gọng Nhựa Dẻo Tròn
-                    </h3>
-                    <div class="flex space-x-3 items-center mb-4">
-                        <p class="text-amber-700 font-bold text-xl">200.000đ</p>
-                        <p class="text-stone-400 line-through text-sm">250.000đ</p>
+            <?php if (!empty($products)): ?>
+                <?php foreach ($products as $product): ?>
+                    <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
+                        <div class="h-72 bg-stone-100 relative flex items-center justify-center">
+                            <?php if (isset($product->is_best_seller) && $product->is_best_seller): ?>
+                                <span class="absolute top-4 left-4 bg-black text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Best Seller</span>
+                            <?php endif; ?>
+
+                            <img src="/SELLING-GLASSES/public/assets/images/<?php echo $product->imagePath; ?>"
+                                alt="<?php echo $product->name; ?>" class="w-full h-full object-cover rounded-[32px]">
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-bold text-lg mb-2 text-stone-800">
+                                <?php echo $product->name; ?>
+                            </h3>
+                            <p class="text-amber-700 font-bold text-xl mb-4">
+                                <?php echo number_format($product->price ?? 0, 0, ',', '.'); ?>đ</p>
+                            <button onclick="addToCart(<?php echo $product->productId; ?>)"
+                                class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
+                                Thêm vào giỏ
+                            </button>
+                        </div>
                     </div>
-                    <button
-                        class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
-                        Thêm vào giỏ
-                    </button>
-                </div>
-            </div>
-            <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
-                <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <img src="/SELLING-GLASSES/public/assets/images/matmeonu.jpg" alt="Gọng Mắt Mèo Nữ" class="w-full h-full object-cover rounded-[32px]">
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg mb-2 text-stone-800">
-                        Gọng Mắt Mèo Nữ
-                    </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">220.000đ</p>
-                    <button
-                        class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
-                        Thêm vào giỏ
-                    </button>
-                </div>
-            </div>
-            <div class="bg-white rounded-[32px] overflow-hidden border border-stone-100 group shadow-sm">
-                <div class="h-72 bg-stone-100 relative flex items-center justify-center">
-                    <span class="absolute top-4 left-4 bg-blue-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">New</span>
-                    <img src="/SELLING-GLASSES/public/assets/images/kimloaimanh.jpg" alt="Gọng Kim Loại Mảnh" class="w-full h-full object-cover rounded-[32px]">
-                </div>
-                <div class="p-6">
-                    <h3 class="font-bold text-lg mb-2 text-stone-800">
-                        Gọng Kim Loại Mảnh
-                    </h3>
-                    <p class="text-amber-700 font-bold text-xl mb-4">320.000đ</p>
-                    <button
-                        class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
-                        Thêm vào giỏ
-                    </button>
-                </div>
-            </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                    <p class="col-span-4 text-center">Đang cập nhật sản phẩm...</p>
+            <?php endif; ?> 
         </div>
     </section>
 
@@ -541,7 +501,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="chat-anchor"></div>
         </div>
 
@@ -563,6 +523,7 @@
 
     <script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
 </body>
 
 </html>
