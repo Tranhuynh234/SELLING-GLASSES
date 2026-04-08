@@ -8,6 +8,7 @@ require_once "../app/controllers/PromotionController.php";
 require_once "../app/controllers/StaffController.php";
 require_once "../app/controllers/CartController.php";
 require_once "../app/controllers/HomeController.php";
+require_once __DIR__ . "/../app/controllers/UserController.php";
 
 // tạo controller
 //Yen them
@@ -18,6 +19,7 @@ $promotionController = new PromotionController();
 $staffController = new StaffController();
 $cartController = new CartController();
 $homeController = new HomeController();
+$userController = new UserController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -55,8 +57,45 @@ switch ($url) {
     case "staff-save":
         $staffController->save();
         exit();
+   case "manager":
+        AuthMiddleware::handle(['staff'], ['manager']);
+        require_once "../app/views/Dashboard/manager/mana.php";
+        exit();
+
+    case "sales":
+        AuthMiddleware::handle(['staff'], ['sales']);
+        require_once "../app/views/Dashboard/sale/sale.php";
+        exit();
+
+    case "operation":
+        AuthMiddleware::handle(['staff'], ['operation']);
+        require_once "../app/views/ops/ops.php";
+        exit();
+    case "register":
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $authController->register();
+        }
+        exit();
+    case "get-users":
+        AuthMiddleware::handle(['staff'], ['manager']);
+        $userController->getAllUsers();
+        exit();
+    case "search-users":
+        // AuthMiddleware::handle(['staff'], ['manager']);
+        $userController->searchUsers();
+        exit();
+    case "update-user":
+        AuthMiddleware::handle(['staff'], ['manager']);
+       $userController->updateUser();
+        exit();
+     case "create-user":
+        AuthMiddleware::handle(['staff'], ['manager']);
+        $userController->createUser();
+        exit();
+
     case "delete-user":
-        $staffController->delete();
+        AuthMiddleware::handle(['staff'], ['manager']);
+        $userController->deleteUser();
         exit();
 
     // --- PHẦN QUẢN LÝ CỦA YẾN ---

@@ -28,31 +28,43 @@ class AuthController {
     // =========================
     // LOGIN
     // =========================
-    public function login() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+   public function login() {
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            header("Content-Type: application/json");
-            header("Content-Type: application/json");
-            $email = $_POST['email'] ?? '';
-            $password = $_POST['password'] ?? '';
-
-            $result = $this->userService->login($email, $password);
-
-            if ($result['success']) {
-                $_SESSION['user'] = $result['data'];
-                $result['redirect'] = "/SELLING-GLASSES/public/home";
-            }
-
-            echo json_encode($result);
-            exit; 
-        }
-
-        // 👉 CHỈ GET mới load view
-        require_once __DIR__ . "/../views/auth/login.php";
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        header("Content-Type: application/json");
+
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        $result = $this->userService->login($email, $password);
+
+        if ($result['success']) {
+    $_SESSION['user'] = $result['data'];
+
+    $position = $result['data']['position'];
+
+    if ($position === 'manager') {
+        $result['redirect'] = "/SELLING-GLASSES/public/manager";
+    } elseif ($position === 'operation') {
+        $result['redirect'] = "/SELLING-GLASSES/public/operation";
+    } elseif ($position === 'sales') {
+        $result['redirect'] = "/SELLING-GLASSES/public/sales";
+    } else {
+        $result['redirect'] = "/SELLING-GLASSES/public/home";
+    }
+}
+        echo json_encode($result);
+        exit; 
+    }
+
+    // CHỈ GET mới load view
+    require_once __DIR__ . "/../views/auth/login.php";
+}
 
     // =========================
     // LOGOUT
@@ -129,6 +141,7 @@ class AuthController {
     public function showLogin() {
         require_once __DIR__ . "/../views/auth/auth.php";
     }
+    
 
 } 
 ?>

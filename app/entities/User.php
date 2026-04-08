@@ -58,5 +58,14 @@ class User {
     public function setRole($role) {
         $this->role = $role;
     }
+      public function toArray() {
+    return [
+        "userId" => $this->userId,
+        "name" => $this->name,
+        "email" => $this->email,
+        "phone" => $this->phone,
+        "role" => $this->role
+    ];
+}
 }
 ?>

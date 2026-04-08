@@ -1,34 +1,37 @@
 <?php
 
 class AuthMiddleware {
+public static function handle($roles = [], $positions = []) {
 
-    public static function handle($roles = []) {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+    if (!isset($_SESSION['user'])) {
+        self::jsonResponse(401, "Unauthorized", [
+            "redirect" => "/SELLING-GLASSES/public/auth"
+        ]);
+    }
 
-        // chưa login
-        if (!isset($_SESSION['user'])) {
-            self::jsonResponse(401, "Unauthorized", [
-                "redirect" => "/SELLING-GLASSES/public/login"
-            ]);
-        }
+    $user = $_SESSION['user'];
 
-        $user = $_SESSION['user'];
-
-        // ✔ chỉ cần login
-        if (empty($roles)) {
-            return $user;
-        }
-
-        // không có quyền
-        if (!in_array($user['role'], $roles)) {
-            self::jsonResponse(403, "Access denied");
-        }
-
+    // ✔ chỉ cần login
+    if (empty($roles) && empty($positions)) {
         return $user;
     }
+
+    // check role
+    if (!empty($roles) && !in_array($user['role'], $roles)) {
+        self::jsonResponse(403, "Không có quyền (role)");
+    }
+
+    // check position
+    if (!empty($positions) && !in_array($user['position'], $positions)) {
+        self::jsonResponse(403, "Không có quyền - position");
+    }
+
+    return $user;
+}
 
     //  trả JSON
     private static function jsonResponse($status, $message, $extra = []) {

@@ -86,40 +86,48 @@ public function register($data) {
     // =========================
     // LOGIN
     // =========================
-    public function login($email, $password) {
-          $email = trim($email ?? '');
-    $password = trim($password ?? '');
+  public function login($email, $password) {
+        $email = trim($email ?? '');
+        $password = trim($password ?? '');
 
 
-   if (!$email) {
-    return $this->response(false, "Vui lòng nhập email");
-}
-
-if (!$password) {
-    return $this->response(false, "Vui lòng nhập mật khẩu");
-} 
-        if (strpos($email, ' ') !== false) {
-     return $this->response(false, "Email không được chứa khoảng trắng");
-}
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return $this->response(false, "Email không hợp lệ");
+    if (!$email) {
+        return $this->response(false, "Vui lòng nhập email");
     }
-        $user = $this->userModel->findByEmail($email);
 
-        if (!$user) {
-            return $this->response(false, "User not found");
+    if (!$password) {
+        return $this->response(false, "Vui lòng nhập mật khẩu");
+    } 
+            if (strpos($email, ' ') !== false) {
+        return $this->response(false, "Email không được chứa khoảng trắng");
+    }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response(false, "Email không hợp lệ");
         }
+            $user = $this->userModel->findByEmail($email);
 
-        if (!password_verify($password, $user->getPassword())) {
-            return $this->response(false, "Wrong password");
-        }
+            if (!$user) {
+                return $this->response(false, "User not found");
+            }
 
-        return $this->response(true, "Login success", [
-    "userId" => $user->getUserId(),
-    "name" => $user->getName(),
-    "email" => $user->getEmail(),
-    "role" => $user->getRole(),
-]);
+            if (!password_verify($password, $user->getPassword())) {
+                return $this->response(false, "Wrong password");
+            }
+            // lấy positon từ table staff 
+            $staff = $this->staffModel->findByUserId($user->getUserId());
+
+            if ($staff && $staff->getPosition()) {
+                $position = strtolower($staff->getPosition());
+            } else {
+                $position = 'customer';
+            }
+                    return $this->response(true, "Login success", [
+                "userId" => $user->getUserId(),
+                "name" => $user->getName(),
+                "email" => $user->getEmail(),
+                "role" => $user->getRole(),
+                "position" => $position,
+            ]);
     }
 
     // =========================
@@ -133,18 +141,75 @@ if (!$password) {
     // UPDATE USER 
     // =========================
     public function updateUser($id, $data) {
-        // nếu có password thì hash lại
-        if (isset($data['password'])) {
-            $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-        }
 
-        return $this->userModel->update($id, $data, "userId");
+    // Check ID
+    if (!$id) {
+        return [
+            "success" => false,
+            "message" => "Thiếu userId"
+        ];
     }
 
+    //  có email → validate
+    if (isset($data['email'])) {
+
+        $data['email'] = trim(strtolower($data['email']));
+
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            return [
+                "success" => false,
+                "message" => "Email không hợp lệ"
+            ];
+        }
+    }
+
+    //  có password → hash
+    if (isset($data['password']) && $data['password'] !== '') {
+        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+    } else {
+        unset($data['password']); // không update password rỗng
+    }
+
+    //  data rỗng → không update
+    if (empty($data)) {
+        return [
+            "success" => false,
+            "message" => "Không có dữ liệu để cập nhật"
+        ];
+    }
+
+    try {
+        $result = $this->userModel->update($id, $data, "userId");
+
+        return [
+            "success" => $result > 0,
+            "message" => $result > 0
+                ? "Cập nhật thành công"
+                : "Không có thay đổi"
+        ];
+
+    } catch (PDOException $e) {
+        if ($e->getCode() == 23000) {
+            return [
+                "success" => false,
+                "message" => "Email đã tồn tại"
+            ];
+        }
+        throw $e;
+    }
+}
     // =========================
     // DELETE USER
     // ========================
    public function deleteUser($id) {
+      $user = $this->userModel->findUser($id);
+
+    if (!$user) {
+        return [
+            "success" => false,
+            "message" => "User không tồn tại"
+        ];
+    }
 
     try {
         $this->userModel->beginTransaction();
@@ -229,6 +294,143 @@ return [
     }
 public function getUserByEmail($email) {
     return $this->userModel->findByEmail($email);
+}
+// lấy tất cả user
+public function getAllUsers() {
+    $users = $this->userModel->getAllUsers();
+
+    $result = [];
+
+    foreach ($users as $user) {
+
+        //  lấy staff theo userId
+        $staff = $this->staffModel->findByUserId($user->getUserId());
+
+        $position = null;
+
+        if ($staff && $staff->getPosition()) {
+            $position = $staff->getPosition();
+        }
+
+        // convert + thêm position
+        $data = $user->toArray();
+        $data['position'] = $position;
+
+        $result[] = $data;
+    }
+
+    return [
+        "success" => true,
+        "message" => "Lấy danh sách user thành công",
+        "data" => $result
+    ];
+}
+public function searchUsers($keyword) {
+
+    $rows = $this->userModel->searchUsers($keyword);
+
+    $result = [];
+
+    foreach ($rows as $row) {
+
+        $user = new User($row);
+
+        $staff = $this->staffModel->findByUserId($user->getUserId());
+
+        $position = null;
+        if ($staff && $staff->getPosition()) {
+            $position = $staff->getPosition();
+        }
+
+        $data = $user->toArray();
+        $data['position'] = $position;
+
+        $result[] = $data;
+    }
+
+    return [
+        "success" => true,
+        "message" => "Search user success",
+        "data" => $result
+    ];
+}
+public function createUserByAdmin($data)
+{
+ 
+    try {
+        $this->userModel->beginTransaction();
+        if (empty($data['name'])) {
+        return [
+            "success" => false,
+            "message" => "Thiếu tên"
+        ];
+    }
+    if (empty($data['email'])) {
+        return [
+            "success" => false,
+            "message" => "Thiếu email"
+        ];
+    }
+
+    if (empty($data['password'])) {
+        return [
+            "success" => false,
+            "message" => "Thiếu mật khẩu"
+        ];
+    }
+    if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        return [
+            "success" => false,
+            "message" => "Email không hợp lệ"
+        ];
+    }
+
+        // 1. check trùng email trước 
+        $existing = $this->userModel->findByEmail($data['email']);
+        if ($existing) {
+            $this->userModel->rollBack();
+            return [
+                "success" => false,
+                "message" => "Email đã tồn tại"
+            ];
+        }
+
+        // 2. tạo user
+        $userId = $this->userModel->create([
+            "name" => $data['name'],
+            "email" => $data['email'],
+            "password" => password_hash($data['password'], PASSWORD_BCRYPT),
+            "phone" => $data['phone'] ?? null,
+            "role" => $data['role'] ?? "customer"
+        ]);
+
+        // 3. nếu là customer thì tạo thêm
+        if (($data['role'] ?? 'customer') === 'customer') {
+            $this->customerModel->createCustomer([
+                "userId" => $userId,
+                "address" => $data['address'] ?? null
+            ]);
+        }
+
+        // 4. commit
+        $this->userModel->commit();
+
+        return [
+            "success" => true,
+            "message" => "Create user success",
+            "userId" => $userId
+        ];
+
+    } catch (Exception $e) {
+
+        // rollback khi lỗi
+        $this->userModel->rollBack();
+
+        return [
+            "success" => false,
+            "message" => $e->getMessage()
+        ];
+    }
 }
 
     // =========================

@@ -26,5 +26,18 @@ class UserModel extends BaseModel {
 
         return $users;
     }
+     public function searchUsers($keyword) {
+    $sql = "SELECT * FROM users 
+            WHERE name LIKE :kw 
+            OR email LIKE :kw 
+            OR phone LIKE :kw";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([
+        ":kw" => "%" . $keyword . "%"
+    ]);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }
 ?>
