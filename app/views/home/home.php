@@ -19,10 +19,18 @@
                 <span> <i class="fa-solid fa-truck text-amber-500"></i> Giao hàng toàn quốc - Miễn phí đơn từ 500k</span>
             </div>
             <div id="auth-box" class="flex space-x-4">
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
-                <span>|</span>
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng ký</a>
-            </div>
+    <?php if (isset($_SESSION['userId'])): ?>
+        <a href="profile.php" class="hover:text-amber-500">
+            <i class="fa-solid fa-user"></i> Tài khoản
+        </a>
+        <span>|</span>
+        <a href="logout.php" class="hover:text-amber-500">Đăng xuất</a>
+    <?php else: ?>
+        <a href="login.php" class="hover:text-amber-500">Đăng nhập</a>
+        <span>|</span>
+        <a href="register.php" class="hover:text-amber-500">Đăng ký</a>
+    <?php endif; ?>
+</div>
         </div>
         <header class="bg-white py-4 px-6 md:px-12 flex justify-between items-center border-b border-stone-100">
             <div class="font-bold text-3xl tracking-tighter">
@@ -38,7 +46,9 @@
             </nav>
             <div class="flex space-x-5 text-xl text-stone-700 items-center">
                 <button><i class="fas fa-search"></i></button>
-                <button><i class="fas fa-user"></i></button>
+                <a href="<?php echo isset($_SESSION['user']) ? '/SELLING-GLASSES/public/profile' : '/SELLING-GLASSES/public/auth'; ?>" class="hover:text-amber-600 transition">
+        <i class="fas fa-user"></i>
+    </a>
                 <button class="relative">
                     <i class="fas fa-shopping-cart"></i>
                     <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>

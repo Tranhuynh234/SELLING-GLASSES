@@ -23,7 +23,6 @@ body {
     margin: 0;
 }
 
-/* LAYOUT GIỐNG PROFILE CŨ */
 .layout {
     display: flex;
     min-height: 100vh;
@@ -49,6 +48,8 @@ body {
     margin-bottom: 10px;
     transition: var(--transition);
     color: #aaa;
+    display: block;
+    text-decoration: none;
 }
 
 .menu-item:hover {
@@ -126,21 +127,12 @@ button:hover {
     color: white;
 }
 
-/* INPUT */
-input {
-    margin-top: 5px;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #e7e5e4;
-}
-
-/* SELECT */
+/* SELECT & SWITCH */
 select {
     padding: 10px;
     border-radius: 10px;
 }
 
-/* SWITCH */
 .switch span {
     background: #e7e5e4;
 }
@@ -171,4 +163,98 @@ select {
 
 .tab.active {
     display: block;
+}
+
+
+.hidden {
+    display: none !important;
+}
+
+/* Hiệu ứng mượt mà (fade) cho chữ và ô nhập */
+#nameText, #emailText, #phoneText, #addressText, 
+#nameInput, #emailInput, #phoneInput, #addressInput {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Căn chỉnh lại khu vực chứa nội dung */
+.row > div {
+    flex: 1; 
+    margin-right: 20px;
+}
+
+.row p {
+    margin: 5px 0 0 0;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.row input {
+    margin-top: 5px;
+    width: 100%;
+    max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--primary-light);
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+    transition: var(--transition);
+}
+
+.row input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
+}
+
+.modal {
+    display: none; 
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 350px;
+    box-shadow: var(--shadow-vip);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-box input {
+    margin: 0;
+    width: auto;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #e7e5e4;
+}
+
+.modal-btn {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-btn .save {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+
+.modal-btn .save:hover {
+    background: var(--primary-light);
 }
