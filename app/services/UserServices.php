@@ -173,53 +173,60 @@ return [
     }
 }
     public function updateProfile($userId, $data) {
-        
+        try {
+            // BẮT ĐẦU TRANSACTION
+            $this->userModel->beginTransaction();
 
-    try {
-        $this->userModel->beginTransaction();
-
-        // 1. Update USER (phone)
-        if (isset($data['phone'])) {
-            $this->userModel->update($userId, [
-                "phone" => $data['phone']
-            ], "userId");
-        }
-
-        // 2. Update CUSTOMER (address)
-        if (isset($data['address'])) {
-
-            $customer = $this->customerModel->findByUserId($userId);
-
-            if ($customer) {
-                // update
-                $this->customerModel->updateCustomer(
-                    $customer->getCustomerId(),
-                    ["address" => $data['address']]
-                );
-            } else {
-                // chưa có thì tạo mới
-                $this->customerModel->createCustomer([
-                    "userId" => $userId,
-                    "address" => $data['address']
-                ]);
+            // 1. Update bảng USER
+            $updateUserData = [];
+            if (isset($data['name'])) {
+                $updateUserData['name'] = $data['name'];
             }
+            if (isset($data['email'])) {
+                $updateUserData['email'] = $data['email'];
+            }
+            if (isset($data['phone'])) {
+                $updateUserData['phone'] = $data['phone'];
+            }
+
+            if (!empty($updateUserData)) {
+                $this->userModel->update($userId, $updateUserData, "userId");
+            }
+
+            // 2. Update bảng CUSTOMER (Riêng cho address)
+            if (isset($data['address'])) {
+                $customer = $this->customerModel->findByUserId($userId);
+
+                if ($customer) {
+                    $this->customerModel->updateCustomer(
+                        $customer->getCustomerId(),
+                        ["address" => $data['address']]
+                    );
+                } else {
+                    // Chưa có data ở bảng customer -> tạo mới
+                    $this->customerModel->createCustomer([
+                        "userId" => $userId,
+                        "address" => $data['address']
+                    ]);
+                }
+            }
+
+            $this->userModel->commit();
+
+            return $this->response(true, "Cập nhật hồ sơ thành công", [
+                "userId" => $userId,
+                "name" => $data['name'] ?? null,
+                "email" => $data['email'] ?? null,
+                "phone" => $data['phone'] ?? null,
+                "address" => $data['address'] ?? null
+            ]);
+
+        } catch (Exception $e) {
+            // CÓ LỖI THÌ ROLLBACK
+            $this->userModel->rollBack();
+            return $this->response(false, "Cập nhật thất bại: " . $e->getMessage());
         }
-
-        $this->userModel->commit();
-
-        return $this->response(true, "Update profile success", [
-    "userId" => $userId,
-    "phone" => $data['phone'] ?? null,
-    "address" => $data['address'] ?? null
-]);
-
-    } catch (Exception $e) {
-
-        $this->userModel->rollBack();
-
-        return $this->response(false, "Update failed");
     }
-}
 public function getUserByEmail($email) {
     return $this->userModel->findByEmail($email);
 }
