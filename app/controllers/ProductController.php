@@ -116,22 +116,28 @@ class ProductController {
 
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
-    // 1. Xóa bỏ mọi ký tự lạ hoặc khoảng trắng thừa ở đầu file PHP nếu có
-    
-    // 2. Kiểm tra ID
+    // 1. Kiểm tra ID hợp lệ
     if (!$id || !is_numeric($id)) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+        if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+            exit;
+        }
+        die("ID không hợp lệ");
+    }
+
+    // 2. Lấy dữ liệu từ Service
+    $result = $this->productService->getProductDetail($id);
+
+    // 3. KIỂM TRA: Nếu là yêu cầu từ file JS (có header Accept: application/json)
+    if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    // 3. Gọi Service (Hãy chắc chắn tên hàm trong Service là getProductDetail)
-    // Nếu em đổi tên hàm ở Service thì ở đây cũng phải đổi theo nhé
-    $result = $this->productService->getProductDetail($id);
-    
-    // 4. Trả về JSON
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($result, JSON_UNESCAPED_UNICODE);
-    exit;
+    // 4. KIỂM TRA: Nếu là người dùng gõ URL trực tiếp (trình duyệt đòi HTML)
+    // Trả về file giao diện .php của bạn
+    include dirname(__DIR__) . '/views/product-detail.php';
 }
 }

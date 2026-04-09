@@ -10,6 +10,87 @@
 </head>
 
 <body>
+    <div id="modalUpdate" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Cập nhật thông tin</h2>
+                <button class="close-btn" onclick="dongModal()">&times;</button>
+            </div>
+
+            <form id="formUpdateUser" class="modal-body">
+                <input type="hidden" id="edit_userId">
+
+                <div class="form-group">
+                    <label>Họ tên</label>
+                    <input type="text" id="edit_name" placeholder="Nhập họ tên...">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="edit_email" placeholder="Nhập email...">
+                </div>
+
+                <div class="form-group">
+                    <label>Số điện thoại</label>
+                    <input type="text" id="edit_phone" placeholder="Nhập số điện thoại...">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="dongModal()">Hủy</button>
+                    <button type="submit" class="btn-save">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div id="userModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-glow"></div>
+            <div class="modal-head">
+                <div class="head-title">
+                    <i class="fas fa-user-plus"></i>
+                    <h3>TẠO TÀI KHOẢN MỚI</h3>
+                </div>
+                <span class="close-modal" onclick="closeUserModal()">&times;</span>
+            </div>
+
+            <div class="modal-body">
+                <div class="input-field">
+                    <label>Họ và tên</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="u_name" placeholder="Nhập họ tên..." />
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Email / Tài khoản</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="u_email" placeholder="example@gmail.com" />
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="u_password" placeholder="Nhập mật khẩu..." />
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="modal-foot">
+                <button class="btn-ghost" onclick="closeUserModal()">
+                    <i class="fas fa-times"></i> Hủy bỏ
+                </button>
+                <button class="btn-confirm" onclick="saveUser()">
+                    <i class="fas fa-user-plus"></i> Thêm người dùng
+                </button>
+            </div>
+        </div>
+    </div>
     <div id="modal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-glow"></div>
@@ -155,6 +236,10 @@
                         <i class="far fa-bell"></i>
                         <span class="dot"></span>
                     </div>
+                    <!-- LOGOUT -->
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-right-from-bracket"></i> Logout
+                    </button>
                 </div>
             </header>
 
@@ -283,9 +368,16 @@
                 <section id="user" class="tab-pane">
                     <div class="pane-header">
                         <h2>Quản lý khách hàng</h2>
-                        <button class="btn-confirm" onclick="openModal('user')">
-                            <i class="fas fa-user-plus"></i> Thêm người dùng
-                        </button>
+                        <div class="header-tools" style="display: flex; gap: 10px;">
+                            <div class="search-box">
+                                <input type="text" id="searchUser" placeholder="Tìm tên hoặc email..."
+                                    onkeyup="handleSearchUser(event)"
+                                    style="padding: 8px 15px; border-radius: 8px; border: 1px solid #ddd; outline: none;">
+                            </div>
+                            <button class="btn-confirm" onclick="openUserModal()">
+                                <i class="fas fa-user-plus"></i> Thêm người dùng
+                            </button>
+                        </div>
                     </div>
                     <div class="table-wrapper glass">
                         <table class="vip-table">
@@ -294,12 +386,16 @@
                                     <th>STT</th>
                                     <th>Họ tên</th>
                                     <th>Liên hệ</th>
+                                    <th>Vai Trò</th>
                                     <th>Hành động</th>
+
                                 </tr>
                             </thead>
                             <tbody id="userTable"></tbody>
                         </table>
                     </div>
+
+                    <div id="pagination" class="pagination-container"></div>
                 </section>
 
                 <section id="combo" class="tab-pane">
@@ -349,6 +445,7 @@
         </main>
     </div>
     <script src="/SELLING-GLASSES/public/assets/js/mana.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/user.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

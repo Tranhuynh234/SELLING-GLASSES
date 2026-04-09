@@ -81,7 +81,7 @@ switch ($url) {
         $userController->getAllUsers();
         exit();
     case "search-users":
-        // AuthMiddleware::handle(['staff'], ['manager']);
+        AuthMiddleware::handle(['staff'], ['manager']);
         $userController->searchUsers();
         exit();
     case "update-user":
