@@ -32,11 +32,14 @@
             </a>
 
             <nav class="hidden lg:flex space-x-8 font-medium text-stone-600">
-                <a href="#danh-muc" onclick="highlightCards('gong')" class="hover:text-amber-700">Gọng kính</a>
-                <a href="#danh-muc" onclick="highlightCards('trong')" class="hover:text-amber-700">Tròng kính</a>
-                <a href="#combo-section" class="hover:text-amber-700">Combo</a>
-                <a href="#" class="hover:text-amber-700">Khuyến mãi</a>
-                <a href="#try-on-section" class="hover:text-amber-700">Try On</a>
+                <a href="/SELLING-GLASSES/public/home#danh-muc" onclick="highlightCards('gong')"
+                    class="hover:text-amber-700">Gọng kính</a>
+                <a href="/SELLING-GLASSES/public/home#danh-muc" onclick="highlightCards('trong')"
+                    class="hover:text-amber-700">Tròng kính</a>
+                <a href="/SELLING-GLASSES/public/get-all-products" class="hover:text-amber-700">Sản phẩm</a>
+                <a href="/SELLING-GLASSES/public/home#combo-section" class="hover:text-amber-700">Combo</a>
+                <a href="/SELLING-GLASSES/public/home#" class="hover:text-amber-700">Khuyến mãi</a>
+                <a href="/SELLING-GLASSES/public/home#try-on-section" class="hover:text-amber-700">Try On</a>
                 <a href="javascript:void(0)" onclick="openChatboxAndConsult()" class="hover:text-amber-700">Tư vấn</a>
             </nav>
 

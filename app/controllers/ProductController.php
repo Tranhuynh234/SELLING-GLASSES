@@ -109,11 +109,31 @@ class ProductController {
     // ================================
 
     // Hiển thị danh sách sản phẩm đầy đủ
-    public function index() {
-        $result = $this->productService->getAllProductsWithDetails();
+public function index() {
+    // 1. Lấy dữ liệu từ Service
+    $result = $this->productService->getAllProductsWithDetails();
+
+    // 2. Kiểm tra nếu là yêu cầu JSON (từ bạn của ông hoặc từ AJAX)
+    // Cách 1: Kiểm tra Header Accept (như hàm detail của ông)
+    // Cách 2: Kiểm tra tham số ?type=json trên URL (dễ test hơn)
+    $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+              || (isset($_GET['type']) && $_GET['type'] === 'json');
+
+    if ($isJson) {
         $this->sendResponse($result);
     }
 
+    // 3. Nếu không phải JSON, nạp dữ liệu vào biến và gọi View
+    // Dựa vào cấu trúc API của ông, sản phẩm nằm trong $result['data']
+    $products = $result['data'] ?? [];
+    
+    // Giả lập phân trang cơ bản nếu cần
+    $currentPage = $_GET['page'] ?? 1;
+    $totalPages = 1; // Service hiện tại của ông chưa trả về pagination nên tạm để 1
+
+    // 4. Gọi file giao diện (đảm bảo đường dẫn đúng)
+    include dirname(__DIR__) . '/views/products/all_products.php';
+}
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
     // 1. Kiểm tra ID hợp lệ

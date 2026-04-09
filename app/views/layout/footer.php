@@ -1,9 +1,10 @@
 <footer class="bg-[#0A0A0A] text-stone-400 py-10 px-6 border-t border-stone-900">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
         <div class="space-y-6">
-            <div class="font-bold text-3xl text-white">
+            <a href="/SELLING-GLASSES/public/home"
+                class="font-bold text-3xl text-white cursor-pointer select-none hover:opacity-80 transition">
                 EYESGLASS<span class="text-amber-600">.</span>
-            </div>
+            </a>
             <p class="text-sm leading-relaxed">
                 Thương hiệu mắt kính hiện đại, mang đến giải pháp thị lực toàn diện
                 kết hợp công nghệ AI. Mua sắm dễ dàng, tận tâm và chuyên nghiệp.
@@ -15,16 +16,20 @@
             </h4>
             <ul class="space-y-4 text-sm">
                 <li>
-                    <a href="#" class="hover:text-white transition">Tất cả sản phẩm</a>
+                    <a href="/SELLING-GLASSES/public/home#danh-muc" class="hover:text-white transition">Tất cả sản
+                        phẩm</a>
                 </li>
                 <li>
-                    <a href="#" class="hover:text-white transition">Chương trình khuyến mãi</a>
+                    <a href="/SELLING-GLASSES/public/home#" class="hover:text-white transition">Chương trình khuyến
+                        mãi</a>
                 </li>
                 <li>
-                    <a href="#combo-section" class="hover:text-white transition">Combo Gọng + Tròng</a>
+                    <a href="/SELLING-GLASSES/public/home#combo-section" class="hover:text-white transition">Combo Gọng
+                        + Tròng</a>
                 </li>
                 <li>
-                    <a href="#try-on-section" class="hover:text-white transition">Thử kính AI</a>
+                    <a href="/SELLING-GLASSES/public/home#try-on-section" class="hover:text-white transition">Thử kính
+                        AI</a>
                 </li>
             </ul>
         </div>
