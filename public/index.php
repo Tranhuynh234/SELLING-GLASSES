@@ -58,7 +58,7 @@ switch ($url) {
         $staffController->save();
         exit();
    case "manager":
-        AuthMiddleware::handle(['staff'], ['manager']);
+        //AuthMiddleware::handle(['staff'], ['manager']);
         require_once "../app/views/Dashboard/manager/mana.php";
         exit();
 

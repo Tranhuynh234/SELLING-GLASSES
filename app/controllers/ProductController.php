@@ -8,13 +8,6 @@ class ProductController {
         $this->productService = new ProductServices();
     }
 
-    // Hàm hỗ trợ trả về JSON chuẩn cho Frontend
-    private function sendResponse($data) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
     // ================================
     // QUẢN LÝ DANH MỤC (CATEGORY)
     // ================================
@@ -22,24 +15,32 @@ class ProductController {
     // Lấy toàn bộ danh mục
     public function getAllCategories() {
         $result = $this->productService->getAllCategories();
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function addCategory() {
         $data = ['name' => $_POST['name'] ?? '']; 
         $result = $this->productService->addCategory($data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateCategory($id) {
         $data = ['name' => $_POST['name'] ?? ''];
         $result = $this->productService->editCategory($id, $data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function deleteCategory($id) {
         $result = $this->productService->deleteCategory($id);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -53,12 +54,14 @@ class ProductController {
             'description' => $_POST['description'] ?? '', 
             'categoryId'  => $_POST['categoryId'] ?? 1,
             'staffId'     => $_POST['staffId'] ?? 1,
-            'variants'    => $_POST['variants'] ?? [] 
+            'variants'    => $_POST['variants'] ?? '',
         ];
 
         // Truyền $_FILES để Service xử lý upload ảnh
         $result = $this->productService->addFullProductAndVariants($data, $_FILES);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateProduct($id) {
@@ -66,15 +69,23 @@ class ProductController {
             'name'        => $_POST['name'] ?? '',
             'description' => $_POST['description'] ?? '',
             'categoryId'  => $_POST['categoryId'] ?? 1,
-            'imagePath'   => $_POST['imagePath'] ?? null
+            'staffId'     => $_POST['staffId'] ?? 1,
+            'variants'    => $_POST['variants'] ?? '' // Nhận chuỗi Màu|Size|Giá|Kho
         ];
-        $result = $this->productService->editProduct($id, $data);
-        $this->sendResponse($result);
+
+        // Truyền thêm $_FILES để xử lý cập nhật ảnh
+        $result = $this->productService->updateFullProductAndVariants($id, $data, $_FILES);
+        
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function deleteProduct($id) {
         $result = $this->productService->deleteProduct($id);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -90,7 +101,9 @@ class ProductController {
             'stock'     => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->addVariant($data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateVariant($variantId) {
@@ -101,7 +114,9 @@ class ProductController {
             'stock' => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->updateVariant($variantId, $data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -110,28 +125,24 @@ class ProductController {
 
     // Hiển thị danh sách sản phẩm đầy đủ
     public function index() {
-        $result = $this->productService->getAllProductsWithDetails();
-        $this->sendResponse($result);
+        $products = $this->productService->getAllProducts(); 
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($products, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
-    // 1. Xóa bỏ mọi ký tự lạ hoặc khoảng trắng thừa ở đầu file PHP nếu có
-    
-    // 2. Kiểm tra ID
     if (!$id || !is_numeric($id)) {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
-        exit;
-    }
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+            exit();
+        }
 
-    // 3. Gọi Service (Hãy chắc chắn tên hàm trong Service là getProductDetail)
-    // Nếu em đổi tên hàm ở Service thì ở đây cũng phải đổi theo nhé
-    $result = $this->productService->getProductDetail($id);
-    
-    // 4. Trả về JSON
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($result, JSON_UNESCAPED_UNICODE);
-    exit;
-}
+        $result = $this->productService->getProductDetail($id);
+        
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
+    }
 }

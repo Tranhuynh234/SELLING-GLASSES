@@ -48,7 +48,7 @@ public function addProduct($data) {
     }
 
     // 2. Thêm biến thể (Bảng product_variant)
-    public function createVariant($data) {
+    public function addVariant($data) {
         $sql = "INSERT INTO product_variant (color, size, price, productId, stock) 
                 VALUES (:color, :size, :price, :productId, :stock)";
         
@@ -86,18 +86,49 @@ public function addProduct($data) {
     // 4. Lấy dữ liệu kèm giá/kho và Tên danh mục để hiện lên bảng Manager
     public function getAllProductsWithVariants() {
         // Anh JOIN thêm bảng category để lấy categoryName hiển thị cho người dùng xem
-        $sql = "SELECT p.*, v.price, v.stock, v.color, v.size, c.name as categoryName
-                FROM product p 
-                LEFT JOIN product_variant v ON p.productId = v.productId 
-                LEFT JOIN category c ON p.categoryId = c.categoryId
-                GROUP BY p.productId
-                ORDER BY p.productId DESC"; 
+        $sql = "SELECT p.*, c.name as categoryName,
+            GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
+            MIN(v.price) as minPrice,
+            SUM(v.stock) as totalStock
+            FROM product p 
+            LEFT JOIN product_variant v ON p.productId = v.productId 
+            LEFT JOIN category c ON p.categoryId = c.categoryId
+            GROUP BY p.productId
+            ORDER BY p.productId DESC"; 
         return $this->queryAll($sql);
     }
 
     public function deleteProduct($id) {
         return $this->deleteProductComplete($id);
     }
+
+
+    // BỔ SUNG
+    public function updateProduct($id, $data) {
+        // Sửa lỗi: Phải kiểm tra $data['imagePath'] thay vì biến $imagePath tự do
+        if (isset($data['imagePath']) && $data['imagePath'] !== null) {
+            $sql = "UPDATE product SET name = :name, description = :desc, categoryId = :cat, imagePath = :img WHERE productId = :id";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':img', $data['imagePath']);
+        } else {
+            $sql = "UPDATE product SET name = :name, description = :desc, categoryId = :cat WHERE productId = :id";
+            $stmt = $this->conn->prepare($sql);
+        }
+
+        $stmt->bindValue(':name', $data['name']);
+        $stmt->bindValue(':desc', $data['description']);
+        $stmt->bindValue(':cat', $data['categoryId']);
+        $stmt->bindValue(':id', $id);
+
+        return $stmt->execute();
+    }
+
+    public function deleteVariantsByProductId($id) {
+        $sql = "DELETE FROM product_variant WHERE productId = ?";
+        // Sửa lỗi: Dùng $this->conn (đồng nhất với các hàm khác trong file)
+        return $this->conn->prepare($sql)->execute([$id]);
+    }
+    // KẾT THÚC BỔ SUNG
 
    public function countProducts() {
         $sql = "SELECT COUNT(*) AS total FROM product";
