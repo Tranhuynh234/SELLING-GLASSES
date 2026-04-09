@@ -1,80 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<title>Thông tin đặt hàng</title>
-<style>
-
-body{
-font-family: Arial;
-padding:40px;
-}
-
-.container{
-width:400px;
-margin:auto;
-border:1px solid #ddd;
-padding:20px;
-border-radius:8px;
-}
-
-input{
-width:100%;
-padding:8px;
-margin:8px 0;
-}
-
-button{
-background:black;
-color:white;
-padding:10px;
-border:none;
-width:100%;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán chuyển khoản - EYESGLASS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/checkout.css">
 </head>
-
 <body>
+    <header class="checkout-header">
+        <a href="/SELLING-GLASSES/public/cart" class="checkout-back">Quay lại giỏ hàng</a>
+        <div class="checkout-brand">EYESGLASS<span>.</span></div>
+    </header>
 
-<h2>Thông tin đặt hàng</h2>
+    <main class="checkout-shell">
+        <section class="checkout-form-panel">
+            <div class="section-head">
+                <p class="section-kicker">Thông tin giao hàng</p>
+                <h1>Hoàn tất đơn chuyển khoản</h1>
+                <p>Điền thông tin nhận hàng, quét QR ngân hàng của admin và gửi yêu cầu để hệ thống chuyển sang trạng thái chờ duyệt.</p>
+            </div>
 
-<div class="container">
+            <form id="checkout-form" class="checkout-form">
+                <div class="field-grid two">
+                    <label class="field">
+                        <span>Họ và tên</span>
+                        <input type="text" name="recipientName" id="recipientName" placeholder="Nguyễn Văn A" required>
+                    </label>
+                    <label class="field">
+                        <span>Số điện thoại</span>
+                        <input type="text" name="recipientPhone" id="recipientPhone" placeholder="09xxxxxxxx" required>
+                    </label>
+                </div>
 
-<label>Tên khách hàng</label>
-<input type="text" id="name">
+                <div class="field-grid two">
+                    <label class="field">
+                        <span>Email</span>
+                        <input type="email" name="recipientEmail" id="recipientEmail" placeholder="email@example.com" required>
+                    </label>
+                    <label class="field">
+                        <span>Tỉnh / Thành phố</span>
+                        <select name="city" id="city" required>
+                            <option value="">Chọn tỉnh / thành phố</option>
+                            <option value="Ho Chi Minh">TP. Ho Chi Minh</option>
+                            <option value="Ha Noi">Ha Noi</option>
+                            <option value="Da Nang">Da Nang</option>
+                            <option value="Can Tho">Can Tho</option>
+                            <option value="Hai Phong">Hai Phong</option>
+                        </select>
+                    </label>
+                </div>
 
-<label>Số điện thoại</label>
-<input type="text" id="phone">
+                <label class="field">
+                    <span>Địa chỉ chi tiết</span>
+                    <input type="text" name="detailAddress" id="detailAddress" placeholder="Số nhà, tên đường..." required>
+                </label>
 
-<label>Địa chỉ</label>
-<input type="text" id="address">
+                <div class="field-grid two">
+                    <label class="field">
+                        <span>Quận / Huyện</span>
+                        <input type="text" name="district" id="district" placeholder="Ví dụ: Bình Thạnh" required>
+                    </label>
+                    <label class="field">
+                        <span>Phường / Xã</span>
+                        <input type="text" name="ward" id="ward" placeholder="Ví dụ: Phường 25" required>
+                    </label>
+                </div>
 
-<label>Thông số mắt</label>
-<input type="text" id="eye">
+                <label class="field">
+                    <span>Ghi chú</span>
+                    <textarea name="note" id="note" rows="4" placeholder="Lời nhắn cho admin hoặc shipper..."></textarea>
+                </label>
 
-<button onclick="placeOrder()">Đặt hàng</button>
+                <input type="hidden" name="transferNote" id="transferNote">
 
-</div>
+                <div class="checkout-notice">
+                    <strong>Cách hoạt động:</strong>
+                    <span>Người dùng chuyển khoản theo QR bên phải, sau đó bấm gửi yêu cầu. Admin sẽ kiểm tra giao dịch và duyệt đơn sang trạng thái thành công.</span>
+                </div>
 
-<script>
+                <button type="submit" id="submit-payment" class="submit-btn">Tôi đã chuyển khoản, gửi đơn chờ duyệt</button>
+            </form>
+        </section>
 
-function placeOrder() {
-    let name = document.getElementById("name").value;
-    let phone = document.getElementById("phone").value;
-    let address = document.getElementById("address").value;
+        <aside class="checkout-summary-panel">
+            <div class="summary-sticky">
+                <div class="summary-block">
+                    <div class="summary-head">
+                        <h2>Giỏ hàng <span id="cart-count-label">(0)</span></h2>
+                    </div>
+                    <div id="checkout-items" class="checkout-items"></div>
+                </div>
 
-    if (!name || !phone || !address) {
-        alert("Vui lòng nhập đầy đủ thông tin giao hàng");
-        return;
-    }
+                <div class="summary-block qr-block">
+                    <div class="qr-copy">
+                        <h3>QR ngân hàng của admin</h3>
+                        <p>Quét mã để chuyển khoản đúng số tiền. Nội dung chuyển khoản nên giữ nguyên để admin dễ đối soát.</p>
+                    </div>
+                    <div class="qr-wrap">
+                        <img id="bank-qr" src="" alt="QR thanh toán ngân hàng">
+                    </div>
+                    <div class="bank-meta">
+                        <div><span>Ngân hàng</span><strong id="bank-name">-</strong></div>
+                        <div><span>Số tài khoản</span><strong id="bank-account">-</strong></div>
+                        <div><span>Chủ tài khoản</span><strong id="bank-owner">-</strong></div>
+                        <div><span>Nội dung CK</span><strong id="bank-note">-</strong></div>
+                    </div>
+                </div>
 
-    // Logic xử lý đơn hàng (Gửi về server nếu có)
-    alert("Cảm ơn " + name + "! Đơn hàng của bạn đã được tiếp nhận.");
-    
-    localStorage.removeItem("cart"); // Xóa giỏ hàng sau khi đặt thành công
-    window.location.href = "trangchu.html";
-}
-</script>
+                <div class="summary-block totals-block">
+                    <div class="total-row">
+                        <span>Tạm tính</span>
+                        <strong id="subtotal">0đ</strong>
+                    </div>
+                    <div class="total-row">
+                        <span>Giảm giá</span>
+                        <strong id="discount">0đ</strong>
+                    </div>
+                    <div class="total-row">
+                        <span>Phí giao hàng</span>
+                        <strong id="shipping-fee">0đ</strong>
+                    </div>
+                    <div class="grand-total">
+                        <span>Tổng</span>
+                        <strong id="grand-total">0đ</strong>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
 
+    <script src="/SELLING-GLASSES/public/assets/js/checkout.js"></script>
 </body>
 </html>
