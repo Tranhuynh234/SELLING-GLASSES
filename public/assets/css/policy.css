@@ -1,0 +1,122 @@
+/* 1. HIỆU ỨNG CARD CHÍNH */
+.custom-policy-card {
+    border: none !important;
+    border-radius: 20px !important;
+    overflow: hidden;
+    /* Đổ bóng sâu để Card nổi bật hẳn lên trên lớp nền mờ */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    background-color: #fff;
+    /* Hiệu ứng mượt khi xuất hiện */
+    animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 2. HEADER CỦA CARD */
+.modal-header-custom {
+    background-color: #1a1a1a; /* Màu đen sang trọng */
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #D17842; /* Màu cam đất của web bạn */
+}
+
+.modal-title-custom {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-btn-custom {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    transition: 0.3s;
+}
+
+.close-btn-custom:hover {
+    color: #D17842;
+    transform: rotate(90deg);
+}
+
+/* 3. NỘI DUNG BÊN TRONG CARD */
+.modal-body-custom {
+    padding: 35px 40px;
+    color: #333;
+    font-size: 15px;
+    line-height: 1.8;
+    max-height: 65vh; /* Giới hạn chiều cao để không bị tràn màn hình */
+    overflow-y: auto;
+}
+
+/* Định dạng các thẻ h6 bên trong nội dung JS */
+.modal-body-custom h6 {
+    color: #D17842; /* Màu nhấn cam đất */
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* Thêm icon nhỏ trước tiêu đề mục cho đẹp */
+.modal-body-custom h6::before {
+    content: "●";
+    margin-right: 10px;
+    font-size: 10px;
+}
+
+/* 4. FOOTER CỦA CARD */
+.modal-footer-custom {
+    padding: 15px 30px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.btn-done {
+    background-color: #D17842;
+    color: #fff;
+    border: none;
+    padding: 10px 35px;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-done:hover {
+    background-color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(209, 120, 66, 0.3);
+}
+
+/* 5. TÙY CHỈNH LỚP NỀN MỜ (BACKDROP) */
+.modal-backdrop.show {
+    opacity: 0.7 !important; /* Làm nền phía sau tối hơn để Card nổi bật */
+    background-color: #000;
+}
+
+/* Tùy chỉnh thanh cuộn cho chuyên nghiệp */
+.modal-body-custom::-webkit-scrollbar {
+    width: 5px;
+}
+.modal-body-custom::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+#policyModal {
+    z-index: 1060 !important;
+}
+
