@@ -1,128 +1,88 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
 <meta charset="UTF-8">
-<title>Giỏ hàng - LENS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giỏ hàng - EYESGLASS</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/cart.css">
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Playfair Display', 'serif'],
-      }
-    }
-  }
-}
-</script>
-
 </head>
 
-<body class="bg-white font-sans text-stone-800">
+<body>
+<header class="cart-header">
+    <div class="cart-brand">EYESGLASS<span>.</span></div>
+    <nav class="cart-nav">
+        <a href="/SELLING-GLASSES/public/home">Trang chủ</a>
+        <a href="/SELLING-GLASSES/public/auth">Tài khoản</a>
+    </nav>
+</header>
 
-<!-- HEADER -->
-<div class="flex justify-between items-center p-6 border-b">
+<main class="cart-shell">
+    <section class="cart-intro">
+        <p class="cart-kicker">Giỏ hàng</p>
+        <h1>Sản phẩm bạn đã chọn</h1>
+        <p>Kiểm tra lại mẫu kính, số lượng và tổng tiền trước khi chuyển sang bước thanh toán.</p>
+    </section>
 
-<div class="font-serif text-3xl font-bold tracking-wide">
-EYESGLASS<span class="text-amber-600">.</span>
-</div>
+    <div class="cart-layout">
+        <section class="cart-panel">
+            <div class="cart-table">
+                <div class="cart-table-head">
+                    <label class="check-wrap">
+                        <input type="checkbox" id="select-all" checked>
+                        <span></span>
+                    </label>
+                    <div>Thông tin sản phẩm</div>
+                    <div>Giá</div>
+                    <div>Số lượng</div>
+                    <div>Còn lại</div>
+                    <div>Tổng cộng</div>
+                    <div>Xóa</div>
+                </div>
 
-<a href="trangchu.html"
-class="text-sm font-bold uppercase tracking-widest text-stone-600 hover:text-amber-600 transition">
-Trang chủ
-</a>
+                <div id="cart-items" class="cart-table-body"></div>
+            </div>
 
-</div>
+            <div class="cart-actions">
+                <button id="remove-selected" class="btn btn-muted" type="button">Xóa sản phẩm đã chọn</button>
+                <a href="/SELLING-GLASSES/public/home" class="btn btn-primary">Tiếp tục mua hàng</a>
+            </div>
+        </section>
 
-<!-- PAGE -->
-<div class="max-w-7xl mx-auto px-12 py-12">
+        <aside class="summary-card">
+            <h2>Tóm tắt đơn hàng</h2>
 
-<h1 class="font-serif text-4xl mb-10">
-Giỏ hàng của bạn
-</h1>
+            <div class="summary-row">
+                <span>Sản phẩm đã chọn</span>
+                <strong id="selected-count">0</strong>
+            </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-4 gap-16 items-start">
+            <div class="summary-row">
+                <span>Tạm tính</span>
+                <strong id="subtotal">0đ</strong>
+            </div>
 
-<!-- DANH SÁCH -->
-<div class="lg:col-span-3">
+            <div class="summary-row">
+                <span>Phí vận chuyển</span>
+                <strong id="shipping">0đ</strong>
+            </div>
 
-<table class="w-full border-separate border-spacing-y-10">
+            <div class="summary-total">
+                <span>Tổng</span>
+                <strong id="total">0đ</strong>
+            </div>
 
-<thead class="text-sm uppercase text-stone-500 tracking-wider">
-<tr class="text-left">
-<th class="w-32"></th>
-<th class="w-72">SẢN PHẨM</th>
-<th class="w-40">LOẠI</th>
-<th class="w-32">GIÁ</th>
-<th class="w-40 text-center">SỐ LƯỢNG</th>
-<th class="w-32">TỔNG</th>
-<th class="w-20"></th>
-</tr>
-</thead>
+            <button type="button" id="go-to-checkout" class="checkout-btn">Thanh toán ngay</button>
 
-<tbody id="cart-items" class="divide-y"></tbody>
-
-</table>
-
-</div>
-
-<!-- THANH TOÁN -->
-<div>
-
-<div class="bg-white p-10 rounded-3xl shadow-lg border border-stone-200 sticky top-24">
-
-<h2 class="font-serif text-2xl mb-6">Thanh toán</h2>
-
-<div class="space-y-3 text-sm">
-
-<div class="flex justify-between">
-<span>Tạm tính</span>
-<span id="subtotal"></span>
-</div>
-
-<div class="flex justify-between">
-<span>Phí ship</span>
-<span>30.000 đ</span>
-</div>
-
-<div class="flex justify-between">
-<span>Thuế</span>
-<span>10%</span>
-</div>
-
-</div>
-
-<div class="border-t mt-6 pt-6 flex justify-between font-bold text-lg">
-<span>Tổng</span>
-<span id="total"></span>
-</div>
-
-<a href="checkout.html"
-class="mt-8 block text-center py-4 bg-stone-900 text-white rounded-full text-sm font-bold tracking-widest uppercase hover:bg-stone-800 transition">
-Thanh toán
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-
+            <p class="summary-note">Bạn có thể điều chỉnh số lượng hoặc bỏ bớt sản phẩm trước khi xác nhận đơn hàng.</p>
+        </aside>
+    </div>
+</main>
 
 <script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
-
-
 </body>
-
 </html>
