@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 2. Xử lý ảnh (Kiểm tra lại đường dẫn nếu vẫn lỗi ảnh)
         const imgElement = document.getElementById("detail-image");
-        imgElement.src = `/SELLING-GLASSES/public/assets/images/${product.imagePath}`;
+        imgElement.src = `/SELLING-GLASSES/public/assets/images/products/${product.imagePath}`;
         imgElement.onerror = function () {
           this.src = "https://via.placeholder.com/500x300?text=No+Image"; // Ảnh thay thế nếu sai đường dẫn
         };

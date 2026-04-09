@@ -1,13 +1,3 @@
-//document.addEventListener("DOMContentLoaded", () => {
-//   let buttons = document.querySelectorAll("button");
-//    buttons.forEach((btn, index) => {
- //       if (btn.innerText.includes("Thêm vào giỏ")) {
-   //         // gán tạm variantId theo index
-     //       btn.onclick = () => addToCart(index + 1);
-       // }
-    //});
-
-//});
 document.addEventListener("DOMContentLoaded", function () {
     loadCart();
 });

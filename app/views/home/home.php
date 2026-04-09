@@ -1,53 +1,4 @@
-<!doctype html>
-<html lang="vi">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EYESGLASS - Hệ thống mắt kính AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/home.css" />
-    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/chatbox.css" />
-</head>
-
-<body class="bg-stone-50 text-stone-900 pt-[104px]">
-    <div class="fixed top-0 left-0 w-full z-50 shadow-sm flex flex-col">
-        <div class="bg-[#111] text-white text-[11px] py-2 px-6 flex justify-between items-center font-medium">
-            <div class="flex space-x-6">
-                <span> <i class="fa-solid fa-phone text-amber-500"></i> Hotline: 1900 1234</span>
-                <span> <i class="fa-solid fa-truck text-amber-500"></i> Giao hàng toàn quốc - Miễn phí đơn từ 500k</span>
-            </div>
-            <div id="auth-box" class="flex space-x-4">
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
-                <span>|</span>
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng ký</a>
-            </div>
-        </div>
-        <header class="bg-white py-4 px-6 md:px-12 flex justify-between items-center border-b border-stone-100">
-            <div class="font-bold text-3xl tracking-tighter">
-                EYESGLASS<span class="text-amber-600">.</span>
-            </div>
-            <nav class="hidden lg:flex space-x-8 font-medium text-stone-600">
-                <a href="#" class="hover:text-amber-700">Gọng kính</a>
-                <a href="#" class="hover:text-amber-700">Tròng kính</a>
-                <a href="#" class="hover:text-amber-700">Combo</a>
-                <a href="#" class="hover:text-amber-700">Khuyến mãi</a>
-                <a href="#" class="hover:text-amber-700">Try On</a>
-                <a href="#" class="hover:text-amber-700">Tư vấn</a>
-            </nav>
-            <div class="flex space-x-5 text-xl text-stone-700 items-center">
-                <button><i class="fas fa-search"></i></button>
-                <a href="<?php echo isset($_SESSION['user']) ? '/SELLING-GLASSES/public/profile' : '/SELLING-GLASSES/public/auth'; ?>" class="hover:text-amber-600 transition">
-        <i class="fas fa-user"></i>
-</a>
-                <button class="relative">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
-                </button>
-            </div>
-        </header>
-    </div>
+ <?php include_once __DIR__ . '/../layout/header.php'; ?>
 
     <section class="flex flex-col md:flex-row bg-[#F2EFE6]">
         <div class="md:w-1/2 p-12 md:p-24 flex flex-col justify-center space-y-6">
@@ -61,13 +12,14 @@
                 đơn bác sĩ và nhận hàng tận tay.
             </p>
             <div class="flex space-x-4 pt-4">
-                <button class="px-10 py-4 bg-[#1C1917] text-white rounded-full font-bold hover:bg-black transition">
+                <a href="#danh-muc"
+                    class="inline-block px-10 py-4 bg-[#1C1917] text-white rounded-full font-bold hover:bg-black transition text-center">
                     Mua ngay
-                </button>
-                <button
-                    class="px-10 py-4 border-2 border-stone-800 rounded-full font-bold hover:bg-stone-800 hover:text-white transition">
+                </a>
+                <a href="#try-on-section"
+                    class="inline-block px-10 py-4 border-2 border-stone-800 rounded-full font-bold hover:bg-stone-800 hover:text-white transition text-center">
                     Thử kính online
-                </button>
+                </a>
             </div>
         </div>
         <div class="md:w-1/2 h-[400px] md:h-auto overflow-hidden">
@@ -76,48 +28,48 @@
         </div>
     </section>
 
-    <section class="py-20 px-6 max-w-7xl mx-auto text-center">
+    <section id="danh-muc" class="py-20 px-6 max-w-7xl mx-auto text-center scroll-mt-[104px]">
         <h2 class="text-4xl font-bold mb-12">Khám Phá Danh Mục</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/gongnam.jpg" alt="Gọng Nam" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/gongnam.jpg" alt="Gọng Nam" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Gọng Nam</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/gongnu.jpg" alt="Gọng Nữ" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/gongnu.jpg" alt="Gọng Nữ" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Gọng Nữ</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/gongtrem.jpg" alt="Gọng Trẻ Em" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/gongtrem.jpg" alt="Gọng Trẻ Em" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Gọng Trẻ Em</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/anhsangxanh.jpg" alt="Tròng AS Xanh" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/anhsangxanh.jpg" alt="Tròng AS Xanh" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Chống Ánh Sáng Xanh</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/doimau.jpg" alt="Kính Đổi Màu" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/doimau.jpg" alt="Kính Đổi Màu" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Kính Đổi Màu</p>
             </div>
             <div class="group cursor-pointer">
                 <div
                     class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
-                    <img src="/SELLING-GLASSES/public/assets/images/sieumong.jpg" alt="Kính Siêu Mỏng" class="w-full h-full object-cover rounded-[32px]">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/sieumong.jpg" alt="Kính Siêu Mỏng" class="w-full h-full object-cover rounded-[32px]">
                 </div>
                 <p class="font-bold text-stone-600">Kính Siêu Mỏng</p>
             </div>
@@ -141,7 +93,7 @@
                                 <span class="absolute top-4 left-4 bg-black text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Best Seller</span>
                             <?php endif; ?>
 
-                            <img src="/SELLING-GLASSES/public/assets/images/<?php echo $product->imagePath; ?>"
+                            <img src="/SELLING-GLASSES/public/assets/images/products/<?php echo $product->imagePath; ?>"
                                 alt="<?php echo $product->name; ?>" class="w-full h-full object-cover rounded-[32px]">
                         </div>
                         <div class="p-6">
@@ -163,7 +115,7 @@
         </div>
     </section>
 
-    <section class="py-20 px-6 max-w-7xl mx-auto">
+    <section id="combo-section" class="py-20 px-6 max-w-7xl mx-auto scroll-mt-[104px]">
         <div
             class="bg-[#8B4513] rounded-[40px] p-12 text-white flex flex-col md:flex-row items-center justify-between mb-16 relative overflow-hidden">
             <div class="md:w-2/3 space-y-4 relative z-10">
@@ -184,7 +136,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    <img src="/SELLING-GLASSES/public/assets/images/combo_sinhvien.jpg" alt="Combo Sinh Viên" class="w-full h-full object-cover">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/combo_sinhvien.jpg" alt="Combo Sinh Viên" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Sinh Viên</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -201,7 +153,7 @@
                     class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase">Hot
                     nhất</span>
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    <img src="/SELLING-GLASSES/public/assets/images/combo_vanphong.jpg" alt="Combo Văn Phòng" class="w-full h-full object-cover">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/combo_vanphong.jpg" alt="Combo Văn Phòng" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Văn Phòng</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -214,7 +166,7 @@
             </div>
             <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
                 <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                    <img src="/SELLING-GLASSES/public/assets/images/combo_sieunet.jpg" alt="Combo Siêu Nét" class="w-full h-full object-cover">
+                    <img src="/SELLING-GLASSES/public/assets/images/products/combo_sieunet.jpg" alt="Combo Siêu Nét" class="w-full h-full object-cover">
                 </div>
                 <h3 class="font-bold text-xl mb-1">Combo Siêu Nét</h3>
                 <p class="text-stone-400 text-sm mb-4">
@@ -229,20 +181,24 @@
         </div>
     </section>
 
-    <section class="bg-[#1C1917] text-white py-24 px-6">
+    <section id="try-on-section" class="bg-[#1C1917] text-white py-24 px-6 scroll-mt-[104px]">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
             <div class="md:w-1/2 flex justify-center">
-                <div
-                    class="relative w-72 h-[500px] bg-stone-800 rounded-[45px] border-8 border-stone-700 overflow-hidden shadow-2xl flex items-center justify-center">
-                    <div class="z-10 text-stone-500 text-center text-sm px-8 pointer-events-none">
+                <div class="relative w-72 h-[500px] bg-stone-800 rounded-[45px] border-8 border-stone-700 overflow-hidden shadow-2xl flex items-center justify-center">               
+                    <video id="video" autoplay playsinline class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500"></video>
+                    <canvas id="canvas" class="absolute inset-0 w-full h-full object-cover z-10 opacity-0 transition-opacity duration-500"></canvas>
+                    
+                    <div id="tryon-placeholder" class="z-20 text-stone-500 text-center text-sm px-8 pointer-events-none transition-opacity duration-300">
                         [Hình Demo Camera Điện Thoại] <br />
                         Quét khuôn mặt AI
                     </div>
-                    <div
-                        class="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/25 to-transparent w-full h-1/2 animate-scan top-0 pointer-events-none">
+                    
+                    <div id="scan-line" class="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/25 to-transparent w-full h-1/2 animate-scan top-0 pointer-events-none transition-opacity duration-300">
                     </div>
+                    
                 </div>
             </div>
+
             <div class="md:w-1/2 space-y-6">
                 <h2 class="text-5xl font-bold">Thử Kính Ảo Bằng AI</h2>
                 <p class="text-stone-400 text-lg leading-relaxed">
@@ -254,16 +210,44 @@
                         <i class="fa-solid fa-face-smile text-amber-500"></i> <span>Nhận diện khuôn mặt chính xác</span>
                     </li>
                     <li class="flex items-center space-x-3">
-                        <i class="fa-solid fa-ruler text-amber-500"></i> <span>Gợi ý size kính vừa vặn</span>
+                        <i class="fa-solid fa-ruler text-amber-500"></i> <span id="ai-size-result">Gợi ý size kính vừa vặn</span>
                     </li>
                     <li class="flex items-center space-x-3">
-                        <i class="fa-solid fa-sync-alt text-amber-500"></i> <span>So sánh hàng trăm mẫu cùng lúc</span>
+                        <i class="fa-solid fa-sync-alt text-amber-500"></i> <span>Thử nhiều kiểu gọng kính theo khuôn mặt</span>
                     </li>
                 </ul>
-                <button
+                <button id="btn-start-tryon"
                     class="mt-8 px-10 py-4 bg-amber-600 rounded-full font-bold shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:bg-amber-500 transition">
                     Bắt đầu thử kính ngay
                 </button>
+
+                <!--  DANH SÁCH CHỌN KÍNH (ẨN BAN ĐẦU) -->
+                <div id="glasses-selector" class="mt-6 flex flex-wrap gap-3 hidden">
+                    <button onclick="changeGlasses('Square')" 
+                        class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                        Vuông
+                    </button>
+
+                    <button onclick="changeGlasses('Round')" 
+                        class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                        Tròn
+                    </button>
+
+                    <button onclick="changeGlasses('Oval')" 
+                        class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                        Oval
+                    </button>
+
+                    <button onclick="changeGlasses('Rectangle')" 
+                        class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                        Chữ nhật
+                    </button>
+
+                    <button onclick="changeGlasses('Cat-eye')" 
+                        class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
+                        Cat-eye
+                    </button>
+                </div>  
             </div>
         </div>
     </section>
@@ -356,176 +340,21 @@
         </div>
     </section>
 
-    <footer class="bg-[#0A0A0A] text-stone-400 py-10 px-6 border-t border-stone-900">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
-            <div class="space-y-6">
-                <div class="font-bold text-3xl text-white">
-                    EYESGLASS<span class="text-amber-600">.</span>
-                </div>
-                <p class="text-sm leading-relaxed">
-                    Thương hiệu mắt kính hiện đại, mang đến giải pháp thị lực toàn diện
-                    kết hợp công nghệ AI. Mua sắm dễ dàng, tận tâm và chuyên nghiệp.
-                </p>
-            </div>
-            <div>
-                <h4 class="text-white font-bold mb-8 uppercase text-xs tracking-[3px]">
-                    Liên kết nhanh
-                </h4>
-                <ul class="space-y-4 text-sm">
-                    <li>
-                        <a href="#" class="hover:text-white transition">Tất cả sản phẩm</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Chương trình khuyến mãi</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Combo Gọng + Tròng</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Thử kính AI</a>
-                    </li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-bold mb-8 uppercase text-xs tracking-[3px]">
-                    Chính sách
-                </h4>
-                <ul class="space-y-4 text-sm">
-                    <li>
-                        <a href="#" class="hover:text-white transition">Chính sách đổi trả</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Chính sách bảo hành</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Phương thức thanh toán</a>
-                    </li>
-                    <li>
-                        <a href="#" class="hover:text-white transition">Chính sách giao hàng</a>
-                    </li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-bold mb-8 uppercase text-xs tracking-[3px]">
-                    Liên hệ
-                </h4>
-                <ul class="space-y-4 text-sm">
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-phone text-amber-500"></i> <span>Hotline: 1900 1234 (8h-22h)</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-envelope text-amber-500"></i> <span>Email: hello@lens.vn</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-location-dot text-amber-500"></i> <span>Cửa hàng: 123 Đường ABC, Quận X, TP.HCM</span>
-                    </li>
-                </ul>
-                <div class="flex space-x-4 mt-8">
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center hover:bg-white hover:text-black transition">FB</a>
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center hover:bg-white hover:text-black transition">IG</a>
-                    <a href="#"
-                        class="w-10 h-10 rounded-full bg-stone-900 flex items-center justify-center hover:bg-white hover:text-black transition">TT</a>
-                </div>
-            </div>
-        </div>
-        <div
-            class="max-w-7xl mx-auto mt-24 pt-8 border-t border-stone-900 text-center text-xs tracking-widest uppercase">
-            © 2026 EYESGLASS. All rights reserved.
-        </div>
-    </footer>
-
-    <!-- CHATBOX -->
-    <div id="ai-chat-panel" 
-        class="fixed bottom-24 right-8 w-[90vw] sm:w-[400px] max-w-[400px] h-[80vh] max-h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-[100] transition-all duration-300 opacity-0 pointer-events-none translate-y-10 overflow-hidden border border-stone-200">
-        <div class="bg-stone-900 text-white p-4 flex justify-between items-center shadow-md z-10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-xl">
-                    <i class="fa-solid fa-robot text-white"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-[15px] leading-tight">
-                        Trợ lý Kính sành điệu
-                    </h4>
-                    <p class="text-xs text-green-400 flex items-center gap-1 mt-0.5">
-                        <span class="w-2 h-2 bg-green-400 rounded-full inline-block animate-pulse"></span>
-                        Online
-                    </p>
-                </div>
-            </div>
-            <div class="flex gap-4 items-center">
-                <button id="minimize-chat"
-                    class="text-stone-400 hover:text-white transition text-2xl leading-none -mt-3">
-                    <i class="fa-solid fa-minus"></i>
-                </button>
-                <button id="close-chat" class="text-stone-400 hover:text-red-500 transition text-2xl leading-none">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="chat-body" class="flex-1 bg-stone-50 p-4 overflow-y-auto chat-scroll flex flex-col gap-4 relative">
-            <div class="flex gap-2 w-full">
-                <div
-                    class="w-8 h-8 bg-amber-600 rounded-full flex-shrink-0 flex items-center justify-center text-sm shadow-sm">
-                    <i class="fa-solid fa-robot text-white"></i>
-                </div>
-
-                <div class="flex flex-col gap-1 max-w-[85%]">
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-[14px] text-stone-800 border border-stone-100">
-                        Ngày mới tốt lành 
-                        <i class="fa-solid fa-hand text-amber-500"></i> 
-                        Tôi là trợ lý Kính sành điệu của EYESGLASS.
-                        Tôi có thể giúp gì cho baby nò?
-
-                        <!-- QUICK OPTIONS-->
-                         <div class="flex flex-wrap gap-2 mt-3">
-                            <button onclick="handleQuickAction('Tư vấn chọn kính', 'find_glasses')"
-                                 class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
-                                <i class="fa-solid fa-glasses"></i>
-                                Tư vấn chọn kính
-                            </button>
-
-                            <button onclick="handleQuickAction('Xem sản phẩm hot', 'hot_products')"
-                                class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
-                                <i class="fa-solid fa-fire"></i>
-                                Xem sản phẩm hot
-                            </button>
-
-                            <button onclick="handleQuickAction('Liên hệ nhân viên', 'human')"
-                                class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
-                                <i class="fa-solid fa-headset"></i>
-                                Liên hệ nhân viên
-                            </button>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chat-anchor"></div>
-        </div>
-
-        <div id="chat-footer" class="p-3 bg-white border-t border-stone-200 flex gap-2 items-center">
-            <input type="text" id="chat-input" placeholder="Nhập câu hỏi của bạn..."
-                class="flex-1 bg-stone-100 rounded-full px-4 py-2 text-[14px] focus:outline-none focus:ring-1 focus:ring-amber-500 border border-transparent transition"
-                onkeypress="handleEnter(event)" />
-            <button onclick="sendManualMessage()" id="send-btn"
-                class="w-9 h-9 bg-amber-600 text-white rounded-full flex items-center justify-center hover:bg-amber-700 transition flex-shrink-0 shadow-md">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
-
-    <div id="ai-icon"
-        class="fixed bottom-8 right-8 w-16 h-16 bg-amber-600 text-white rounded-full flex items-center justify-center shadow-xl cursor-grab z-[101] text-3xl glow-effect">
-        <i class="fa-solid fa-robot text-white"></i>
-    </div>
-
+    <?php include_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php include_once __DIR__ . '/../partials/chatbox.php'; ?>          
     <script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/home.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include_once __DIR__ . '/../partials/policies.php'; ?>
+    <script src="/SELLING-GLASSES/public/assets/js/policy.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/tryon.js" defer></script>
+    
 </body>
 
 </html>
