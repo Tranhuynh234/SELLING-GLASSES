@@ -26,13 +26,36 @@ class ProductModel extends BaseModel {
     }
     
    public function getProducts($limit, $offset) {
-    $sql = "SELECT * FROM product LIMIT $limit OFFSET $offset";
-    $rows = $this->queryAll($sql); // Lấy mảng dữ liệu thô
+    $sql = "SELECT
+                p.*,
+                pv.variantId,
+                pv.price,
+                pv.stock,
+                pv.color,
+                pv.size
+            FROM product p
+            LEFT JOIN product_variant pv
+                ON pv.variantId = (
+                    SELECT pv2.variantId
+                    FROM product_variant pv2
+                    WHERE pv2.productId = p.productId
+                    ORDER BY pv2.variantId ASC
+                    LIMIT 1
+                )
+            ORDER BY p.productId DESC
+            LIMIT :limit OFFSET :offset";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $products = [];
     foreach ($rows as $row) {
-        $products[] = new Product($row); // Chuyển từng mảng dữ liệu thành đối tượng Product
+        $products[] = new Product($row);
     }
-    return $products;   
+    return $products;
    }
 
 

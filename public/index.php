@@ -9,7 +9,7 @@ require_once "../app/controllers/StaffController.php";
 require_once "../app/controllers/CartController.php";
 require_once "../app/controllers/HomeController.php";
 require_once __DIR__ . "/../app/controllers/UserController.php";
-
+require_once "../app/controllers/PaymentController.php";
 // tạo controller
 //Yen them
 $authController = new AuthController();
@@ -20,6 +20,7 @@ $staffController = new StaffController();
 $cartController = new CartController();
 $homeController = new HomeController();
 $userController = new UserController();
+$paymentController = new PaymentController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;

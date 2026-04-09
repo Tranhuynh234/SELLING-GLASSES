@@ -6,7 +6,7 @@ class OrderModel extends BaseModel {
     protected $primaryKey = "orderId";
 
     // ================================
-    // 🔥 LẤY ORDER THEO CUSTOMER
+    // LẤY ORDER THEO CUSTOMER
     // ================================
     public function findByCustomer($customerId) {
         if (!$customerId) return [];
@@ -24,7 +24,7 @@ class OrderModel extends BaseModel {
     }
 
     // ================================
-    // 🔥 LẤY ORDER THEO STATUS
+    //  LẤY ORDER THEO STATUS
     // ================================
     public function findByStatus($status) {
         if (!$status) return [];
@@ -42,7 +42,7 @@ class OrderModel extends BaseModel {
     }
 
     // ================================
-    // 🔥 THỐNG KÊ STATUS
+    //  THỐNG KÊ STATUS
     // ================================
     public function countByStatus() {
         try {

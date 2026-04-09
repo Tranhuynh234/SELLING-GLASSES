@@ -42,6 +42,16 @@ class CartController {
         return $customer['customerId'];
     }
 
+    public function showCartPage() {
+        require_once __DIR__ . "/../views/cart/cart.html";
+        exit();
+    }
+
+    public function showCheckoutPage() {
+        require_once __DIR__ . "/../views/order/checkout.html";
+        exit();
+    }
+
     /**
      * Lấy toàn bộ sản phẩm trong giỏ hàng (Trả về JSON)
      */

@@ -3,15 +3,22 @@ require_once __DIR__ . "/../../core/BaseModel.php";
 require_once __DIR__ . "/../../entities/order/Payment.php";
 
 class PaymentModel extends BaseModel {
-    protected $table = "payments"; 
+    protected $table = "payment";
 
-    // 🔥 đồng bộ với service
+    public function findPayment($paymentId) {
+        $data = $this->find($paymentId, "paymentId");
+        return $data ? new Payment($data) : null;
+    }
+
     public function findByOrderId($orderId) {
         $data = $this->findBy("orderId", $orderId);
         return $data ? new Payment($data) : null;
     }
 
-    // cập nhật trạng thái thanh toán
+    public function createPayment($data) {
+        return $this->create($data);
+    }
+
     public function updateStatusByOrderId($orderId, $status) {
         $sql = "UPDATE {$this->table} 
                 SET paymentStatus = :status 
@@ -23,5 +30,8 @@ class PaymentModel extends BaseModel {
             ':orderId' => $orderId
         ]);
     }
+
+    public function updatePayment($paymentId, $data) {
+        return $this->update($paymentId, $data, "paymentId");
+    }
 }
-?>
