@@ -8,13 +8,6 @@ class ProductController {
         $this->productService = new ProductServices();
     }
 
-    // Hàm hỗ trợ trả về JSON chuẩn cho Frontend
-    private function sendResponse($data) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
     // ================================
     // QUẢN LÝ DANH MỤC (CATEGORY)
     // ================================
@@ -22,24 +15,32 @@ class ProductController {
     // Lấy toàn bộ danh mục
     public function getAllCategories() {
         $result = $this->productService->getAllCategories();
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function addCategory() {
         $data = ['name' => $_POST['name'] ?? '']; 
         $result = $this->productService->addCategory($data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateCategory($id) {
         $data = ['name' => $_POST['name'] ?? ''];
         $result = $this->productService->editCategory($id, $data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function deleteCategory($id) {
         $result = $this->productService->deleteCategory($id);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -53,12 +54,14 @@ class ProductController {
             'description' => $_POST['description'] ?? '', 
             'categoryId'  => $_POST['categoryId'] ?? 1,
             'staffId'     => $_POST['staffId'] ?? 1,
-            'variants'    => $_POST['variants'] ?? [] 
+            'variants'    => $_POST['variants'] ?? '',
         ];
 
         // Truyền $_FILES để Service xử lý upload ảnh
         $result = $this->productService->addFullProductAndVariants($data, $_FILES);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateProduct($id) {
@@ -66,15 +69,23 @@ class ProductController {
             'name'        => $_POST['name'] ?? '',
             'description' => $_POST['description'] ?? '',
             'categoryId'  => $_POST['categoryId'] ?? 1,
-            'imagePath'   => $_POST['imagePath'] ?? null
+            'staffId'     => $_POST['staffId'] ?? 1,
+            'variants'    => $_POST['variants'] ?? '' // Nhận chuỗi Màu|Size|Giá|Kho
         ];
-        $result = $this->productService->editProduct($id, $data);
-        $this->sendResponse($result);
+
+        // Truyền thêm $_FILES để xử lý cập nhật ảnh
+        $result = $this->productService->updateFullProductAndVariants($id, $data, $_FILES);
+        
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function deleteProduct($id) {
         $result = $this->productService->deleteProduct($id);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -90,7 +101,9 @@ class ProductController {
             'stock'     => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->addVariant($data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     public function updateVariant($variantId) {
@@ -101,7 +114,9 @@ class ProductController {
             'stock' => $_POST['stock'] ?? 0
         ];
         $result = $this->productService->updateVariant($variantId, $data);
-        $this->sendResponse($result);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
     // ================================
@@ -109,55 +124,76 @@ class ProductController {
     // ================================
 
     // Hiển thị danh sách sản phẩm đầy đủ
-public function index() {
-    // 1. Lấy dữ liệu từ Service
-    $result = $this->productService->getAllProductsWithDetails();
-
-    // 2. Kiểm tra nếu là yêu cầu JSON (từ bạn của ông hoặc từ AJAX)
-    // Cách 1: Kiểm tra Header Accept (như hàm detail của ông)
-    // Cách 2: Kiểm tra tham số ?type=json trên URL (dễ test hơn)
-    $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
-              || (isset($_GET['type']) && $_GET['type'] === 'json');
-
-    if ($isJson) {
-        $this->sendResponse($result);
+    public function index() {
+        $products = $this->productService->getAllProducts(); 
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($products, JSON_UNESCAPED_UNICODE);
+        exit();
     }
 
-    // 3. Nếu không phải JSON, nạp dữ liệu vào biến và gọi View
-    // Dựa vào cấu trúc API của ông, sản phẩm nằm trong $result['data']
-    $products = $result['data'] ?? [];
-    
-    // Giả lập phân trang cơ bản nếu cần
-    $currentPage = $_GET['page'] ?? 1;
-    $totalPages = 1; // Service hiện tại của ông chưa trả về pagination nên tạm để 1
+    // public function index() {
+    //     // 1. Lấy dữ liệu từ Service
+    //     $result = $this->productService->getAllProducts();
 
-    // 4. Gọi file giao diện (đảm bảo đường dẫn đúng)
-    include dirname(__DIR__) . '/views/products/all_products.php';
-}
+    //     // 2. Kiểm tra nếu là yêu cầu JSON (từ bạn của ông hoặc từ AJAX)
+    //     // Cách 1: Kiểm tra Header Accept (như hàm detail của ông)
+    //     // Cách 2: Kiểm tra tham số ?type=json trên URL (dễ test hơn)
+    //     $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+    //               || (isset($_GET['type']) && $_GET['type'] === 'json');
+
+    //     if ($isJson) {
+    //         $this->sendResponse($result);
+    //     }
+
+    //     // 3. Nếu không phải JSON, nạp dữ liệu vào biến và gọi View
+    //     // Dựa vào cấu trúc API của ông, sản phẩm nằm trong $result['data']
+    //     $products = $result['data'] ?? [];
+        
+    //     // Giả lập phân trang cơ bản nếu cần
+    //     $currentPage = $_GET['page'] ?? 1;
+    //     $totalPages = 1; // Service hiện tại của ông chưa trả về pagination nên tạm để 1
+
+    //     // 4. Gọi file giao diện (đảm bảo đường dẫn đúng)
+    //     include dirname(__DIR__) . '/views/products/all_products.php';
+    // }
+
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
-    // 1. Kiểm tra ID hợp lệ
     if (!$id || !is_numeric($id)) {
-        if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
-            header('Content-Type: application/json');
+            header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
-            exit;
+            exit();
         }
-        die("ID không hợp lệ");
-    }
 
-    // 2. Lấy dữ liệu từ Service
-    $result = $this->productService->getProductDetail($id);
-
-    // 3. KIỂM TRA: Nếu là yêu cầu từ file JS (có header Accept: application/json)
-    if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+        $result = $this->productService->getProductDetail($id);
+        
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
-        exit;
+        exit();
     }
 
-    // 4. KIỂM TRA: Nếu là người dùng gõ URL trực tiếp (trình duyệt đòi HTML)
-    // Trả về file giao diện .php của bạn
-    include dirname(__DIR__) . '/views/product-detail.php';
-}
+//     // 1. Kiểm tra ID hợp lệ
+//     if (!$id || !is_numeric($id)) {
+//         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+//             header('Content-Type: application/json');
+//             echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+//             exit;
+//         }
+//         die("ID không hợp lệ");
+//     }
+
+//     // 2. Lấy dữ liệu từ Service
+//     $result = $this->productService->getProductDetail($id);
+
+//     // 3. KIỂM TRA: Nếu là yêu cầu từ file JS (có header Accept: application/json)
+//     if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+//         header('Content-Type: application/json; charset=utf-8');
+//         echo json_encode($result, JSON_UNESCAPED_UNICODE);
+//         exit;
+//     }
+
+//     // 4. KIỂM TRA: Nếu là người dùng gõ URL trực tiếp (trình duyệt đòi HTML)
+//     // Trả về file giao diện .php của bạn
+//     include dirname(__DIR__) . '/views/product-detail.php';
+// }
 }

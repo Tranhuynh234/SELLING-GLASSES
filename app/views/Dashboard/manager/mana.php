@@ -7,6 +7,7 @@
     <title>Manager System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/mana.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -93,83 +94,86 @@
     </div>
     <div id="modal" class="modal-overlay">
         <div class="modal-card">
-            <div class="modal-glow"></div>
-            <div class="modal-head">
-                <div class="head-title">
-                    <i class="fas fa-plus-circle"></i>
-                    <h3 id="modalTitle">Thêm mới</h3>
+            <form id="productForm" onsubmit="event.preventDefault(); saveData();">
+                <div class="modal-glow"></div>
+                <div class="modal-head">
+                    <div class="head-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <h3 id="modalTitle">Thêm mới sản phẩm</h3>
+                    </div>
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
                 </div>
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-            </div>
 
-            <div class="modal-body">
-                <input type="hidden" id="editProductId" value="" />
-                <div class="input-field">
-                    <label id="lbl1">Tên mắt kính</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-pen-nib"></i>
-                        <input type="text" id="input1" placeholder="Ví dụ: Kính Mắt..." />
+                <div class="modal-body">
+                    <input type="hidden" id="editProductId" value="" />
+                    
+                    <div class="input-field">
+                        <label>Tên mắt kính</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-pen-nib"></i>
+                            <input type="text" id="input1" placeholder="Ví dụ: Kính Mắt Phi Công..." required />
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Mô tả sản phẩm</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-align-left"></i>
+                            <input type="text" id="input2" placeholder="Chất liệu, đặc điểm nổi bật..." />
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Giá hiển thị (VNĐ)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-tag"></i>
+                            <input type="text" id="inputProductPrice" placeholder="Ví dụ: 500000" required />
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Danh mục (Loại kính)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-list"></i>
+                            <select id="inputCatId">
+                                <option value="1">Gọng Nam</option>
+                                <option value="2">Gọng Nữ</option>
+                                <option value="3">Gọng Trẻ Em</option>
+                                <option value="4">Chống Ánh Sáng Xanh</option>
+                                <option value="5">Kính Đổi Màu</option>
+                                <option value="6">Kính Siêu Mỏng</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Hình ảnh sản phẩm</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-image"></i>
+                            <input type="file" id="inputImage" accept="image/*" />
+                        </div>
+                        <small id="currentImageName" style="color: #aaa; margin-top: 5px; display: block;"></small>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Biến thể (Màu|Size|Giá|Kho)</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-tags"></i>
+                            <input type="text" id="inputVariant" placeholder="Đen|M|500000|10" />
+                        </div>
+                        <small class="helper-text-amber">* Ngăn cách bằng dấu gạch đứng |</small>
                     </div>
                 </div>
 
-                <div class="input-field">
-                    <label id="lbl2">Mô tả sản phẩm</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-align-left"></i>
-                        <input type="text" id="input2" placeholder="Nhập mô tả chi tiết sản phẩm..." />
-                    </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn-ghost" onclick="closeModal()">
+                        <i class="fas fa-times"></i> Hủy bỏ
+                    </button>
+                    <button type="submit" class="btn-confirm">
+                        <i class="fas fa-check"></i> Xác nhận lưu
+                    </button>
                 </div>
-
-                <div class="input-field">
-                    <label>Giá sản phẩm (VNĐ)</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-tag"></i>
-                        <input type="text" id="inputProductPrice" placeholder="Ví dụ: 500000" />
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Danh mục (Loại kính)</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-list"></i>
-                        <select id="inputCatId">
-                            <option value="1">Gọng Nam</option>
-                            <option value="2">Gọng Nữ</option>
-                            <option value="3">Gọng Trẻ Em</option>
-                            <option value="4">Chống Ánh Sáng Xanh</option>
-                            <option value="5">Kính Đổi Màu</option>
-                            <option value="6">Kính Siêu Mỏng</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Hình ảnh sản phẩm</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-image"></i>
-                        <input type="file" id="inputImage" accept="image/*" />
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Biến thể (Màu|Size|Giá|Kho)</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-tags"></i>
-                        <input type="text" id="inputVariant" placeholder="Đen|M|500000|10" />
-                    </div>
-                    <small class="helper-text-amber">* Ngăn cách bằng dấu gạch đứng |
-                    </small>
-                </div>
-            </div>
-
-            <div class="modal-foot">
-                <button class="btn-ghost" onclick="closeModal()">
-                    <i class="fas fa-times"></i> Hủy bỏ
-                </button>
-                <button class="btn-confirm" onclick="saveData()">
-                    <i class="fas fa-check"></i> Xác nhận lưu
-                </button>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -297,7 +301,7 @@
                 <section id="product" class="tab-pane">
                     <div class="pane-header">
                         <h2>Quản lý kho hàng</h2>
-                        <button class="btn-confirm" onclick="openModal('product')">
+                        <button class="btn-confirm" onclick="openModal()">
                             <i class="fas fa-plus"></i> Thêm mới
                         </button>
                     </div>
