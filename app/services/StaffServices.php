@@ -18,8 +18,23 @@ class StaffService {
     // CREATE OR UPDATE STAFF
     // =========================
     public function createOrUpdateStaff($userId, $position) {
+        // 1. Kiểm tra nếu chọn về làm Customer
+    if ($position === 'customer') {
+        // Cập nhật role về customer
+        $this->userModel->update($userId, ["role" => "customer"]);
+        
+        // Kiểm tra xem đã có bên bảng customer chưa, nếu chưa thì tạo lại
+        $isCustomer = $this->customerModel->findByUserId($userId);
+        if (!$isCustomer) {
+            $this->customerModel->createCustomer(["userId" => $userId]);
+        }
+        
+        // Xóa bên bảng staff (vì không còn là nhân viên nữa)
+        $this->staffModel->deleteByUserId($userId);
+        return; // Kết thúc hàm
+    }
 
-        $validPositions = ['sales', 'operation', 'leader', 'manager'];
+        $validPositions = ['sales', 'operation', 'manager'];
 
         if (!in_array($position, $validPositions)) {
             throw new Exception("Position không hợp lệ");

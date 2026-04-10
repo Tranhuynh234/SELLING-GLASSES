@@ -423,23 +423,28 @@
                 <section id="permission" class="tab-pane">
                     <div class="pane-header">
                         <h2>Phân quyền nhân viên</h2>
-                        <button class="btn-confirm" onclick="openModal('permission')">
-                            <i class="fas fa-shield-alt"></i> Cấp quyền
-                        </button>
                     </div>
+
                     <div class="table-wrapper glass">
                         <table class="vip-table">
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Tên nhân viên</th>
+                                    <th>Tên người dùng</th>
+                                    <th>Email</th>
                                     <th>Quyền hạn</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody id="permissionTable"></tbody>
+
+                            <tbody id="permissionTable">
+                                <!-- JS render -->
+                            </tbody>
                         </table>
                     </div>
+
+                    <!--  PHÂN TRANG -->
+                    <div id="permissionPagination" class="pagination" style="margin-top: 16px;"></div>
                 </section>
             </div>
         </main>
