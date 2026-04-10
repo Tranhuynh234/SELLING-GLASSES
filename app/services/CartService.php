@@ -12,6 +12,24 @@ class CartService {
         $this->model = new CartModel($conn);
     }
 
+    private function findOrCreateCartId($customerId) {
+        $stmt = $this->conn->prepare("SELECT cartId FROM cart WHERE customerId = ? LIMIT 1");
+        $stmt->execute([$customerId]);
+        $cart = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($cart) {
+            return (int) $cart['cartId'];
+        }
+
+        $stmt = $this->conn->prepare("
+            INSERT INTO cart (customerId, createdDate)
+            VALUES (?, NOW())
+        ");
+        $stmt->execute([$customerId]);
+
+        return (int) $this->conn->lastInsertId();
+    }
+
     // ================= UPDATE =================
     public function updateItem($cartItemId, $quantity) {
         if (!$cartItemId || $quantity <= 0) {
@@ -48,24 +66,7 @@ class CartService {
         if (!$customerId) return [];
 
         try {
-            // Bước 1: Tìm xem thằng khách này có cái Cart nào không
-            $stmt = $this->conn->prepare("SELECT cartId FROM cart WHERE customerId = ? LIMIT 1");
-            $stmt->execute([$customerId]);
-            $cart = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$cart) {
-                return []; // Không có giỏ hàng thì trả về rỗng là đúng
-            }
-
-            $cartId = $cart['cartId'];
-
-            // Bước 2: Lấy sạch sành sanh đồ trong cart_item của nó ra
-            $stmt = $this->conn->prepare("SELECT * FROM cart_item WHERE cartId = ?");
-            $stmt->execute([$cartId]);
-            
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            return $result ? $result : [];
+            return $this->model->getCartDetailsByCustomer($customerId);
 
         } catch (Exception $e) {
             return []; // Có lỗi thì trả về rỗng luôn cho an toàn
@@ -77,11 +78,12 @@ class CartService {
         $vId = (int)$variantId;
         $qty = (int)$quantity;
 
-        // 1. Tìm cartId
-        $stmt = $this->conn->prepare("SELECT cartId FROM cart WHERE customerId = ?");
-        $stmt->execute([$customerId]);
-        $cart = $stmt->fetch(PDO::FETCH_ASSOC);
-        $cartId = $cart['cartId'];
+        if (!$customerId || $vId <= 0 || $qty <= 0) {
+            return [];
+        }
+
+        // 1. Tìm hoặc tạo cartId
+        $cartId = $this->findOrCreateCartId($customerId);
 
         // 2. KIỂM TRA TRÙNG SẢN PHẨM
         $stmt = $this->conn->prepare("SELECT cartItemId, quantity FROM cart_item WHERE cartId = ? AND variantId = ?");

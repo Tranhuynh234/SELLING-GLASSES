@@ -131,6 +131,32 @@ class ProductController {
         exit();
     }
 
+    // public function index() {
+    //     // 1. Lấy dữ liệu từ Service
+    //     $result = $this->productService->getAllProducts();
+
+    //     // 2. Kiểm tra nếu là yêu cầu JSON (từ bạn của ông hoặc từ AJAX)
+    //     // Cách 1: Kiểm tra Header Accept (như hàm detail của ông)
+    //     // Cách 2: Kiểm tra tham số ?type=json trên URL (dễ test hơn)
+    //     $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+    //               || (isset($_GET['type']) && $_GET['type'] === 'json');
+
+    //     if ($isJson) {
+    //         $this->sendResponse($result);
+    //     }
+
+    //     // 3. Nếu không phải JSON, nạp dữ liệu vào biến và gọi View
+    //     // Dựa vào cấu trúc API của ông, sản phẩm nằm trong $result['data']
+    //     $products = $result['data'] ?? [];
+        
+    //     // Giả lập phân trang cơ bản nếu cần
+    //     $currentPage = $_GET['page'] ?? 1;
+    //     $totalPages = 1; // Service hiện tại của ông chưa trả về pagination nên tạm để 1
+
+    //     // 4. Gọi file giao diện (đảm bảo đường dẫn đúng)
+    //     include dirname(__DIR__) . '/views/products/all_products.php';
+    // }
+
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
     if (!$id || !is_numeric($id)) {
@@ -145,4 +171,29 @@ class ProductController {
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
         exit();
     }
+
+//     // 1. Kiểm tra ID hợp lệ
+//     if (!$id || !is_numeric($id)) {
+//         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+//             header('Content-Type: application/json');
+//             echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+//             exit;
+//         }
+//         die("ID không hợp lệ");
+//     }
+
+//     // 2. Lấy dữ liệu từ Service
+//     $result = $this->productService->getProductDetail($id);
+
+//     // 3. KIỂM TRA: Nếu là yêu cầu từ file JS (có header Accept: application/json)
+//     if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+//         header('Content-Type: application/json; charset=utf-8');
+//         echo json_encode($result, JSON_UNESCAPED_UNICODE);
+//         exit;
+//     }
+
+//     // 4. KIỂM TRA: Nếu là người dùng gõ URL trực tiếp (trình duyệt đòi HTML)
+//     // Trả về file giao diện .php của bạn
+//     include dirname(__DIR__) . '/views/product-detail.php';
+// }
 }

@@ -26,13 +26,36 @@ class ProductModel extends BaseModel {
     }
     
    public function getProducts($limit, $offset) {
-    $sql = "SELECT * FROM product LIMIT $limit OFFSET $offset";
-    $rows = $this->queryAll($sql); // Lấy mảng dữ liệu thô
+    $sql = "SELECT
+                p.*,
+                pv.variantId,
+                pv.price,
+                pv.stock,
+                pv.color,
+                pv.size
+            FROM product p
+            LEFT JOIN product_variant pv
+                ON pv.variantId = (
+                    SELECT pv2.variantId
+                    FROM product_variant pv2
+                    WHERE pv2.productId = p.productId
+                    ORDER BY pv2.variantId ASC
+                    LIMIT 1
+                )
+            ORDER BY p.productId DESC
+            LIMIT :limit OFFSET :offset";
+
+    $stmt = $this->conn->prepare($sql);
+    $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+    $stmt->execute();
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $products = [];
     foreach ($rows as $row) {
-        $products[] = new Product($row); // Chuyển từng mảng dữ liệu thành đối tượng Product
+        $products[] = new Product($row);
     }
-    return $products;   
+    return $products;
    }
 
 
@@ -85,7 +108,6 @@ public function addProduct($data) {
 
     // 4. Lấy dữ liệu kèm giá/kho và Tên danh mục để hiện lên bảng Manager
     public function getAllProductsWithVariants() {
-        // Anh JOIN thêm bảng category để lấy categoryName hiển thị cho người dùng xem
         $sql = "SELECT p.*, c.name as categoryName,
             GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
             MIN(v.price) as minPrice,
@@ -102,10 +124,7 @@ public function addProduct($data) {
         return $this->deleteProductComplete($id);
     }
 
-
-    // BỔ SUNG
     public function updateProduct($id, $data) {
-        // Sửa lỗi: Phải kiểm tra $data['imagePath'] thay vì biến $imagePath tự do
         if (isset($data['imagePath']) && $data['imagePath'] !== null) {
             $sql = "UPDATE product SET name = :name, description = :desc, categoryId = :cat, imagePath = :img WHERE productId = :id";
             $stmt = $this->conn->prepare($sql);
@@ -125,10 +144,8 @@ public function addProduct($data) {
 
     public function deleteVariantsByProductId($id) {
         $sql = "DELETE FROM product_variant WHERE productId = ?";
-        // Sửa lỗi: Dùng $this->conn (đồng nhất với các hàm khác trong file)
         return $this->conn->prepare($sql)->execute([$id]);
     }
-    // KẾT THÚC BỔ SUNG
 
    public function countProducts() {
         $sql = "SELECT COUNT(*) AS total FROM product";

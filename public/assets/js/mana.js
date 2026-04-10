@@ -20,10 +20,7 @@ function showTab(tabId) {
 
   if (tabId === "promo") {
     loadPromotions();
-  }
-
-  // BỔ SUNG THÊM ĐOẠN NÀY:
-  else if (tabId === "product") {
+  } else if (tabId === "product") {
     loadProducts();
   }
 }
@@ -189,27 +186,6 @@ function saveData() {
 /* =========================================
    4. XÓA SẢN PHẨM (TRANSACTION)
    ========================================= */
-// function confirmDelete(id) {
-//   if (
-//     confirm(
-//       "Bạn chắc chắn muốn xóa sản phẩm này? Hệ thống sẽ xóa cả các màu và size liên quan!",
-//     )
-//   ) {
-//     fetch(`/SELLING-GLASSES/public/index.php?url=delete-product&id=${id}`, {
-//       method: "POST",
-//     })
-//       .then((response) => response.json())
-//       .then((result) => {
-//         if (result.success) {
-//           loadProducts();
-//           //updateDashboardStats();
-//         } else {
-//           alert("Không thể xóa sản phẩm này!");
-//         }
-//       })
-//       .catch((error) => alert("Lỗi khi yêu cầu xóa!"));
-//   }
-// }
 function confirmDelete(id) {
   Swal.fire({
     title: "Xác nhận xóa?",
