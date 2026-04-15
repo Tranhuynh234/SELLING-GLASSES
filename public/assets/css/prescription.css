@@ -1,0 +1,84 @@
+:root {
+    --brand-orange: #d97706;
+    --brand-orange-dark: #b45309;
+}
+
+/* Custom Input Styles */
+.input-group label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 0.025em;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-input:focus {
+    background-color: #ffffff;
+    border-color: var(--brand-orange);
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
+    outline: none;
+}
+
+/* Lens Select Styles */
+.lens-select {
+    width: 100%;
+    padding: 1rem;
+    background-color: #f1f5f9;
+    border: none;
+    border-radius: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+}
+
+/* Button Submit Pro */
+.btn-submit-pro {
+    width: 100%;
+    padding: 1.25rem;
+    background-color: var(--brand-orange);
+    color: white;
+    border-radius: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s;
+    box-shadow: 0 10px 20px -5px rgba(217, 119, 6, 0.4);
+}
+
+.btn-submit-pro:hover {
+    background-color: var(--brand-orange-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(217, 119, 6, 0.5);
+}
+
+.btn-submit-pro:active {
+    transform: translateY(0);
+}
+
+/* Micro-interactions */
+.upload-zone {
+    cursor: pointer;
+    border-style: dashed;
+}

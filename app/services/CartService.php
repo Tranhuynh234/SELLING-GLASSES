@@ -75,33 +75,62 @@ class CartService {
 
     // ================= ADD TO CART =================
     public function addToCart($customerId, $variantId, $quantity) {
-        $vId = (int)$variantId;
-        $qty = (int)$quantity;
+        try {
+            $vId = (int)$variantId;
+            $qty = (int)$quantity;
 
-        if (!$customerId || $vId <= 0 || $qty <= 0) {
-            return [];
+            $stmt = $this->conn->prepare("
+                SELECT variantId 
+                FROM product_variant 
+                WHERE variantId = ?
+            ");
+            $stmt->execute([$vId]);
+
+            if (!$stmt->fetch()) {
+                error_log("Variant not found: " . $vId);
+                return false; // KHÔNG THROW
+            }
+
+            if (!$customerId || $vId <= 0 || $qty <= 0) {
+                return [];
+            }
+
+            $cartId = $this->findOrCreateCartId($customerId);
+
+            if (!$cartId) {
+                throw new Exception("Cannot create cart");
+            }
+
+            $stmt = $this->conn->prepare("
+                SELECT cartItemId, quantity 
+                FROM cart_item 
+                WHERE cartId = ? AND variantId = ?
+            ");
+            $stmt->execute([$cartId, $vId]);
+            $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($item) {
+                $newQty = $item['quantity'] + $qty;
+
+                $update = $this->conn->prepare("
+                    UPDATE cart_item 
+                    SET quantity = ? 
+                    WHERE cartItemId = ?
+                ");
+                $update->execute([$newQty, $item['cartItemId']]);
+            } else {
+                $insert = $this->conn->prepare("
+                    INSERT INTO cart_item (cartId, variantId, quantity)
+                    VALUES (?, ?, ?)
+                ");
+                $insert->execute([$cartId, $vId, $qty]);
+            }
+
+            return $this->getCart($customerId);
+
+        } catch (Exception $e) {
+            error_log("addToCart error: " . $e->getMessage());
+            return false;
         }
-
-        // 1. Tìm hoặc tạo cartId
-        $cartId = $this->findOrCreateCartId($customerId);
-
-        // 2. KIỂM TRA TRÙNG SẢN PHẨM
-        $stmt = $this->conn->prepare("SELECT cartItemId, quantity FROM cart_item WHERE cartId = ? AND variantId = ?");
-        $stmt->execute([$cartId, $vId]);
-        $item = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($item) {
-            // Nếu đã có, thì UPDATE cộng thêm số lượng vào dòng cũ
-            $newQty = $item['quantity'] + $qty;
-            $update = $this->conn->prepare("UPDATE cart_item SET quantity = ? WHERE cartItemId = ?");
-            $update->execute([$newQty, $item['cartItemId']]);
-        } else {
-            // Nếu chưa có, mới INSERT dòng mới
-            $insert = $this->conn->prepare("INSERT INTO cart_item (cartId, variantId, quantity) VALUES (?, ?, ?)");
-            $insert->execute([$cartId, $vId, $qty]);
-        }
-
-        // 3. Trả về giỏ hàng mới nhất
-        return $this->getCart($customerId);
     }
 }

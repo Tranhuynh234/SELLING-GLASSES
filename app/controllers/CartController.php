@@ -43,12 +43,12 @@ class CartController {
     }
 
     public function showCartPage() {
-        require_once __DIR__ . "/../views/cart/cart.html";
+        require_once __DIR__ . "/../views/cart/cart.php";
         exit();
     }
 
     public function showCheckoutPage() {
-        require_once __DIR__ . "/../views/order/checkout.html";
+        require_once __DIR__ . "/../views/order/checkout.php";
         exit();
     }
 
@@ -93,8 +93,21 @@ class CartController {
         // GỌI DUY NHẤT 1 LẦN Ở ĐÂY (Vừa thêm vừa nhận lại giỏ hàng mới nhất)
         $items = $this->cartService->addToCart($customerId, $variantId, $quantity);
 
+        if ($items === false) {
+            http_response_code(500);
+            echo json_encode([
+                "success" => false,
+                "message" => "Add to cart failed"
+            ]);
+            exit();
+        }
+
+        echo json_encode([
+            "success" => true,
+            "data" => $items
+        ]);
+
         // Trả kết quả về cho JS nhảy số
-        echo json_encode($items);
         exit();
     }
 
@@ -132,6 +145,28 @@ class CartController {
 
         $this->cartService->removeItem($cartItemId);
         echo json_encode(["success" => true]);
+        exit();
+    }
+
+    public function getCheckoutSummary() {
+        header('Content-Type: application/json');
+
+        $customerId = $this->getCustomerId();
+
+        $cart = $this->cartService->getCart($customerId);
+
+        echo json_encode($cart);
+        exit();
+    }
+
+    public function checkout() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        // Xóa tiền tròng kính ngay khi rời khỏi giỏ hàng để sang checkout
+        unset($_SESSION['prescription_total']);
+        
+        // Sau đó mới gọi View hoặc Redirect sang trang Checkout
+        header("Location: index.php?url=checkout");
         exit();
     }
 }

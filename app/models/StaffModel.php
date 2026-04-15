@@ -49,5 +49,20 @@ class StaffModel extends BaseModel {
     public function deleteByUserId($userId) {
         return $this->delete($userId, "userId");
     }
+
+    // ===== KIỂM TRA QUYỀN MANAGER THEO userId =====
+    public function isManagerByUserId($userId) {
+        $sql = "SELECT COUNT(*) as total 
+                FROM staff 
+                WHERE userId = :userId AND role = 'manager'";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return ($row['total'] > 0);
+    }
 }
 ?>

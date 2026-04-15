@@ -66,7 +66,9 @@
 
                 <!-- Icon giỏ hàng -->
                 <button class="relative">
-                    <i class="fas fa-shopping-cart"></i>
+                    <a href="/SELLING-GLASSES/public/cart">
+                        <i class="fa fa-shopping-cart"></i>
+                    </a>
                     <span id="cart-count"
                         class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
                 </button>

@@ -23,6 +23,11 @@ body {
         linear-gradient(180deg, #fffdfa 0%, var(--cart-bg) 100%);
 }
 
+.cart-header a {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
 a,
 button {
     transition: all 0.2s ease;
@@ -506,4 +511,12 @@ input {
         justify-self: stretch;
         justify-content: space-between;
     }
+}
+
+.cart-brand,
+.cart-brand a,
+.cart-header a,
+a.cart-brand {
+    text-decoration: none !important;
+    color: inherit !important;
 }

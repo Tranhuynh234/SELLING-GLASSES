@@ -1,4 +1,6 @@
 <?php
+session_start();
+require_once __DIR__ . "/../config/db_connect.php";
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ProductController.php";
 // Yen them
@@ -10,6 +12,10 @@ require_once "../app/controllers/CartController.php";
 require_once "../app/controllers/HomeController.php";
 require_once __DIR__ . "/../app/controllers/UserController.php";
 require_once "../app/controllers/PaymentController.php";
+require_once "../app/controllers/PrescriptionController.php";
+
+$conn = Database::connect();
+
 // tạo controller
 //Yen them
 $authController = new AuthController();
@@ -21,6 +27,7 @@ $cartController = new CartController();
 $homeController = new HomeController();
 $userController = new UserController();
 $paymentController = new PaymentController();
+$prescriptionController = new PrescriptionController($conn);
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -58,7 +65,7 @@ switch ($url) {
     case "staff-save":
         $staffController->save();
         exit();
-   case "manager":
+    case "manager":
         AuthMiddleware::handle(['staff'], ['manager']);
         require_once "../app/views/Dashboard/manager/mana.php";
         exit();
@@ -97,6 +104,26 @@ switch ($url) {
     case "delete-user":
         AuthMiddleware::handle(['staff'], ['manager']);
         $userController->deleteUser();
+        exit();
+
+    // --- PRESCRIPTION ---
+    case "prescription":
+        // Hiển thị giao diện nhập đơn kính
+        $prescriptionController->create(); 
+        exit();
+
+    case "prescription-store":
+        // Xử lý lưu dữ liệu đơn kính (POST)
+        $prescriptionController->store();
+        exit();
+
+    case "get-prescription-session":
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        // Nếu tồn tại thì trả về giá, không thì trả về 0
+        $price = isset($_SESSION['prescription_total']) ? $_SESSION['prescription_total'] : 0;
+        
+        echo json_encode(['price' => $price]);
         exit();
 
     // --- PHẦN QUẢN LÝ CỦA YẾN ---
@@ -201,9 +228,41 @@ switch ($url) {
     case 'remove-cart-item':
         $cartController->remove();
         exit();
+    
+    case "cart":
+        require_once "../app/views/cart/cart.php";
+        exit();
+
+    case "checkout":
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        // KIỂM TRA: Nếu khách vào checkout mà KHÔNG phải vừa từ trang nhập độ về
+        // (tức là không có status=saved trên link) thì xóa số tiền 300k cũ đi.
+        if (!isset($_GET['status']) || $_GET['status'] !== 'saved') {
+            unset($_SESSION['prescription_total']);
+        }
+
+        // Sau đó mới cho hiển thị trang checkout
+        require_once "../app/views/order/checkout.php";
+        exit();
+
+    case "get-checkout-summary":
+        $cartController->getCheckoutSummary();
+        exit();
+
+    case "create-pending-payment": 
+        $paymentController->createPendingPayment();
+        exit();  
+        
+    case "clear-prescription-session":
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        unset($_SESSION['prescription_total']); // Xóa sổ con số 300k
+        echo json_encode(['success' => true]);
+        exit();
+   
     default:
         http_response_code(404);
         echo "404 Not Found";
-    exit();
+        exit();    
 }
 ?>

@@ -6,6 +6,17 @@ const ctx = canvas.getContext('2d');
 const btnStart = document.getElementById('btn-start-tryon');
 const sizeResult = document.getElementById('ai-size-result');
 
+// Tay thỏ
+const bunnyImg = new Image();
+bunnyImg.src = '/SELLING-GLASSES/public/assets/images/bunny.png';
+
+let enableBunny = false;
+
+function toggleBunny() {
+    enableBunny = !enableBunny;
+    console.log("Bunny:", enableBunny);
+}
+
 const glassesConfig = {
     Square: 1.6,
     Rectangle: 0.17,
@@ -136,6 +147,36 @@ faceMesh.onResults(results => {
              Nên dùng: <b>${suggest}</b>
         `;
     }
+
+    // BUNNY FILTER
+    if (enableBunny && bunnyImg.complete && results.multiFaceLandmarks.length > 0) {
+
+        const landmarks = results.multiFaceLandmarks[0];
+
+        const left = landmarks[234];
+        const right = landmarks[454];
+        const top = landmarks[10];
+
+        const x1 = left.x * canvas.width;
+        const x2 = right.x * canvas.width;
+        const yTop = top.y * canvas.height;
+
+        // SCALE (chỉnh size ở đây)
+        const scaleBunny = 3.5;
+        const width = Math.abs(x2 - x1) * scaleBunny;
+
+        ctx.globalAlpha = 0.95;
+
+        ctx.drawImage(
+            bunnyImg,
+            (x1 + x2) / 2 - width / 2,
+            yTop - width * 0.65, // chỉnh cao/thấp
+            width,
+            width
+        );
+
+        ctx.globalAlpha = 1;
+    }
 });
 
 // start camera
@@ -159,6 +200,11 @@ async function startCamera() {
         const selector = document.getElementById('glasses-selector');
         if (selector) {
             selector.classList.add('hidden');
+        }
+
+        const controls = document.getElementById('tryon-controls');
+        if (controls) {
+            controls.classList.add('hidden');
         }
 
         // reset UI
@@ -185,10 +231,12 @@ async function startCamera() {
             isRunning = true;
 
             // ẩn placeholder
-            document.getElementById('tryon-placeholder').classList.add('opacity-0');
+            document.getElementById('tryon-placeholder').classList.add('hidden');
+            document.getElementById('tryon-controls').classList.add('hidden');
 
             // hiện danh sách kính
             document.getElementById('glasses-selector').classList.remove('hidden');
+            document.getElementById('tryon-controls').classList.remove('hidden');
 
             video.style.opacity = 1;
             canvas.style.opacity = 1;

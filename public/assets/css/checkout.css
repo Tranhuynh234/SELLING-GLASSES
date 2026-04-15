@@ -53,6 +53,8 @@ select {
     font-family: "Playfair Display", serif;
     font-size: 32px;
     font-weight: 700;
+    text-decoration: none; 
+    color: inherit;
 }
 
 .checkout-brand span {
@@ -270,11 +272,13 @@ select {
     padding: 18px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    height: 260px;
 }
 
 .qr-wrap img {
     width: 100%;
-    max-width: 280px;
+    max-width: 630px;
     aspect-ratio: 1;
     object-fit: contain;
 }
@@ -368,4 +372,66 @@ select {
     .checkout-item {
         grid-template-columns: 1fr;
     }
+}
+
+.vietqr {
+    width: 280px;
+    height: 250px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Container thông báo đơn kính */
+.prescription-promo {
+    margin-bottom: 15px;
+    padding: 12px;
+    background-color: #fffbeb; /* Vàng nhạt */
+    border: 1px dashed #f59e0b; /* Viền đứt đoạn màu vàng cam */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.prescription-promo:hover {
+    background-color: #fef3c7;
+    border-style: solid;
+}
+
+.prescription-promo p {
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+/* Nút bấm dẫn sang trang nhập thông số */
+.btn-prescription {
+    font-size: 13px;
+    font-weight: 700;
+    color: #d97706;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-prescription:hover {
+    color: #b45309;
+    text-decoration: underline;
+}
+
+/* Icon */
+.icon-plus-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background-color: #d97706;
+    color: white;
+    border-radius: 4px;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
 }

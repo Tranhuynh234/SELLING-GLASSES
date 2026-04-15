@@ -19,6 +19,12 @@ function bindCartEvents() {
             } else {
                 selectedItems.clear();
             }
+
+            sessionStorage.setItem(
+                "selectedCartItems",
+                JSON.stringify(Array.from(selectedItems))
+            );
+
             renderCart();
         });
     }
@@ -47,22 +53,28 @@ async function loadCart() {
             return;
         }
 
-        const previousSelection = new Set(selectedItems);
+        const saved = JSON.parse(sessionStorage.getItem("selectedCartItems")) || [];
+
         cartItems = Array.isArray(data) ? data : [];
 
-        if (previousSelection.size) {
-            selectedItems = new Set(
-                cartItems
-                    .map((item) => String(item.cartItemId))
-                    .filter((id) => previousSelection.has(id))
-            );
-        } else {
-            selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
-        }
+        selectedItems = new Set(saved);
 
-        if (!selectedItems.size && cartItems.length) {
-            selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
-        }
+        //const previousSelection = new Set(selectedItems);
+        //cartItems = Array.isArray(data) ? data : [];
+
+        //if (previousSelection.size) {
+          //  selectedItems = new Set(
+            //    cartItems
+              //      .map((item) => String(item.cartItemId))
+                //    .filter((id) => previousSelection.has(id))
+           // );
+        //} else {
+          //  selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
+        //}
+
+       // if (!selectedItems.size && cartItems.length) {
+       //     selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
+        //}
 
         renderCart();
         updateCartCount(cartItems);
@@ -131,17 +143,26 @@ window.addToCart = async function (variantId) {
             credentials: "include"
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-            alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+        // ❗ CHECK HTTP STATUS TRƯỚC
+        if (!response.ok) {
+            const text = await response.text();
+            console.error("Server error:", text);
+            alert("Lỗi server khi thêm vào giỏ hàng!");
             return;
         }
 
-        updateCartCount(data);
-        alert("Đã thêm vào giỏ hàng thành công!");
+        const data = await response.json();
+
+        if (data.success) {
+            updateCartCount(data.data);
+            alert("Đã thêm vào giỏ hàng thành công!");
+        } else {
+            alert("Lỗi: " + (data.message || "Unknown error"));
+        }
+
     } catch (error) {
         console.error("Lỗi khi thêm vào giỏ:", error);
+        alert("Không thể thêm vào giỏ hàng!");
     }
 };
 
@@ -254,6 +275,11 @@ function bindRowEvents() {
             } else {
                 selectedItems.delete(cartItemId);
             }
+
+            sessionStorage.setItem(
+                "selectedCartItems",
+                JSON.stringify(Array.from(selectedItems))
+            );
 
             renderCart();
         });
@@ -372,14 +398,16 @@ function escapeHtml(value) {
 
 function updateCartCount(data) {
     const badge = document.getElementById("cart-count");
-    if (!badge) {
+    if (!badge) return;
+
+    if (!Array.isArray(data)) {
+        badge.innerText = 0;
         return;
     }
 
-    if (Array.isArray(data) && data.length > 0) {
-        const totalQty = data.reduce((total, item) => total + parseInt(item.quantity, 10), 0);
-        badge.innerText = totalQty;
-    } else {
-        badge.innerText = 0;
-    }
+    const totalQty = data.reduce((total, item) => {
+        return total + Number(item.quantity || 0);
+    }, 0);
+
+    badge.innerText = totalQty;
 }

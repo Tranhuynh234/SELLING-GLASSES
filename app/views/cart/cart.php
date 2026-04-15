@@ -14,10 +14,12 @@
 
 <body>
 <header class="cart-header">
-    <div class="cart-brand">EYESGLASS<span>.</span></div>
+    <a href="/SELLING-GLASSES/public/home">
+        <div class="cart-brand">EYESGLASS<span>.</span></div>
+    </a>
     <nav class="cart-nav">
         <a href="/SELLING-GLASSES/public/home">Trang chủ</a>
-        <a href="/SELLING-GLASSES/public/auth">Tài khoản</a>
+        <a href="/SELLING-GLASSES/public/profile">Tài khoản</a>
     </nav>
 </header>
 
@@ -76,7 +78,9 @@
                 <strong id="total">0đ</strong>
             </div>
 
-            <button type="button" id="go-to-checkout" class="checkout-btn">Thanh toán ngay</button>
+            <a href="/SELLING-GLASSES/public/checkout" class="checkout-btn">
+                Thanh toán ngay
+            </a>
 
             <p class="summary-note">Bạn có thể điều chỉnh số lượng hoặc bỏ bớt sản phẩm trước khi xác nhận đơn hàng.</p>
         </aside>

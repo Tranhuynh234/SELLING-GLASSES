@@ -122,7 +122,7 @@
                      <?php echo number_format($product->price ?? 0, 0, ',', '.'); ?>đ
                  </p>
 
-                 <button onclick="addToCart(<?php echo $product->productId; ?>)"
+                 <button onclick="addToCart(<?php echo $product->variantId; ?>)"
                      class="w-full py-3 border border-stone-800 rounded-xl font-bold group-hover:bg-stone-800 group-hover:text-white transition">
                      Thêm vào giỏ
                  </button>
@@ -244,11 +244,20 @@
                          mặt</span>
                  </li>
              </ul>
-             <button id="btn-start-tryon"
-                 class="mt-8 px-10 py-4 bg-amber-600 rounded-full font-bold shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:bg-amber-500 transition">
-                 Bắt đầu thử kính ngay
-             </button>
+             <div class="relative inline-block mt-8">
+                    <button id="btn-start-tryon"
+                        class="px-10 py-4 bg-amber-600 rounded-full font-bold shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:bg-amber-500 transition">
+                        Bắt đầu thử kính ngay
+                    </button>
 
+                    <div id="tryon-controls" class="hidden absolute left-full top-1/2 -translate-y-1/2 ml-4">
+                            <button onclick="toggleBunny()" 
+                                class="px-4 py-2 bg-pink-500 rounded-lg text-white font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-paw"></i>
+                                Bunny
+                            </button>
+                        </div>
+                </div>
              <!--  DANH SÁCH CHỌN KÍNH (ẨN BAN ĐẦU) -->
              <div id="glasses-selector" class="mt-6 flex flex-wrap gap-3 hidden">
                  <button onclick="changeGlasses('Square')"
@@ -275,6 +284,7 @@
                      class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
                      Cat-eye
                  </button>
+                
              </div>
          </div>
      </div>

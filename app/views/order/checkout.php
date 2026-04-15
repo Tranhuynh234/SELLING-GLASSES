@@ -12,7 +12,9 @@
 <body>
     <header class="checkout-header">
         <a href="/SELLING-GLASSES/public/cart" class="checkout-back">Quay lại giỏ hàng</a>
-        <div class="checkout-brand">EYESGLASS<span>.</span></div>
+        <a href="/SELLING-GLASSES/public/home" class="checkout-brand">
+            EYESGLASS<span>.</span>
+        </a>
     </header>
 
     <main class="checkout-shell">
@@ -100,29 +102,49 @@
                         <p>Quét mã để chuyển khoản đúng số tiền. Nội dung chuyển khoản nên giữ nguyên để admin dễ đối soát.</p>
                     </div>
                     <div class="qr-wrap">
-                        <img id="bank-qr" src="" alt="QR thanh toán ngân hàng">
+                        <img id="bank-qr" src="/SELLING-GLASSES/public/assets/images/qr.png" alt="QR thanh toán ngân hàng">
                     </div>
                     <div class="bank-meta">
-                        <div><span>Ngân hàng</span><strong id="bank-name">-</strong></div>
-                        <div><span>Số tài khoản</span><strong id="bank-account">-</strong></div>
-                        <div><span>Chủ tài khoản</span><strong id="bank-owner">-</strong></div>
-                        <div><span>Nội dung CK</span><strong id="bank-note">-</strong></div>
+                        <div><span>Ngân hàng</span><strong id="bank-name">Vietcombank</strong></div>
+                        <div><span>Số tài khoản</span><strong id="bank-account">123456789</strong></div>
+                        <div><span>Chủ tài khoản</span><strong id="bank-owner">EYESGLASS VN</strong></div>
+                        <div><span>Nội dung CK</span><strong id="bank-note"> Vui lòng ghi rõ Mã đơn hàng và SĐT khi chuyển khoản</strong></div>
                     </div>
                 </div>
 
                 <div class="summary-block totals-block">
+                    <div class="prescription-promo">
+                        <p>Bạn có đơn kính thuốc?</p>
+                        <a href="/SELLING-GLASSES/public/index.php?url=prescription" class="btn-prescription">
+                            <i class="icon-plus-custom">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </i>
+                            <span>Nhập thông số mắt ngay</span>
+                        </a>
+                    </div>
+
                     <div class="total-row">
                         <span>Tạm tính</span>
                         <strong id="subtotal">0đ</strong>
+                    </div>
+
+                    <div class="total-row" id="lens-cost-row" style="color: #6b7280">
+                        <span>Chi phí tròng kính</span>
+                        <strong id="lens-cost">0đ</strong>
                     </div>
                     <div class="total-row">
                         <span>Giảm giá</span>
                         <strong id="discount">0đ</strong>
                     </div>
+
                     <div class="total-row">
                         <span>Phí giao hàng</span>
                         <strong id="shipping-fee">0đ</strong>
                     </div>
+
                     <div class="grand-total">
                         <span>Tổng</span>
                         <strong id="grand-total">0đ</strong>
