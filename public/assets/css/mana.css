@@ -977,3 +977,184 @@ body {
 .btn-save-permission:active {
   transform: translateY(0);
 }
+
+/* =========================================
+   PAGINATION & SEARCH STYLES
+   ========================================= */
+
+/* Search Input */
+#searchProduct {
+  padding: 10px 15px;
+  border: 1.5px solid #e7e5e4;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  width: 250px;
+}
+
+#searchProduct:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+  background-color: #fffbf0;
+}
+
+#searchProduct::placeholder {
+  color: var(--text-muted);
+}
+
+/* Pagination Button */
+.btn-paginate {
+  background-color: #fdfdfd;
+  border: 1.5px solid #e7e5e4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 40px;
+  text-align: center;
+}
+
+.btn-paginate:hover {
+  background-color: var(--primary-light);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+}
+
+.btn-paginate:active {
+  transform: translateY(0);
+}
+
+.btn-paginate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#paginationContainer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+/* Container chứa các nút phân trang của Kho sản phẩm */
+#productPagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+/* Style cho các nút bấm phân trang sản phẩm */
+#productPagination button {
+  background-color: #fdfdfd;
+  border: 1.5px solid #e7e5e4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hiệu ứng Hover - Bay lên và đổ bóng màu cam */
+#productPagination button:hover:not(:disabled) {
+  background-color: #d97706; /* Màu primary cam */
+  color: white;
+  border-color: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+}
+
+/* Trạng thái trang đang hiển thị (Active) */
+#productPagination button.active {
+  background-color: #d97706;
+  color: white;
+  border-color: #d97706;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1);
+}
+
+/* Trạng thái nút bị khóa (khi ở trang đầu hoặc trang cuối) */
+#productPagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Hiệu ứng khi nhấn chuột xuống */
+#productPagination button:active:not(:disabled) {
+  transform: translateY(0);
+}
+/* phân trang product  */
+/* ========================================== */
+/* Container chứa các nút phân trang của Kho sản phẩm */
+#productPagination {
+  display: flex;
+  justify-content: flex-start; /* Chuyển từ center sang bên trái */
+  align-items: center;
+  gap: 8px;
+  margin-top: 30px;
+  padding: 20px 0;
+  padding-left: 10px; /* Thêm một chút khoảng cách với lề trái nếu cần */
+}
+
+/* Style cho các nút bấm (Giữ nguyên như cũ) */
+#productPagination button {
+  background-color: #fdfdfd;
+  border: 1.5px solid #e7e5e4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hiệu ứng Hover */
+#productPagination button:hover:not(:disabled) {
+  background-color: #d97706;
+  color: white;
+  border-color: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+}
+
+/* Trạng thái trang Active */
+#productPagination button.active {
+  background-color: #d97706;
+  color: white;
+  border-color: #d97706;
+  cursor: default;
+}
+
+/* Khi nút bị disabled */
+#productPagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+  transform: none;
+  box-shadow: none;
+}

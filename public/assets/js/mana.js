@@ -1,84 +1,146 @@
 // 1. QUẢN LÝ TAB (CHUYỂN ĐỔI GIỮA CÁC MENU)
 function showTab(tabId) {
-  // Ẩn tất cả các tab
   document.querySelectorAll(".tab-pane").forEach((pane) => {
     pane.classList.remove("active");
-  }); // Hiện tab được chọn
+  });
 
   const activePane = document.getElementById(tabId);
-  if (activePane) {
-    activePane.classList.add("active");
-  } // Cập nhật trạng thái menu sidebar
+  if (activePane) activePane.classList.add("active");
 
   document.querySelectorAll(".nav-item").forEach((item) => {
     item.classList.remove("active");
   });
+
   const activeBtn = document.getElementById("btn-" + tabId);
-  if (activeBtn) {
-    activeBtn.classList.add("active");
-  } // Nếu bấm vào tab Khuyến mãi thì tự động load dữ liệu
+  if (activeBtn) activeBtn.classList.add("active");
 
   if (tabId === "promo") {
     loadPromotions();
   } else if (tabId === "product") {
-    loadProducts();
+    loadProducts(1); // Gọi trang 1 khi chuyển tab
   }
 }
 
 /* =========================================
    1. FETCH & RENDER (LẤY DỮ LIỆU)
    ========================================= */
+let productPage = 1;
+const productPageSize = 10; // Mỗi trang 10 sản phẩm
+let allProducts = []; // Lưu toàn bộ dữ liệu sản phẩm từ server
 function loadProducts() {
-  fetch("/SELLING-GLASSES/public/index.php?url=get-all-products")
+  // Lấy toàn bộ sản phẩm, không cần truyền page lên server nữa vì mình phân trang bằng JS
+  const url = `/SELLING-GLASSES/public/index.php?url=get-all-products&format=json`;
+
+  fetch(url, {
+    headers: { Accept: "application/json" },
+  })
     .then((response) => response.json())
-    .then((products) => {
-      const tableBody = document.getElementById("productTable");
-      tableBody.innerHTML = "";
+    .then((res) => {
+      if (res.success && Array.isArray(res.data)) {
+        allProducts = res.data; // Lưu toàn bộ vào biến global
+        productPage = 1; // Reset về trang đầu
 
-      products.forEach((item, index) => {
-        const row = `
-            <tr style="font-family: inherit; font-size: 0.85rem;">
-              <td>${index + 1}</td>
-
-               <td>
-                <div style="text-align: left;">
-                  <span>${item.name}</span>
-                </div>
-              </td>
-
-              <td>${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 }).format(item.minPrice || 0)}đ</td>
-
-              <td>
-                <button onclick="viewDetail(${item.productId})" style="background:none; border:none; cursor:pointer; color: var(--primary); font-size: 1.1rem;">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </td>
-
-              <td>
-                <div class="action-group" style="display: flex; gap: 20px; justify-content: center;">
-                  <button onclick="openEditModal(${item.productId})" style="color: #f39c12; background:none; border:none; cursor:pointer; font-size: 1.1rem;">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                   <button onclick="confirmDelete(${item.productId})" style="color: #ff4d4d; background:none; border:none; cursor:pointer; font-size: 1.1rem;">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-              </td>
-            </tr>`;
-        tableBody.insertAdjacentHTML("beforeend", row);
-      });
+        renderProductTable(); // Vẽ bảng
+        renderProductPagination(); // Vẽ nút phân trang
+      } else {
+        console.error("Lỗi dữ liệu:", res.message);
+        document.getElementById("productTable").innerHTML =
+          "<tr><td colspan='5'>Không có sản phẩm nào.</td></tr>";
+      }
     })
     .catch((error) => console.error("Lỗi lấy dữ liệu:", error));
+}
+function renderProductTable() {
+  const tableBody = document.getElementById("productTable");
+  if (!tableBody) return;
+
+  // Tính toán vị trí bắt đầu và kết thúc
+  const start = (productPage - 1) * productPageSize;
+  const end = start + productPageSize;
+  const displayData = allProducts.slice(start, end);
+
+  tableBody.innerHTML = displayData
+    .map((item, index) => {
+      const stt = start + index + 1; // STT cộng dồn theo trang
+      return `
+      <tr style="font-family: inherit; font-size: 0.85rem;">
+        <td>${stt}</td>
+        <td><div style="text-align: left;"><span>${item.name}</span></div></td>
+        <td>${new Intl.NumberFormat("vi-VN").format(item.minPrice || 0)}đ</td>
+        <td>
+          <button onclick="viewDetail(${item.productId})" style="background:none; border:none; cursor:pointer; color: var(--primary); font-size: 1.1rem;">
+            <i class="fas fa-eye"></i>
+          </button>
+        </td>
+        <td>
+          <div class="action-group" style="display: flex; gap: 20px; justify-content: center;">
+            <button onclick="openEditModal(${item.productId})" style="color: #f39c12; background:none; border:none; cursor:pointer; font-size: 1.1rem;">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="confirmDelete(${item.productId})" style="color: #ff4d4d; background:none; border:none; cursor:pointer; font-size: 1.1rem;">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    })
+    .join("");
+}
+function renderProductPagination() {
+  const container = document.getElementById("productPagination"); // Nhớ ID này trong HTML
+  if (!container) return;
+
+  const totalPages = Math.ceil(allProducts.length / productPageSize);
+  if (totalPages <= 1) {
+    container.innerHTML = "";
+    return;
+  }
+
+  let html = `
+    <button onclick="changeProductPage(${productPage - 1})" ${productPage === 1 ? "disabled" : ""}>
+      <i class="fas fa-chevron-left"></i>
+    </button>
+  `;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `
+      <button onclick="changeProductPage(${i})" class="${i === productPage ? "active" : ""}">
+        ${i}
+      </button>
+    `;
+  }
+
+  html += `
+    <button onclick="changeProductPage(${productPage + 1})" ${productPage === totalPages ? "disabled" : ""}>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  `;
+
+  container.innerHTML = html;
+}
+
+function changeProductPage(page) {
+  productPage = page;
+  renderProductTable();
+  renderProductPagination();
 }
 
 /* =========================================
    2. XEM CHI TIẾT (DETAIL MODAL)
    ========================================= */
 function viewDetail(id) {
-  fetch(`/SELLING-GLASSES/public/index.php?url=detail&id=${id}`)
+  // Thêm Header Accept để Backend biết bạn muốn nhận JSON
+  fetch(`/SELLING-GLASSES/public/index.php?url=detail&id=${id}`, {
+    headers: {
+      Accept: "application/json",
+    },
+  })
     .then((response) => response.json())
     .then((res) => {
+      // Vì Backend trả về {success: true, data: {...}}
+      // nên chúng ta dùng res.success để kiểm tra
       if (!res.success) return alert(res.message);
+
       const product = res.data;
 
       let variantHtml = product.variants
@@ -108,7 +170,10 @@ function viewDetail(id) {
                 </div>`;
       document.getElementById("detailModal").style.display = "flex";
     })
-    .catch((error) => alert("Lỗi khi kết nối Database!"));
+    .catch((error) => {
+      console.error("Lỗi Detail:", error);
+      alert("Lỗi khi kết nối Database hoặc dữ liệu không đúng định dạng!");
+    });
 }
 
 /* =========================================
@@ -129,58 +194,82 @@ const Toast = Swal.mixin({
 
 function saveData() {
   const productId = document.getElementById("editProductId").value;
-  const name = document.getElementById("input1").value;
-  const description = document.getElementById("input2").value;
+  const name = document.getElementById("input1").value.trim();
+  const description = document.getElementById("input2").value.trim();
   const categoryId = document.getElementById("inputCatId").value;
-  const variantInput = document.getElementById("inputVariant").value;
-  const imageInput = document.getElementById("inputImage");
+  const variantInput = document.getElementById("inputVariant").value.trim();
+  const staffIdFromSession = document.getElementById("sessionStaffId").value;
+  const price = document.getElementById("inputProductPrice").value.trim();
 
+  // 1. Kiểm tra các thông tin bắt buộc
+  if (!staffIdFromSession) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi",
+      text: "Phiên đăng nhập hết hạn!",
+    });
+    return;
+  }
+  if (!name || !categoryId || !price || !variantInput) {
+    Swal.fire({
+      icon: "warning",
+      title: "Thiếu thông tin",
+      text: "Vui lòng điền đầy đủ các trường bắt buộc!",
+    });
+    return;
+  }
+
+  // 2. Kiểm tra định dạng biến thể (Màu|Size|Giá|Kho)
+  const lines = variantInput.split("\n").filter((l) => l.trim());
+  const isValidFormat = lines.every((line) => line.split("|").length === 4);
+  if (!isValidFormat) {
+    Swal.fire({
+      icon: "error",
+      title: "Sai định dạng",
+      text: "Biến thể phải là: Màu|Size|Giá|SốLượng",
+    });
+    return;
+  }
+
+  // 3. Khởi tạo FormData
   const formData = new FormData();
   formData.append("name", name);
   formData.append("description", description);
   formData.append("categoryId", categoryId);
-  formData.append("variants", variantInput);
-  // BỔ SUNG
-  formData.append("staffId", 1); // Thêm dòng này vào trước khi fetch
+  formData.append("staffId", staffIdFromSession);
+  formData.append("price", price);
 
+  // Gửi ảnh nếu có
+  const imageInput = document.getElementById("inputImage");
   if (imageInput.files.length > 0) {
     formData.append("image", imageInput.files[0]);
   }
 
-  // Kiểm tra URL (Nếu có ID thì là update, không thì là add)
+  // QUAN TRỌNG: Đẩy từng dòng biến thể vào mảng variants[]
+  lines.forEach((line) => {
+    formData.append("variants[]", line);
+  });
+
+  // 4. Xác định URL (Add hoặc Update)
   const actionUrl = productId
     ? `update-product&id=${productId}`
     : `add-product`;
-
-  if (productId) {
-    formData.append("productId", productId);
-  }
 
   fetch(`/SELLING-GLASSES/public/index.php?url=${actionUrl}`, {
     method: "POST",
     body: formData,
   })
-    .then((response) => response.json())
+    .then((res) => res.json())
     .then((result) => {
       if (result.success) {
-        Toast.fire({
-          icon: "success",
-          title: productId ? "Cập nhật thành công!" : "Thêm mới thành công!",
-        });
-        closeModal();
-        loadProducts();
+        Swal.fire("Thành công", result.message, "success");
+        closeModal(); // Đóng modal sau khi lưu
+        loadProducts(); // Load lại danh sách sản phẩm
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Lỗi...",
-          text: result.message,
-        });
+        Swal.fire("Lỗi", result.message, "error");
       }
     })
-    .catch((error) => {
-      console.error("Lỗi kết nối:", error);
-      alert("Không thể kết nối API!");
-    });
+    .catch((err) => console.error("Lỗi kết nối:", err));
 }
 
 /* =========================================
@@ -246,6 +335,7 @@ function openModal() {
 }
 
 function closeModal() {
+  document.activeElement.blur();
   document.getElementById("modal").style.display = "none";
 }
 
@@ -263,34 +353,93 @@ function closeDetailModal() {
    7. MỞ MODAL ĐỂ CHỈNH SỬA
    ========================================= */
 function openEditModal(id) {
-  // 1. Đổi tiêu đề Modal
   document.getElementById("modalTitle").innerText = "Chỉnh sửa sản phẩm";
 
-  // 2. Gọi API lấy chi tiết sản phẩm để đổ vào form
-  fetch(`/SELLING-GLASSES/public/index.php?url=detail&id=${id}`)
+  fetch(`/SELLING-GLASSES/public/index.php?url=detail&id=${id}`, {
+    headers: { Accept: "application/json" },
+  })
     .then((response) => response.json())
     .then((res) => {
       if (!res.success) return alert(res.message);
+
       const product = res.data;
 
-      // 3. Điền thông tin vào các ô Input
-      document.getElementById("editProductId").value = product.productId; // Lưu ID vào ô ẩn
+      document.getElementById("editProductId").value = product.productId;
       document.getElementById("input1").value = product.name;
       document.getElementById("input2").value = product.description;
-      document.getElementById("inputCatId").value = product.categoryId;
+      document.getElementById("inputProductPrice").value = product.price ?? "";
 
-      // Gom danh sách biến thể thành chuỗi: Màu|Size|Giá|Kho
+      // ✅ Load danh mục rồi mới set value
+      fetch("/SELLING-GLASSES/public/index.php?url=get-all-categories", {
+        headers: { Accept: "application/json" },
+      })
+        .then((r) => r.json())
+        .then((categories) => {
+          const selectCat = document.getElementById("inputCatId");
+          selectCat.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+
+          if (Array.isArray(categories)) {
+            categories.forEach((cat) => {
+              const option = document.createElement("option");
+              option.value = cat.categoryId;
+              option.textContent = cat.name;
+              // ✅ So sánh == thay vì === để tránh lỗi kiểu dữ liệu số vs chuỗi
+              if (cat.categoryId == product.categoryId) {
+                option.selected = true;
+              }
+              selectCat.appendChild(option);
+            });
+          }
+        });
+
       const variantStr = product.variants
         .map((v) => `${v.color}|${v.size}|${v.price}|${v.stock}`)
         .join("\n");
       document.getElementById("inputVariant").value = variantStr;
 
-      // Hiển thị tên ảnh hiện tại để người dùng biết
       document.getElementById("currentImageName").innerText =
         "Ảnh hiện tại: " + (product.imagePath || "Không có");
 
-      // 4. Mở Modal
       document.getElementById("modal").style.display = "flex";
     })
-    .catch((error) => alert("Lỗi khi lấy thông tin sản phẩm!"));
+    .catch((error) => {
+      console.error("Lỗi Edit Modal:", error);
+      alert("Lỗi khi lấy thông tin sản phẩm!");
+    });
 }
+function loadCategories() {
+  fetch("/SELLING-GLASSES/public/index.php?url=get-all-categories", {
+    headers: { Accept: "application/json" },
+  })
+    .then((response) => response.json())
+    .then((res) => {
+      // Vì Server trả về mảng trực tiếp [ {...}, {...} ]
+      // Ta kiểm tra xem res có phải là mảng không
+      if (Array.isArray(res)) {
+        const selectCat = document.getElementById("inputCatId");
+        if (!selectCat) return;
+
+        res.forEach((cat) => {
+          // Sử dụng đúng tên thuộc tính categoryId từ JSON bạn vừa gửi
+          const option = `<option value="${cat.categoryId}">${cat.name}</option>`;
+          selectCat.insertAdjacentHTML("beforeend", option);
+        });
+
+        console.log("Đã tải danh mục thành công!");
+      } else {
+        console.error("Dữ liệu trả về không phải là mảng:", res);
+      }
+    })
+    .catch((err) => console.error("Lỗi load danh mục:", err));
+}
+function loadPromotions() {
+  console.log("Tính năng khuyến mãi đang phát triển...");
+  const tableBody = document.getElementById("promoTable");
+  if (tableBody)
+    tableBody.innerHTML = "<tr><td colspan='5'>Đang cập nhật...</td></tr>";
+}
+document.addEventListener("DOMContentLoaded", () => {
+  // Kiểm tra xem hàm có tồn tại không trước khi gọi để tránh lỗi dừng script
+  if (typeof loadProducts === "function") loadProducts();
+  if (typeof loadCategories === "function") loadCategories();
+});

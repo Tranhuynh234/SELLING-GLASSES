@@ -55,6 +55,7 @@ class ProductController {
             'categoryId'  => $_POST['categoryId'] ?? 1,
             'staffId'     => $_POST['staffId'] ?? 1,
             'variants'    => $_POST['variants'] ?? '',
+            'price'       => $_POST['price'] ?? 0,
         ];
 
         // Truyền $_FILES để Service xử lý upload ảnh
@@ -124,76 +125,94 @@ class ProductController {
     // ================================
 
     // Hiển thị danh sách sản phẩm đầy đủ
-    public function index() {
-        $products = $this->productService->getAllProducts(); 
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($products, JSON_UNESCAPED_UNICODE);
+       public function index() {
+    // 1. Lấy toàn bộ dữ liệu từ Service
+    $result = $this->productService->getAllProducts();
+
+    // 2. Nhận diện loại yêu cầu (Request Detection)
+    // Nếu có header Accept: application/json hoặc có tham số ?type=json trên URL
+    $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+                  || (isset($_GET['format']) && $_GET['format'] === 'json');
+
+   if ($isJsonRequest) {
+    header('Content-Type: application/json; charset=utf-8');
+    $response = [
+        'success' => true,
+        'data' => $result // $result này chính là mảng bạn thấy trong hình
+    ];
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    exit();
+}
+    else {
+        // --- ĐÂY LÀ PHẦN HIỂN THỊ CHO KHÁCH HÀNG ---
+        
+        // Vì Service của bạn trả về mảng trực tiếp (như hình Thunder Client)
+        // Nên bạn gán thẳng $result cho $products luôn
+        $products = $result; 
+
+        // Nếu bạn muốn an toàn hơn, có thể viết:
+        // $products = (isset($result['data'])) ? $result['data'] : $result;
+
+        $viewPath = __DIR__ . '/../views/products/all_products.php';
+        
+        if (file_exists($viewPath)) {
+            include $viewPath;
+        } else {
+            echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+        }
         exit();
     }
-
-    // public function index() {
-    //     // 1. Lấy dữ liệu từ Service
-    //     $result = $this->productService->getAllProducts();
-
-    //     // 2. Kiểm tra nếu là yêu cầu JSON (từ bạn của ông hoặc từ AJAX)
-    //     // Cách 1: Kiểm tra Header Accept (như hàm detail của ông)
-    //     // Cách 2: Kiểm tra tham số ?type=json trên URL (dễ test hơn)
-    //     $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
-    //               || (isset($_GET['type']) && $_GET['type'] === 'json');
-
-    //     if ($isJson) {
-    //         $this->sendResponse($result);
-    //     }
-
-    //     // 3. Nếu không phải JSON, nạp dữ liệu vào biến và gọi View
-    //     // Dựa vào cấu trúc API của ông, sản phẩm nằm trong $result['data']
-    //     $products = $result['data'] ?? [];
-        
-    //     // Giả lập phân trang cơ bản nếu cần
-    //     $currentPage = $_GET['page'] ?? 1;
-    //     $totalPages = 1; // Service hiện tại của ông chưa trả về pagination nên tạm để 1
-
-    //     // 4. Gọi file giao diện (đảm bảo đường dẫn đúng)
-    //     include dirname(__DIR__) . '/views/products/all_products.php';
-    // }
+}
 
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
-    public function detail($id) {
+   public function detail($id) {
+    // 1. Kiểm tra ID hợp lệ (Dùng chung cho cả 2 bên)
     if (!$id || !is_numeric($id)) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
-            exit();
-        }
+        $this->handleError("ID không hợp lệ");
+    }
 
-        $result = $this->productService->getProductDetail($id);
-        
+    // 2. Lấy dữ liệu từ Service
+    $result = $this->productService->getProductDetail($id);
+
+    // 3. Kiểm tra sản phẩm có tồn tại không
+    if (!$result || (isset($result['success']) && $result['success'] === false)) {
+        $this->handleError("Sản phẩm không tồn tại");
+    }
+
+    // 4. Nhận diện loại yêu cầu (Request Detection)
+    $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+                  || (isset($_GET['format']) && $_GET['format'] === 'json');
+
+    if ($isJsonRequest) {
+        // --- PHẦN CỦA BẠN (TRẢ VỀ JSON CHO MODAL) ---
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
         exit();
+    } else {
+        // --- PHẦN CỦA BẠN BẠN (TRẢ VỀ GIAO DIỆN CHI TIẾT) ---
+        // Gán dữ liệu vào biến để file .php sử dụng
+        // Tùy Service trả về mảng phẳng hay mảng có key 'data'
+        $product = $result['data'] ?? $result; 
+
+        $viewPath = __DIR__ . '/../views/product-detail.php';
+        if (file_exists($viewPath)) {
+            include $viewPath;
+        } else {
+            echo "Lỗi: Không tìm thấy file giao diện chi tiết.";
+        }
+        exit();
     }
+}
 
-//     // 1. Kiểm tra ID hợp lệ
-//     if (!$id || !is_numeric($id)) {
-//         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
-//             header('Content-Type: application/json');
-//             echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
-//             exit;
-//         }
-//         die("ID không hợp lệ");
-//     }
-
-//     // 2. Lấy dữ liệu từ Service
-//     $result = $this->productService->getProductDetail($id);
-
-//     // 3. KIỂM TRA: Nếu là yêu cầu từ file JS (có header Accept: application/json)
-//     if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
-//         header('Content-Type: application/json; charset=utf-8');
-//         echo json_encode($result, JSON_UNESCAPED_UNICODE);
-//         exit;
-//     }
-
-//     // 4. KIỂM TRA: Nếu là người dùng gõ URL trực tiếp (trình duyệt đòi HTML)
-//     // Trả về file giao diện .php của bạn
-//     include dirname(__DIR__) . '/views/product-detail.php';
-// }
+// Hàm bổ trợ để xử lý lỗi nhanh cho cả 2 loại yêu cầu
+private function handleError($message) {
+    $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+    if ($isJson) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => $message]);
+    } else {
+        die($message);
+    }
+    exit();
+}
 }

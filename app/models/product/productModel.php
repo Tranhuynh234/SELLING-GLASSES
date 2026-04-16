@@ -66,10 +66,10 @@ public function addProduct($data) {
             'description' => $data['description'],
             'categoryId'  => $data['categoryId'],
             'imagePath'   => $data['imagePath'] ?? null,
-            'staffId'     => $data['staffId']
+            'staffId'     => $data['staffId'],
+            'price'       => $data['price']
         ]);
     }
-
     // 2. Thêm biến thể (Bảng product_variant)
     public function addVariant($data) {
         $sql = "INSERT INTO product_variant (color, size, price, productId, stock) 

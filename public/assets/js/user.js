@@ -410,7 +410,6 @@ function renderPermissions() {
       <td style="text-align: left; font-size: 0.85rem; color: #78716c;">${u.email}</td>
       <td>
         <select class="role-select" onchange="changeRole('${u.userId}', this.value)">
-          <option value="" ${currentPos === "" ? "selected" : ""}>-- Chọn quyền --</option>
           <option value="customer" ${currentPos === "customer" ? "selected" : ""}>customer</option>
           <option value="sales" ${currentPos === "sales" ? "selected" : ""}>Sales</option>
           <option value="operation" ${currentPos === "operation" ? "selected" : ""}>Operation</option>
