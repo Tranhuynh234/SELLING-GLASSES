@@ -168,7 +168,6 @@ class PaymentService {
 
             $this->userModel->update($userId, [
                 "name" => $recipientName,
-                "email" => $recipientEmail,
                 "phone" => $recipientPhone
             ], "userId");
 

@@ -3,7 +3,7 @@ require_once __DIR__ . "/../../core/BaseModel.php";
 require_once __DIR__ . "/../../entities/order/OrderItem.php";
 
 class OrderItemModel extends BaseModel {
-    protected $table = "order_items"; // 
+    protected $table = "order_item"; // 
 
     public function findByOrderId($orderId) {
         $sql = "SELECT * FROM {$this->table} WHERE orderId = :orderId";

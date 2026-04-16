@@ -8,6 +8,28 @@ document.addEventListener("DOMContentLoaded", () => {
     if (form) {
         form.addEventListener("submit", submitPendingPayment);
     }
+
+    const citySelect = document.getElementById("city");
+
+    if (citySelect) {
+        citySelect.addEventListener("change", () => {
+            if (!checkoutSummary) return;
+
+            const subtotal = checkoutSummary.summary.subtotal;
+            const lensPrice = checkoutSummary.summary.lensPrice || 0;
+            const shippingFee = calculateShippingFee(subtotal);
+
+            checkoutSummary.summary.shippingFee = shippingFee;
+            checkoutSummary.summary.total = subtotal + shippingFee + lensPrice;
+
+            renderSummary(checkoutSummary.summary);
+            renderBankInfo(
+                checkoutSummary.bankInfo,
+                checkoutSummary.summary,
+                checkoutSummary.transferNote
+            );
+        });
+    }
 });
 
 function getSelectedCartItems() {
@@ -22,26 +44,75 @@ function getSelectedCartItems() {
 
 async function loadCheckoutSummary() {
     const selectedCartItems = getSelectedCartItems();
-    const query = selectedCartItems.length ? `?selected=${selectedCartItems.join(",")}` : "";
+    console.log("selectedCartItems:", selectedCartItems);
+    if (!selectedCartItems.length) {
+        renderEmptyState("Bạn chưa chọn sản phẩm nào để thanh toán!");
+        return;
+    }
+
+    const query = `?selected=${selectedCartItems.join(",")}`;
 
     try {
         const response = await fetch(`${CHECKOUT_BASE}/get-checkout-summary${query}`, {
             credentials: "include"
         });
-        const result = await response.json();
+        const data = await response.json();
 
-        if (!result.success) {
-            renderEmptyState(result.message || "Không có dữ liệu thanh toán");
+        const sessionRes = await fetch(`${CHECKOUT_BASE}/index.php?url=get-prescription-session`, {
+            credentials: "include"
+        });
+        const sessionData = await sessionRes.json();
+  
+        let lensPrice = 0;
+        if (sessionData && sessionData.price !== undefined && sessionData.price !== null) {
+            lensPrice = Number(sessionData.price);
+        } else {
+            lensPrice = 0;
+        }
+
+        if (!data || data.length === 0) {
+            renderEmptyState("Không có dữ liệu thanh toán");
             return;
         }
 
-        checkoutSummary = result.data;
+        const filteredData = data.filter(item =>
+            selectedCartItems.includes(String(item.cartItemId))
+        );
+
+        const subtotal = filteredData.reduce((sum, i) => sum + i.price * i.quantity, 0);
+        const shippingFee = calculateShippingFee(subtotal);
+
+        checkoutSummary = {
+            items: filteredData,
+            summary: {
+                subtotal: subtotal,
+                discount: 0,
+                lensPrice: lensPrice,
+                shippingFee: shippingFee,
+                total: subtotal + shippingFee + lensPrice 
+            },
+            bankInfo: {
+                bankName: "Vietcombank",
+                bankCode: "VCB",
+                accountNumber: "9346484951",
+                accountName: "EYESGLASS VN"
+            },
+        transferNote: "EYESGLASS"
+    };
+
+        // gọi render
+    renderItems(checkoutSummary.items);
+    renderSummary(checkoutSummary.summary);
+    
+
+        //checkoutSummary = result.data;
         fillCustomerInfo(checkoutSummary.customer || {});
         document.getElementById("transferNote").value = checkoutSummary.transferNote || "";
         renderItems(checkoutSummary.items || []);
         renderSummary(checkoutSummary.summary || {});
         renderBankInfo(checkoutSummary.bankInfo || {}, checkoutSummary.summary || {}, checkoutSummary.transferNote || "");
     } catch (error) {
+        console.log("DATA:", data);
         renderEmptyState("Không tải được dữ liệu thanh toán. Vui lòng thử lại.");
     }
 }
@@ -65,7 +136,9 @@ function renderItems(items) {
 
     container.innerHTML = items.map((item) => {
         const lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
-        const imageUrl = resolveImageUrl(item.imagePath);
+        const imageUrl = item.imagePath 
+            ? `/SELLING-GLASSES/public/assets/images/products/${item.imagePath}`
+            : "/SELLING-GLASSES/public/assets/images/thumbnail1.jpg";
 
         return `
             <article class="checkout-item">
@@ -84,6 +157,7 @@ function renderItems(items) {
 function renderSummary(summary) {
     setText("subtotal", formatCurrency(summary.subtotal || 0));
     setText("discount", formatCurrency(summary.discount || 0));
+    setText("lens-cost", formatCurrency(summary.lensPrice || 0));
     setText("shipping-fee", formatCurrency(summary.shippingFee || 0));
     setText("grand-total", formatCurrency(summary.total || 0));
 }
@@ -105,6 +179,7 @@ function renderBankInfo(bankInfo, summary, transferNote) {
     const accountName = encodeURIComponent(bankInfo.accountName || "");
     const addInfo = encodeURIComponent(transferNote || "EYESGLASS");
     qr.src = `https://img.vietqr.io/image/${bankCode}-${account}-compact2.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
+    qr.classList.add("vietqr"); // Chỉ áp dụng khi là VietQR
 }
 
 async function submitPendingPayment(event) {
@@ -118,14 +193,18 @@ async function submitPendingPayment(event) {
         return;
     }
 
-    const selectedCartItems = getSelectedCartItems().length
-        ? getSelectedCartItems()
-        : (checkoutSummary.items || []).map((item) => item.cartItemId);
+    const selectedCartItems = getSelectedCartItems();
+
+    if (!selectedCartItems.length) {
+        alert("Vui lòng chọn sản phẩm để thanh toán!");
+        return;
+    }
+
     const formData = new FormData(form);
     formData.append("selectedCartItems", selectedCartItems.join(","));
 
     button.disabled = true;
-    button.textContent = "Đang gửi yêu cầu thanh toán...";
+    button.textContent = "Đang gửi...";
 
     try {
         const response = await fetch(`${CHECKOUT_BASE}/create-pending-payment`, {
@@ -133,16 +212,21 @@ async function submitPendingPayment(event) {
             body: formData,
             credentials: "include"
         });
-        const result = await response.json();
 
-        if (!result.success) {
-            alert(result.message || "Không thể tạo yêu cầu thanh toán.");
+        const data = await response.json();
+        console.log("RESPONSE:", data);
+
+        if (!data || !data.success || !data.data?.orderId) {
+            alert("Tạo đơn thất bại!");
             return;
         }
 
         sessionStorage.removeItem("selectedCartItems");
-        alert(`Đã tạo đơn #${result.data.orderId}. Đơn hiện ở trạng thái chờ admin duyệt.`);
+
+        alert(`Đã tạo đơn #${data.data.orderId}. Đơn đang chờ duyệt.`);
+
         window.location.href = `${CHECKOUT_BASE}/profile`;
+
     } catch (error) {
         alert("Không gửi được yêu cầu thanh toán. Vui lòng thử lại.");
     } finally {
@@ -195,4 +279,18 @@ function escapeHtml(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+function calculateShippingFee(subtotal) {
+    const city = document.getElementById("city")?.value;
+
+    if (city === "Ho Chi Minh") {
+        return 0;
+    }
+
+    if (subtotal >= 500000) {
+        return 0;
+    }
+
+    return 30000;
 }
