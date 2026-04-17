@@ -62,18 +62,20 @@ document.addEventListener("DOMContentLoaded", function () {
               // Active nút hiện tại
               btn.className = baseClass + activeClass;
 
+              // Lưu variant được chọn
+              window.__selectedProductVariantId = v.variantId || v.id || null;
+
               // CẬP NHẬT GIÁ VÀ KHO TẠI ĐÂY
-              updatePriceAndStock(v.price, v.stock);
+              updatePriceAndStock(v.price, v.stock, window.__selectedProductVariantId);
             };
 
             container.appendChild(btn);
           });
 
           // 4. QUAN TRỌNG: Cập nhật giá của variant đầu tiên ngay khi load trang
-          updatePriceAndStock(
-            product.variants[0].price,
-            product.variants[0].stock,
-          );
+          const first = product.variants[0];
+          window.__selectedProductVariantId = first.variantId || first.id || null;
+          updatePriceAndStock(first.price, first.stock, window.__selectedProductVariantId);
         }
       }
     })
@@ -81,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Hàm bổ trợ để cập nhật giá tiền lên giao diện
-function updatePriceAndStock(price, stock) {
+function updatePriceAndStock(price, stock, variantId) {
   const priceEl = document.getElementById("detail-price");
   const stockEl = document.getElementById("detail-stock");
 
@@ -94,3 +96,49 @@ function updatePriceAndStock(price, stock) {
     stockEl.className = `text-sm ${stock > 0 ? "text-green-600" : "text-red-500"} font-medium`;
   }
 }
+
+// Gắn sự kiện cho nút thêm vào giỏ
+document.addEventListener('click', function (e) {
+  const btn = document.getElementById('add-to-cart-btn');
+  if (!btn) return;
+  if (e.target && (e.target === btn || btn.contains(e.target))) {
+    // Lấy variant đang chọn
+    const variantId = window.__selectedProductVariantId;
+    if (!variantId) {
+      alert('Vui lòng chọn phiên bản sản phẩm trước khi thêm vào giỏ.');
+      return;
+    }
+
+    // Sử dụng hàm toàn cục từ cart.js nếu có
+    if (typeof window.addToCart === 'function') {
+      window.addToCart(variantId);
+    } else {
+      // Fallback: gửi POST trực tiếp
+      const fd = new FormData();
+      fd.append('variantId', variantId);
+      fd.append('quantity', 1);
+      fetch('/SELLING-GLASSES/public/add-to-cart', {
+        method: 'POST',
+        body: fd,
+        credentials: 'include'
+      }).then(res => res.json()).then(data => {
+        if (data && data.success) {
+          alert('Đã thêm vào giỏ hàng thành công!');
+          // Cập nhật badge nếu server trả về data
+          if (Array.isArray(data.data)) {
+            const badge = document.getElementById('cart-count');
+            if (badge) {
+              const totalQty = data.data.reduce((s, it) => s + Number(it.quantity||0), 0);
+              badge.innerText = totalQty;
+            }
+          }
+        } else {
+          alert('Thêm vào giỏ thất bại: ' + (data.message || 'Lỗi'));
+        }
+      }).catch(err => {
+        console.error(err);
+        alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại.');
+      });
+    }
+  }
+});

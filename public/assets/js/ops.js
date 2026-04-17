@@ -23,7 +23,7 @@ const opsApp = {
       {
         id: "EG-1100",
         customer: "Nguyễn Văn Toàn",
-        status: "Chờ lấy hàng",
+        status: "Đang xử lý",
         date: "2026-03-19",
         total: "850.000đ",
         tracking: "",
@@ -39,7 +39,7 @@ const opsApp = {
       {
         id: "EG-1102",
         customer: "Lê Minh",
-        status: "Hoàn thành",
+        status: "Hoàn tất",
         date: "2026-03-15",
         total: "500.000đ",
         tracking: "VTP-999888",
@@ -115,7 +115,7 @@ const opsApp = {
   // --- 1. TỔNG QUAN (DASHBOARD) ---
   renderDashboard(el) {
     const pendingOrders = this.state.orders.filter(
-      (o) => o.status === "Chờ lấy hàng",
+      (o) => o.status === "Đang xử lý",
     ).length;
     const outOfStock = this.state.inventory.filter((i) => i.stock <= 0).length;
     const lowStock = this.state.inventory.filter(
@@ -185,9 +185,9 @@ const opsApp = {
   // --- 2. QUẢN LÝ ĐƠN HÀNG ---
   renderOrders(el) {
     const filteredOrders = this.state.orders.filter((o) => {
-      if (this.orderFilter === "pending") return o.status === "Chờ lấy hàng";
+      if (this.orderFilter === "pending") return o.status === "Đang xử lý";
       if (this.orderFilter === "shipping") return o.status === "Đang giao";
-      if (this.orderFilter === "completed") return o.status === "Hoàn thành";
+      if (this.orderFilter === "completed") return o.status === "Hoàn tất";
       return true;
     });
 
@@ -197,9 +197,9 @@ const opsApp = {
                 <div class="header-actions">
                     <select class="filter-select" onchange="opsApp.handleOrderFilter(this.value)">
                         <option value="all" ${this.orderFilter === "all" ? "selected" : ""}>Tất cả trạng thái</option>
-                        <option value="pending" ${this.orderFilter === "pending" ? "selected" : ""}>Chờ lấy hàng</option>
+                        <option value="pending" ${this.orderFilter === "pending" ? "selected" : ""}>Đang xử lý</option>
                         <option value="shipping" ${this.orderFilter === "shipping" ? "selected" : ""}>Đang giao</option>
-                        <option value="completed" ${this.orderFilter === "completed" ? "selected" : ""}>Hoàn thành</option>
+                        <option value="completed" ${this.orderFilter === "completed" ? "selected" : ""}>Hoàn tất</option>
                     </select>
                 </div>
             </div>
@@ -237,16 +237,16 @@ const opsApp = {
   },
 
   getOrderBadgeClass(status) {
-    if (status === "Chờ lấy hàng") return "bg-low";
+    if (status === "Đang xử lý") return "bg-low";
     if (status === "Đang giao") return "bg-shipping";
-    if (status === "Hoàn thành") return "bg-ok";
+    if (status === "Hoàn tất") return "bg-ok";
     return "";
   },
 
   // --- 3. VẬN CHUYỂN ---
   renderShipping(el) {
     const pending = this.state.orders.filter(
-      (o) => o.status === "Chờ lấy hàng",
+      (o) => o.status === "Đang xử lý",
     );
     el.innerHTML = `
             <div class="warehouse-header">
@@ -385,7 +385,7 @@ const opsApp = {
   },
   openUpdateOrderModal(id) {
     const order = this.state.orders.find((o) => o.id === id);
-    const body = `<div class="form-group"><label>Trạng thái</label><select id="up-status" class="input-field"><option value="Chờ lấy hàng" ${order.status === "Chờ lấy hàng" ? "selected" : ""}>Chờ lấy hàng</option><option value="Đang giao" ${order.status === "Đang giao" ? "selected" : ""}>Đang giao</option><option value="Hoàn thành" ${order.status === "Hoàn thành" ? "selected" : ""}>Hoàn thành</option></select></div><div class="form-group"><label>Mã Tracking</label><input type="text" id="up-tracking" class="input-field" value="${order.tracking}"></div>`;
+    const body = `<div class="form-group"><label>Trạng thái</label><select id="up-status" class="input-field"><option value="Đang xử lý" ${order.status === "Đang xử lý" ? "selected" : ""}>Đang xử lý</option><option value="Đang giao" ${order.status === "Đang giao" ? "selected" : ""}>Đang giao</option><option value="Hoàn tất" ${order.status === "Hoàn tất" ? "selected" : ""}>Hoàn tất</option></select></div><div class="form-group"><label>Mã Tracking</label><input type="text" id="up-tracking" class="input-field" value="${order.tracking}"></div>`;
     this.setModal(`Cập nhật đơn #${id}`, body, () => {
       order.status = document.getElementById("up-status").value;
       order.tracking = document.getElementById("up-tracking").value;

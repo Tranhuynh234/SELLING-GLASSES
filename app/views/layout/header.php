@@ -27,7 +27,7 @@
             </div>
         </div>
         <header class="bg-white py-4 px-6 md:px-12 flex justify-between items-center border-b border-stone-100">
-            <a href="#" class="font-bold text-3xl tracking-tighter hover:opacity-80 transition">
+            <a href="/SELLING-GLASSES/public/home" class="font-bold text-3xl tracking-tighter hover:opacity-80 transition">
                 EYESGLASS<span class="text-amber-600">.</span>
             </a>
 

@@ -364,9 +364,162 @@ async function logout() {
     alert("Không thể logout!");
   }
 }
+// ======== phân quyền =============
+// =============================
+// PERMISSION MODULE
+// =============================
+let permissionPage = 1;
+const permissionPageSize = 5;
+let allPermissions = [];
+async function loadPermissions() {
+  try {
+    const res = await fetch("/SELLING-GLASSES/public/get-users");
+    const result = await res.json();
+
+    if (!result.success) {
+      alert("Lỗi load permission");
+      return;
+    }
+
+    allPermissions = result.data;
+    permissionPage = 1;
+
+    renderPermissions();
+    renderPermissionPagination();
+  } catch (err) {
+    console.error(err);
+  }
+}
+function renderPermissions() {
+  const tbody = document.getElementById("permissionTable");
+  if (!tbody) return;
+
+  const start = (permissionPage - 1) * permissionPageSize;
+  const end = start + permissionPageSize;
+  const users = allPermissions.slice(start, end);
+
+  tbody.innerHTML = users
+    .map((u, i) => {
+      // Lấy giá trị position hiện tại, nếu là null (khách hàng) thì để trống hoặc mặc định
+      const currentPos = u.position ? u.position.toLowerCase() : "";
+
+      return `
+    <tr>
+      <td>${start + i + 1}</td>
+      <td style="font-weight: 600;">${u.name}</td>
+      <td style="text-align: left; font-size: 0.85rem; color: #78716c;">${u.email}</td>
+      <td>
+        <select class="role-select" onchange="changeRole('${u.userId}', this.value)">
+          <option value="customer" ${currentPos === "customer" ? "selected" : ""}>customer</option>
+          <option value="sales" ${currentPos === "sales" ? "selected" : ""}>Sales</option>
+          <option value="operation" ${currentPos === "operation" ? "selected" : ""}>Operation</option>
+          <option value="manager" ${currentPos === "manager" ? "selected" : ""}>Manager</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn-save-permission" onclick="updatePermission('${u.userId}')">Lưu</button>
+      </td>
+    </tr>
+  `;
+    })
+    .join("");
+}
+function renderPermissionPagination() {
+  const container = document.getElementById("permissionPagination");
+  if (!container) return;
+
+  const totalPages = Math.ceil(allPermissions.length / permissionPageSize);
+
+  let html = "";
+
+  html += `
+    <button onclick="changePermissionPage(${permissionPage - 1})" ${permissionPage === 1 ? "disabled" : ""}>
+      ←
+    </button>
+  `;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `
+      <button onclick="changePermissionPage(${i})" class="${i === permissionPage ? "active" : ""}">
+        ${i}
+      </button>
+    `;
+  }
+
+  html += `
+    <button onclick="changePermissionPage(${permissionPage + 1})" ${permissionPage === totalPages ? "disabled" : ""}>
+      →
+    </button>
+  `;
+
+  container.innerHTML = html;
+}
+
+function changePermissionPage(page) {
+  const totalPages = Math.ceil(allPermissions.length / permissionPageSize);
+  if (page < 1 || page > totalPages) return;
+
+  permissionPage = page;
+  renderPermissions();
+  renderPermissionPagination();
+}
+function changeRole(userId, newRole) {
+  const user = allPermissions.find((u) => u.userId == userId);
+  if (user) {
+    // Cập nhật lại role của user trong mảng local để hàm updatePermission lấy ra gửi API
+    user.role = newRole;
+    console.log(`Đã chọn quyền mới cho ${user.name}: ${newRole}`);
+  }
+}
+async function updatePermission(userId) {
+  // 1. Tìm user để lấy email
+  const user = allPermissions.find((u) => u.userId == userId);
+
+  if (!user || !user.email) {
+    alert("Không tìm thấy email của người dùng!");
+    return;
+  }
+
+  try {
+    // 2. Gọi ĐÚNG đường dẫn API và truyền ĐÚNG tham số như ảnh Thunder Client
+    const res = await fetch("/SELLING-GLASSES/public/staff-save", {
+      // Thay đổi route ở đây
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        position: user.role, // Tương ứng với 'position' trong ảnh
+        email: user.email, // Tương ứng với 'email' trong ảnh
+      }),
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("Cập nhật quyền thành công!");
+    } else {
+      alert("Lỗi từ server: " + (result.message || "Thất bại"));
+    }
+  } catch (err) {
+    console.error("Lỗi kết nối:", err);
+    alert("Không thể kết nối đến máy chủ.");
+  }
+}
 // ======================
 // AUTO LOAD WHEN CLICK TAB
 // =============================
+document.addEventListener("DOMContentLoaded", () => {
+  const btnPermission = document.getElementById("btn-permission");
+
+  if (btnPermission) {
+    btnPermission.addEventListener("click", () => {
+      setTimeout(() => {
+        loadPermissions();
+      }, 100);
+    });
+  }
+});
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btn-user");
 
@@ -390,7 +543,7 @@ if (formUpdate) {
     const email = document.getElementById("edit_email").value;
     const phone = document.getElementById("edit_phone").value;
 
-    // Đóng gói dữ liệu theo định dạng x-www-form-urlencoded (giống Thunder Client)
+    // Đóng gói dữ liệu theo định dạng x-www-form-urlencoded (giống Thunder)
     const params = new URLSearchParams();
     params.append("userId", userId);
     params.append("name", name);

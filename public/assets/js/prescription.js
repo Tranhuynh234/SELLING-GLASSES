@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const fileInput = document.getElementById("file-upload");
     const fileNameDisplay = document.getElementById("file-name-display");
 
-    // Hàm định dạng tiền tệ chuyên nghiệp (VD: 300.000 đ)
+    // Hàm định dạng tiền tệ chuyên nghiệp 
     const formatVND = (amount) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
@@ -16,13 +16,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Hàm cập nhật giá
     function updatePrice() {
-        const price = parseInt(lensSelect.value) || 0;
+    const price = parseInt(lensSelect.value) || 0;
         const processingFee = 50000;
         const total = price + processingFee;
 
         // Hiệu ứng thay đổi số mượt hơn
         lensPriceDisplay.innerText = formatVND(price);
         totalPriceDisplay.innerText = formatVND(total);
+
+        document.getElementById("total_amount_input").value = total;
     }
 
     // Hiển thị tên file khi chọn ảnh

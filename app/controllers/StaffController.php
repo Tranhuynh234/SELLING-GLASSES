@@ -13,10 +13,8 @@ class StaffController {
         $this->userService = new UserService();
     }
 
-    // =========================
-    // SAVE STAFF (email → userId)
-    // =========================
-    public function save() {
+    // SAVE STAFF (email -> userId)
+     public function save() {
 
         $currentUser = AuthMiddleware::handle(['staff']);
 
@@ -62,9 +60,7 @@ class StaffController {
         exit;
     }
 
-    // =========================
     // DELETE STAFF
-    // =========================
     public function delete() {
 
         AuthMiddleware::handle(['staff']);

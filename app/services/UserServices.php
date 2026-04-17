@@ -127,6 +127,7 @@ public function register($data) {
                 "email" => $user->getEmail(),
                 "role" => $user->getRole(),
                 "position" => $position,
+                "staffId"  => $staff ? $staff->getStaffId() : null
             ]);
     }
 

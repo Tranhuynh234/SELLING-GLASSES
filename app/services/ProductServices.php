@@ -106,12 +106,11 @@ class ProductServices {
     }
 
     // HÀM dành cho nút Thêm mới: Xử lý Upload Ảnh + Lưu Sản phẩm + Lưu Biến thể
-    public function addFullProductAndVariants($postData, $fileData) {
-    // 1. Bắt đầu Transaction từ Model
+   public function addFullProductAndVariants($postData, $fileData) {
     $this->productModel->beginTransaction();
 
     try {
-        // --- BƯỚC 1: Xử lý file ảnh (giữ nguyên logic của bạn) ---
+        // --- BƯỚC 1: Xử lý file ảnh ---
         $imageName = null; 
         if (isset($fileData['image']) && $fileData['image']['error'] === 0) {
             $ext = strtolower(pathinfo($fileData['image']['name'], PATHINFO_EXTENSION));
@@ -120,73 +119,78 @@ class ProductServices {
                 $imageName = "glass_" . time() . "_" . uniqid() . "." . $ext;
                 $targetDir = __DIR__ . "/../../public/assets/images/products/";
                 if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-                $targetFile = $targetDir . $imageName;
-                if (!move_uploaded_file($fileData['image']['tmp_name'], $targetFile)) {
-                    $imageName = null; 
+                if (move_uploaded_file($fileData['image']['tmp_name'], $targetDir . $imageName)) {
+                    $postData['imagePath'] = $imageName;
                 }
             }
         }
 
-        $postData['imagePath'] = $imageName;
-        // staffId nên lấy từ Session ở Controller truyền vào, ở đây tạm giữ logic của bạn
-        $postData['staffId'] = $postData['staffId'] ?? 1;
+        // --- BƯỚC 2: Xử lý giá (Price) cho bảng products ---
+        // Lấy giá từ POST, nếu không có hoặc bằng 0 thì lấy từ biến thể đầu tiên
+        $rawPrice = $postData['price'] ?? 0;
         
-        // --- BƯỚC 2: Thêm sản phẩm chính ---
-        $resProduct = $this->addProduct($postData);
+        // Nếu giá gửi lên là chuỗi trống hoặc 0, ta lấy từ chuỗi variants gửi kèm
+        if ((int)preg_replace('/[^0-9]/', '', $rawPrice) <= 0 && !empty($postData['variants'])) {
+            $variantsArray = is_array($postData['variants']) ? $postData['variants'] : [$postData['variants']];
+            $firstVariant = explode('|', $variantsArray[0]);
+            $rawPrice = $firstVariant[2] ?? 0; // Lấy phần tử giá trong chuỗi "Màu|Size|Giá|Kho"
+        }
 
+        // Làm sạch và ép về kiểu INT để khớp với Database
+        $postData['price'] = (int)preg_replace('/[^0-9]/', '', $rawPrice);
+
+        if ($postData['price'] <= 0) {
+            throw new Exception("Lỗi: Giá sản phẩm chính không hợp lệ (phải lớn hơn 0).");
+        }
+
+        // --- BƯỚC 3: Thêm sản phẩm chính ---
+        $resProduct = $this->addProduct($postData);
         if (!$resProduct['success']) {
-            // Nếu không tạo được sản phẩm, ném ra lỗi để nhảy vào catch
-            throw new Exception("Lỗi: Không thể tạo thông tin sản phẩm chính.");
+            throw new Exception("Lỗi: Không thể lưu thông tin sản phẩm chính vào Database.");
         }
 
         $newProductId = $resProduct['productId'];
 
-        // --- BƯỚC 3: Thêm các biến thể ---
-        // 1. Kiểm tra nếu nó là chuỗi thì biến nó thành mảng để xử lý
-        $variantsArray = $postData['variants'];
-        if (!is_array($variantsArray)) {
-            $variantsArray = [$variantsArray]; // Ép chuỗi "Bạc|M|..." vào trong 1 mảng []
-        }
-
-        if (!empty($variantsArray)) {
-            foreach ($variantsArray as $variantString) {
-                $parts = explode('|', $variantString);
-                if (count($parts) === 4) {
-                    $resVariant = $this->addVariant([
-                        'productId' => $newProductId,
-                        'color'     => trim($parts[0]),
-                        'size'      => trim($parts[1]),
-                        'price'     => (float)preg_replace('/[^0-9.]/', '', $parts[2]), 
-                        'stock'     => (int)$parts[3]
-                    ]);
-
-                    if (!$resVariant['success']) {
-                        throw new Exception("Lỗi: Không thể thêm biến thể sản phẩm.");
-                    }
-                }
-            }
-        } else {
+        // --- BƯỚC 4: Thêm các biến thể ---
+        $variantsArray = is_array($postData['variants']) ? $postData['variants'] : [$postData['variants']];
+        
+        if (empty($variantsArray) || (count($variantsArray) === 1 && empty($variantsArray[0]))) {
             throw new Exception("Lỗi: Sản phẩm phải có ít nhất một biến thể.");
         }
 
-        // --- BƯỚC 4: Nếu chạy đến đây không lỗi, lưu vĩnh viễn vào DB ---
-        $this->productModel->commit();
-        return ['success' => true, 'message' => 'Thêm sản phẩm và biến thể thành công!'];
+        foreach ($variantsArray as $variantString) {
+            if (empty(trim($variantString))) continue;
 
-        } catch (Exception $e) {
-            // --- BƯỚC 5: Nếu có bất kỳ lỗi nào ở trên, hủy bỏ mọi thay đổi ---
-            $this->productModel->rollBack();
+            $parts = explode('|', $variantString);
+            if (count($parts) === 4) {
+                $variantData = [
+                    'productId' => $newProductId,
+                    'color'     => trim($parts[0]),
+                    'size'      => trim($parts[1]),
+                    'price'     => (int)preg_replace('/[^0-9]/', '', $parts[2]), // Giá biến thể cũng ép INT
+                    'stock'     => (int)trim($parts[3])
+                ];
 
-            // Xóa file ảnh vừa upload nếu đã lỡ upload thành công để tránh rác server
-            if ($imageName) {
-                $pathToDelete = __DIR__ . "/../../public/assets/images/products/" . $imageName;
-                if (file_exists($pathToDelete)) unlink($pathToDelete);
+                $resVariant = $this->addVariant($variantData);
+                if (!$resVariant['success']) {
+                    throw new Exception("Lỗi: Không thể thêm biến thể: " . $parts[0]);
+                }
             }
-
-            return ['success' => false, 'message' => $e->getMessage()];
         }
-    }
 
+        $this->productModel->commit();
+        return ['success' => true, 'message' => 'Thêm sản phẩm thành công!'];
+
+    } catch (Exception $e) {
+        $this->productModel->rollBack();
+        // Xóa ảnh nếu có lỗi để tránh rác server
+        if (!empty($imageName)) {
+            $pathToDelete = __DIR__ . "/../../public/assets/images/products/" . $imageName;
+            if (file_exists($pathToDelete)) unlink($pathToDelete);
+        }
+        return ['success' => false, 'message' => $e->getMessage()];
+    }
+}
     // HÀM dành cho nút Chỉnh sửa: Xử lý Upload Ảnh + Lưu Sản phẩm + Lưu Biến thể (KHI CẬP NHẬT XONG)
     public function updateFullProductAndVariants($id, $data, $files) {
         try {

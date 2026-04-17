@@ -11,6 +11,7 @@
 </head>
 
 <body>
+    <input type="hidden" id="sessionStaffId" value="<?php echo $_SESSION['user']['staffId'] ?? ''; ?>">
     <div id="modalUpdate" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
@@ -106,7 +107,7 @@
 
                 <div class="modal-body">
                     <input type="hidden" id="editProductId" value="" />
-                    
+
                     <div class="input-field">
                         <label>Tên mắt kính</label>
                         <div class="input-wrapper">
@@ -132,16 +133,11 @@
                     </div>
 
                     <div class="input-field">
-                        <label>Danh mục (Loại kính)</label>
+                        <label>Danh mục</label>
                         <div class="input-wrapper">
                             <i class="fas fa-list"></i>
                             <select id="inputCatId">
-                                <option value="1">Gọng Nam</option>
-                                <option value="2">Gọng Nữ</option>
-                                <option value="3">Gọng Trẻ Em</option>
-                                <option value="4">Chống Ánh Sáng Xanh</option>
-                                <option value="5">Kính Đổi Màu</option>
-                                <option value="6">Kính Siêu Mỏng</option>
+                                <option value="">-- Chọn danh mục --</option>
                             </select>
                         </div>
                     </div>
@@ -157,11 +153,12 @@
 
                     <div class="input-field">
                         <label>Biến thể (Màu|Size|Giá|Kho)</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-tags"></i>
-                            <input type="text" id="inputVariant" placeholder="Đen|M|500000|10" />
+                        <div class="input-wrapper" style="align-items: flex-start;">
+                            <i class="fas fa-tags" style="margin-top: 10px;"></i>
+                            <textarea id="inputVariant" placeholder="Đen|M|500000|10" rows="4"
+                                style="width: 100%; border: none; outline: none; padding: 10px; font-family: inherit;"></textarea>
                         </div>
-                        <small class="helper-text-amber">* Ngăn cách bằng dấu gạch đứng |</small>
+                        <small class="helper-text-amber">* Mỗi dòng là một biến thể. Ngăn cách bằng |</small>
                     </div>
                 </div>
 
@@ -319,6 +316,7 @@
                             <tbody id="productTable"></tbody>
                         </table>
                     </div>
+                    <div id="productPagination" class="pagination-container"></div>
                 </section>
 
                 <section id="promo" class="tab-pane">
@@ -427,23 +425,28 @@
                 <section id="permission" class="tab-pane">
                     <div class="pane-header">
                         <h2>Phân quyền nhân viên</h2>
-                        <button class="btn-confirm" onclick="openModal('permission')">
-                            <i class="fas fa-shield-alt"></i> Cấp quyền
-                        </button>
                     </div>
+
                     <div class="table-wrapper glass">
                         <table class="vip-table">
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Tên nhân viên</th>
+                                    <th>Tên người dùng</th>
+                                    <th>Email</th>
                                     <th>Quyền hạn</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody id="permissionTable"></tbody>
+
+                            <tbody id="permissionTable">
+                                <!-- JS render -->
+                            </tbody>
                         </table>
                     </div>
+
+                    <!--  PHÂN TRANG -->
+                    <div id="permissionPagination" class="pagination" style="margin-top: 16px;"></div>
                 </section>
             </div>
         </main>

@@ -16,11 +16,11 @@ class HomeController {
         // Lấy toàn bộ dữ liệu từ HomeService
         $data = $this->homeService->getHomeData($page);
 
-        /** * TRÍCH XUẤT DỮ LIỆU ĐỂ TRANG HOME.PHP SỬ DỤNG
-         * Giả sử HomeService trả về mảng có dạng ['products' => [...], 'pagination' => ...]
-         * Ta gán mảng products vào biến $products để vòng lặp foreach trong view hoạt động.
-         */
-        $products = $data['products'] ?? []; 
+        // Trích xuất dữ liệu để trang home.php sử dụng 
+        $products = $data['products'] ?? [];
+        
+        // Lấy danh sách đánh giá từ khách hàng
+        $reviews = $this->homeService->getLatestReviews(5);
 
         // Nhúng file giao diện trang chủ
         require_once __DIR__ . "/../views/home/home.php";

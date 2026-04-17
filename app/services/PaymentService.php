@@ -182,7 +182,7 @@ class PaymentService {
                 "customerId" => $customerId,
                 "orderDate" => date("Y-m-d H:i:s"),
                 "status" => "Pending",
-                "totalPrice" => $summary['total'],
+                "totalPrice" => (float)($payload['totalPrice'] ?? $summary['total']),
                 "staffId" => null
             ]);
 
@@ -296,6 +296,29 @@ class PaymentService {
         } catch (Exception $e) {
             $this->conn->rollBack();
             return $this->response(false, "Không thể duyệt thanh toán: " . $e->getMessage());
+        }
+    }
+
+    public function cancelOrder($orderId, $userId) {
+        try {
+            // 1. Kiểm tra đơn hàng có đúng của User này và đang Pending (Chờ xử lý) không
+            // Phải JOIN với bảng customers để check đúng userId
+            $sql = "SELECT o.orderId FROM orders o 
+                    JOIN customers c ON o.customerId = c.customerId 
+                    WHERE o.orderId = :oid AND c.userId = :uid AND o.status = 'Pending'";
+            
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':oid' => $orderId, ':uid' => $userId]);
+            
+            if ($stmt->fetch()) {
+                // 2. Nếu đúng điều kiện thì UPDATE thành Cancelled
+                $updateSql = "UPDATE orders SET status = 'Cancelled' WHERE orderId = :oid";
+                $stmtUpdate = $this->conn->prepare($updateSql);
+                return $stmtUpdate->execute([':oid' => $orderId]);
+            }
+            return false; // Không thỏa điều kiện hủy
+        } catch (Exception $e) {
+            return false;
         }
     }
 }

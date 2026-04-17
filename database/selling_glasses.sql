@@ -581,6 +581,43 @@ ALTER TABLE `shipment`
 --
 ALTER TABLE `staff`
   ADD CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `review`
+--
+
+CREATE TABLE `review` (
+  `reviewId` int(11) NOT NULL,
+  `customerId` int(11) NOT NULL,
+  `orderId` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `comment` text DEFAULT NULL,
+  `createdDate` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Chỉ mục cho bảng `review`
+--
+ALTER TABLE `review`
+  ADD PRIMARY KEY (`reviewId`),
+  ADD KEY `customerId` (`customerId`),
+  ADD KEY `orderId` (`orderId`);
+
+--
+-- AUTO_INCREMENT cho bảng `review`
+--
+ALTER TABLE `review`
+  MODIFY `reviewId` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Các ràng buộc cho bảng `review`
+--
+ALTER TABLE `review`
+  ADD CONSTRAINT `review_ibfk_1` FOREIGN KEY (`customerId`) REFERENCES `customers` (`customerId`),
+  ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`orderId`) REFERENCES `orders` (`orderId`);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

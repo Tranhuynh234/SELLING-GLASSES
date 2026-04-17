@@ -330,26 +330,36 @@
              Khách Hàng Nói Gì Về EYESGLASS?
          </h2>
          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-             <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100">
-                 <div class="text-amber-500 mb-4">
-                     <i class="fa-solid fa-star"></i>
-                     <i class="fa-solid fa-star"></i>
-                     <i class="fa-solid fa-star"></i>
-                     <i class="fa-solid fa-star"></i>
-                     <i class="fa-solid fa-star"></i>
-                 </div>
-                 <p class="text-stone-600 italic mb-8">
-                     "Tính năng thử kính AI quá xịn! Mình đã chọn được gọng Titan rất
-                     vừa vặn mà không cần đến cửa hàng."
-                 </p>
-                 <div class="flex items-center gap-4">
-                     <div class="w-12 h-12 bg-stone-200 rounded-full"></div>
-                     <div>
-                         <p class="font-bold">Minh Tú</p>
-                         <p class="text-xs text-stone-400">Đã mua: Gọng Titan Classic</p>
+             <?php if (!empty($reviews) && is_array($reviews)): ?>
+                 <?php foreach ($reviews as $review): ?>
+                     <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100">
+                         <div class="text-amber-500 mb-4">
+                             <?php 
+                             $rating = isset($review['rating']) ? intval($review['rating']) : 5;
+                             for ($i = 0; $i < 5; $i++): 
+                             ?>
+                                 <i class="fa-solid fa-star" style="<?= $i < $rating ? '' : 'opacity: 0.3;' ?>"></i>
+                             <?php endfor; ?>
+                         </div>
+                         <p class="text-stone-600 italic mb-8">
+                             "<?php echo htmlspecialchars($review['comment'] ?? 'Sản phẩm rất tốt!'); ?>"
+                         </p>
+                         <div class="flex items-center gap-4">
+                             <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center" style="color: white; background: linear-gradient(135deg, #d97706 0%, #ea580c 100%); font-weight: bold;">
+                                 <?php echo strtoupper(substr($review['customerName'] ?? 'User', 0, 1)); ?>
+                             </div>
+                             <div>
+                                 <p class="font-bold"><?php echo htmlspecialchars($review['customerName'] ?? 'Khách hàng'); ?></p>
+                                 <p class="text-xs text-stone-400"><?php echo date('d/m/Y', strtotime($review['createdDate'] ?? date('Y-m-d'))); ?></p>
+                             </div>
+                         </div>
                      </div>
+                 <?php endforeach; ?>
+             <?php else: ?>
+                 <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100 md:col-span-3 text-center">
+                     <p class="text-stone-600">Chưa có đánh giá nào. Hãy mua sản phẩm và chia sẻ trải nghiệm của bạn!</p>
                  </div>
-             </div>
+             <?php endif; ?>
          </div>
      </div>
  </section>
