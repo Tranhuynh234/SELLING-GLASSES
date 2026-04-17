@@ -252,41 +252,9 @@ body {
   background: white;
   padding: 0 30px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   border-bottom: 1px solid #f0f0f0;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  background: white;
-  padding: 10px 18px;
-  border-radius: 50px;
-  width: 320px;
-  border: 1px solid var(--lens-border);
-  transition: all 0.3s ease;
-}
-
-.search-box:focus-within {
-  background: white;
-  border-color: var(--teal);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.search-box i {
-  color: #999;
-  font-size: 14px;
-  margin-right: 10px;
-}
-
-.search-box input {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
-  color: #555;
 }
 
 /* --- NÚT LOGIN --- */
@@ -314,6 +282,33 @@ body {
 
 .login-btn i {
   font-size: 16px;
+}
+
+/* --- NÚT CHAT --- */
+.chat-nav-btn {
+  background-color: var(--lens-gold);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.chat-nav-btn:hover {
+  background-color: var(--lens-dark);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(197, 166, 90, 0.3);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
 }
 
 /*-- ================= DASHBOARD ================= --*/
@@ -770,6 +765,14 @@ tr:hover td {
   box-shadow: 0 4px 15px rgba(197, 166, 90, 0.4) !important;
 }
 
+.btn-request-action {
+  background-color: #e67e22 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.35) !important;
+  justify-content: center !important;
+  gap: 10px;
+}
+
 .btn-support-contact {
   background-color: var(--lens-dark) !important;
   color: #ffffff !important;
@@ -887,4 +890,293 @@ tr:hover td {
   color: #666 !important;
   border-radius: 8px !important;
   border: none !important;
+}
+
+/*-- ================= CHAT LIÊN HỆ VỚI KHÁCH HÀNG ================= --*/
+/* TRẠNG THÁI ẨN */
+.chat-hidden {
+  display: none !important;
+}
+
+/* KHUNG TỔNG */
+.chat-main-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 850px;
+  height: 600px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  z-index: 10001;
+  overflow: hidden;
+  border: 1px solid var(--lens-border);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* HEADER TỔNG */
+.chat-header-container {
+  background: #fff;
+  color: var(--lens-dark);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--lens-gold);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.header-left i {
+  color: var(--lens-gold);
+  font-size: 20px;
+}
+
+.close-inbox-btn {
+  background: none;
+  border: none;
+  color: var(--lens-dark);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.close-inbox-btn:hover {
+  color: var(--lens-gold);
+}
+
+/* LAYOUT CHÍNH 2 CỘT */
+.chat-inbox-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* CỘT TRÁI - SIDEBAR DANH SÁCH */
+.inbox-sidebar {
+  width: 300px;
+  border-right: 1px solid var(--lens-border);
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+}
+
+.inbox-search {
+  padding: 15px;
+  background: #fff;
+}
+
+.inbox-search input {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid var(--lens-border);
+  padding: 8px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.inbox-search input:focus {
+  border-color: var(--lens-gold);
+}
+
+#conversation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+}
+
+/* ITEM KHÁCH HÀNG */
+.conv-item {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: 0.3s;
+}
+
+.conv-item:hover {
+  background: #f1f1f1;
+}
+
+.conv-item.active {
+  background: var(--lens-bg-warm);
+  border-left: 4px solid var(--lens-gold);
+}
+
+.conv-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--lens-dark);
+  color: var(--lens-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.conv-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.conv-name {
+  font-weight: 600;
+  color: var(--lens-dark);
+  font-size: 14px;
+}
+
+.conv-order {
+  font-size: 12px;
+  color: var(--lens-text-gray);
+}
+
+/* CỘT PHẢI - NỘI DUNG CHAT */
+.inbox-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.active-user-header {
+  padding: 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid var(--lens-border);
+  font-weight: 600;
+  color: var(--lens-dark);
+  font-size: 13px;
+}
+
+.inbox-chat-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: #fcfcfc;
+}
+
+/* BONG BÓNG TIN NHẮN */
+.msg-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+  padding-bottom: 18px !important; /* Tạo khoảng trống phía dưới để hiện giờ */
+}
+
+.msg-time {
+  font-size: 10px;
+  position: absolute;
+  bottom: 4px;
+  opacity: 0.7;
+}
+
+.msg-staff {
+  background: var(--lens-gold);
+  color: #fff;
+  align-self: flex-end;
+  border-bottom-right-radius: 2px;
+}
+
+.msg-customer {
+  background: #eee;
+  color: var(--lens-dark);
+  align-self: flex-start;
+  border-bottom-left-radius: 2px;
+}
+
+/* Tùy chỉnh thêm để văn bản không bị đè lên giờ */
+.msg-text {
+  word-wrap: break-word;
+  margin-bottom: 2px;
+}
+
+/* Tin nhắn của Staff: giờ nằm bên phải */
+.msg-staff .msg-time {
+  right: 12px;
+  color: #eee;
+}
+
+/* Tin nhắn của Khách: giờ nằm bên trái */
+.msg-customer .msg-time {
+  left: 12px;
+  color: #888;
+}
+
+/* FOOTER NHẬP LIỆU */
+.inbox-footer {
+  padding: 15px;
+  border-top: 1px solid var(--lens-border);
+}
+
+.input-group-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--lens-border);
+  padding: 5px 15px;
+  border-radius: 25px; /* Tạo hình viên thuốc hiện đại */
+}
+
+.input-group-wrapper:focus-within {
+  border-color: var(--lens-gold);
+}
+
+.input-group-wrapper input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.btn-send-inbox {
+  background: none;
+  border: none;
+  color: var(--lens-gold);
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-send-inbox:hover {
+  transform: scale(1.1);
+}
+
+/* PLACEHOLDER KHI CHƯA CHỌN CHAT */
+.chat-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--lens-text-gray);
+  text-align: center;
+}
+
+.chat-placeholder i {
+  font-size: 50px;
+  color: var(--lens-gold);
+  margin-bottom: 15px;
+  opacity: 0.3;
 }

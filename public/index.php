@@ -198,9 +198,32 @@ switch ($url) {
         $orderController->cancelOrder();
         exit();
 
-    // Thêm chi tiết đơn hàng
+    // Thêm chi tiết đơn hàng (Yến mới thêm)
     case "get-order-detail":
         $orderController->getOrderDetail();
+        exit();
+
+    case "get-complaints":
+        $promotionController->getComplaints();
+        exit();
+
+    case "process-complaint-request":
+        $promotionController->processRequest();
+        exit();
+
+    // --- PHẦN CHAT VÀ LIÊN HỆ (Yến mới thêm) ---
+    case "contact-customer":
+        // Dùng để gửi tin nhắn đầu tiên hoặc gửi tin nhắn chat
+        $orderController->contactCustomer();
+        exit();
+
+    case "get-messages":
+        // Dùng để lấy lịch sử tin nhắn khi mở khung chat
+        $orderController->getMessages();
+        exit();
+
+    case "get-conversation-list":
+        $orderController->getConversationList();
         exit();
 
     // case "return-order":

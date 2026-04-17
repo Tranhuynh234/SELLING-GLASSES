@@ -56,7 +56,7 @@
                         <!-- Khiếu nại -->
                         <div class="menu-item" id="menu-complaints">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span>Khiếu nại</span>
+                            <span>Khiếu nại / Đổi trả</span>
                         </div>
                     </nav>
                 </div>
@@ -84,13 +84,17 @@
         <main class="content">
             <header class="topbar">
                 <!-- Ô tìm kiếm -->
-                <div class="search-box">
+                <!-- <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Search" />
-                </div>
+                </div> -->
 
-                <!-- Nút đăng xuất -->
+                <!-- Nút đăng xuất + Chat -->
                 <div class="topbar-right">
+                    <button id="btn-global-chat" class="chat-nav-btn" onclick="openGlobalChat()" style="margin-right: 10px;">
+                        <i class="fas fa-comment-dots"></i>
+                        <!-- <span>Chat</span> -->
+                    </button>
                     <a href="/SELLING-GLASSES/public/auth" style="text-decoration: none">
                         <button class="login-btn">
                             <i class="fas fa-user-circle"></i>
@@ -187,10 +191,10 @@
 
                 <div class="toolbar-container">
                     <div class="search-group">
-                        <label>Tìm theo tên khách</label>
+                        <label>Tìm theo mã đơn/khách</label>
                         <div class="search-input-wrapper">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="search-customer" placeholder="Nhập tên khách hàng..." />
+                            <input type="text" id="search-customer" placeholder="Nhập mã hoặc tên khách..." />
                         </div>
                     </div>
 
@@ -249,11 +253,11 @@
 
                 <div class="toolbar-container">
                     <div class="search-group">
-                        <label>Tìm theo tên khách</label>
+                        <label>Tìm theo mã đơn/khách</label>
                         <div class="search-input-wrapper">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="search-preorder-customer" placeholder="Nhập tên khách hàng..." />
-                        </div>
+                            <input type="text" id="search-preorder-customer" placeholder="Nhập mã hoặc tên khách..." />
+                       </div>
                     </div>
 
                     <div class="filter-group">
@@ -310,10 +314,9 @@
                     <div class="filter-group">
                         <label>Trạng thái</label>
                         <div class="filter-tabs">
-                            <button class="filter-tab active">Tất cả</button>
-                            <button class="filter-tab">Khiếu nại</button>
-                            <button class="filter-tab">Đổi trả</button>
-                            <button class="filter-tab">Bảo hành</button>
+                            <button class="filter-tab active" data-status="all">Tất cả</button>
+                            <button class="filter-tab" data-status="complaint">Khiếu nại</button>
+                            <button class="filter-tab" data-status="return">Đổi trả</button>
                         </div>
                     </div>
                 </div>
@@ -360,22 +363,41 @@
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
 
+                                    <button class="btn btn-request-action hidden" id="btn-request-action" type="button">
+                                        <i class="fas fa-check"></i> Xác nhận yêu cầu
+                                    </button>
+
                                     <button class="btn-logistic-order hidden" onclick="handleUpdateStatus('Processing')">
-                                        <span><i class="fas fa-truck"></i> Chuyển Operation</span>
+                                        <span><i class="fas fa-truck"></i> Chuyển giao cho đơn vị vận chuyển</span>
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
+
                                 </div>
 
                                 <hr style="border-top: 1px solid #000000; margin: 20px 0;">
 
                                 <div class="action-box">
                                     <p class="group-label">HỖ TRỢ</p>
-                                    <button class="btn-support-contact btn-contact-customer" onclick="handleContactCustomer()">
-                                        <i class="fas fa-phone-alt"></i> Liên hệ khách hàng
+                                    <button class="btn btn-support-contact" onclick="handleContactCustomer()">
+                                        <i class="fas fa-phone"></i> Liên hệ khách hàng
                                     </button>
-                                    <button class="btn-support-edit">
-                                        <i class="fas fa-edit"></i> Chỉnh sửa thông tin
-                                    </button>
+                                </div>
+
+                                <hr style="border-top: 1px solid #000000; margin: 20px 0;">
+
+                                <div class="action-box hidden" id="requestContextBox">
+                                    <p class="group-label">YÊU CẦU KHIẾU NẠI / ĐỔI TRẢ</p>
+                                    <p><strong>Loại:</strong> <span id="requestTypeLabel">-</span></p>
+                                    <p><strong>Lý do:</strong> <span id="requestReason">-</span></p>
+                                    <p><strong>Ghi chú:</strong> <span id="requestNote">-</span></p>
+                                    <p><strong>Nhân viên xử lý:</strong> <span id="requestStaffLabel">-</span></p>
+                                    <p><strong>Trạng thái:</strong> <span id="requestStatusLabel">-</span></p>
+                                    <div id="requestImageContainer" class="request-image hidden" style="margin-top:10px;">
+                                        <strong>Ảnh:</strong>
+                                        <div class="request-image-preview" style="margin-top:8px;">
+                                            <img id="requestImagePreview" src="" alt="Ảnh yêu cầu" style="max-width:100%; border-radius:6px; border:1px solid #ddd;" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -410,31 +432,6 @@
                                         </table>
                                     </div>
                                 </div>
-
-                                <hr style="border-top: 1px solid #000000; margin: 20px 0;">
-
-                                <div class="timeline-container">
-                                    <p class="group-label">TIMELINE XỬ LÝ</p>
-                                    <div class="timeline-steps">
-                                        <div class="timeline-line"></div>
-                                        <div class="step is-complete">
-                                            <div class="step-icon">✓</div>
-                                            <span class="step-text">Đã tạo đơn</span>
-                                        </div>
-                                        <div class="step">
-                                            <div class="step-icon">2</div>
-                                            <span class="step-text">Liên hệ</span>
-                                        </div>
-                                        <div class="step">
-                                            <div class="step-icon">3</div>
-                                            <span class="step-text">Xác nhận</span>
-                                        </div>
-                                        <div class="step">
-                                            <div class="step-icon">4</div>
-                                            <span class="step-text">Chuyển Ops</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -444,6 +441,49 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- CHAT LIÊN HỆ VỚI KHÁCH HÀNG -->
+    <div id="chat-wrapper" class="chat-main-wrapper chat-hidden">
+        <div class="chat-header-container">
+            <div class="header-left">
+                <i class="fas fa-comment-dots"></i>
+                <span>Trung tâm tin nhắn</span>
+            </div>
+            <button type="button" class="close-inbox-btn" onclick="closeChat()">&times;</button>
+        </div>
+        
+        <div class="chat-inbox-layout">
+            <aside class="inbox-sidebar">
+                <div class="inbox-search">
+                    <input type="text" placeholder="Tìm kiếm hội thoại..." id="search-contact">
+                </div>
+                <ul id="conversation-list">
+                    </ul>
+            </aside>
+
+            <section class="inbox-content">
+                <div id="chat-active-header" class="active-user-header">
+                    <span id="chat-title">Chọn khách hàng để hỗ trợ</span>
+                </div>
+
+                <div id="chat-body" class="inbox-chat-body">
+                    <div class="chat-placeholder">
+                        <i class="fas fa-comments"></i>
+                        <p>Chọn một khách hàng từ danh sách bên trái để bắt đầu tư vấn!</p>
+                    </div>
+                </div>
+                
+                <div class="inbox-footer">
+                    <div class="input-group-wrapper">
+                        <input type="text" id="chat-input" placeholder="Nhập tin nhắn phản hồi...">
+                        <button type="button" class="btn-send-inbox" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
