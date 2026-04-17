@@ -6,4 +6,6 @@ class ReturnRequest {
     public $requestDate;
     public $orderItemId;
     public $staffId;
+    public $note;
+    public $imagePath;
 }

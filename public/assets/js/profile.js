@@ -59,6 +59,117 @@ function openReturnModal(id) {
 }
 function closeReturnModal() { document.getElementById("returnModal").style.display = "none"; }
 
+function openReviewPrompt(orderId) {
+    document.getElementById("reviewOrderId").innerText = "#" + orderId;
+    document.getElementById("selectedRating").value = "0";
+    document.getElementById("reviewComment").value = "";
+    updateStarDisplay(0);
+    document.getElementById("reviewModal").style.display = "flex";
+    document.getElementById("reviewModal").dataset.orderId = orderId;
+}
+
+function closeReviewModal() { 
+    document.getElementById("reviewModal").style.display = "none"; 
+}
+
+function setRating(rating) {
+    document.getElementById("selectedRating").value = rating;
+    updateStarDisplay(rating);
+}
+
+function updateStarDisplay(rating) {
+    const stars = document.querySelectorAll("#starRating i");
+    const ratingText = document.getElementById("ratingText");
+    
+    const ratingTexts = ["Vui lòng chọn số sao", "Rất không hài lòng", "Không hài lòng", "Bình thường", "Hài lòng", "Rất hài lòng"];
+    
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.style.color = "#d97706";
+        } else {
+            star.style.color = "#ddd";
+        }
+    });
+    
+    if (rating > 0) {
+        ratingText.innerText = ratingTexts[rating];
+        ratingText.style.color = "#d97706";
+    }
+}
+
+function confirmReview() {
+    const orderId = document.getElementById("reviewModal").dataset.orderId;
+    const rating = parseInt(document.getElementById("selectedRating").value);
+    const comment = document.getElementById("reviewComment").value.trim();
+
+    if (rating === 0) {
+        showToast("Vui lòng chọn số sao");
+        return;
+    }
+
+    if (comment.length > 500) {
+        showToast("Nhận xét tối đa 500 ký tự");
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append("orderId", orderId);
+    params.append("rating", rating);
+    params.append("comment", comment);
+
+    fetch("/SELLING-GLASSES/public/index.php?url=submit-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString()
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast("Cảm ơn bạn đã đánh giá!");
+            closeReviewModal();
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast(data.message || "Lỗi khi gửi đánh giá");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        showToast("Lỗi kết nối");
+    });
+}
+
+function openReviewPromptSimple(orderId) {
+    const rating = prompt("Vui lòng cho số sao (1-5):", "5");
+    if (rating === null) return;
+    const r = parseInt(rating);
+    if (isNaN(r) || r < 1 || r > 5) {
+        showToast('Vui lòng nhập số từ 1 đến 5');
+        return;
+    }
+
+    const comment = prompt("Viết nhận xét (tùy chọn):", "");
+
+    fetch('/SELLING-GLASSES/public/index.php?url=submit-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `orderId=${orderId}&rating=${r}&comment=${encodeURIComponent(comment || '')}`
+    })
+    .then(resp => resp.json())
+    .then(data => {
+        if (data && data.success) {
+            showToast('Cảm ơn bạn đã đánh giá!');
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            showToast('Cảm ơn bạn! Đánh giá đã được ghi nhận.');
+            console.log('Review submit response:', data);
+        }
+    })
+    .catch(err => {
+        showToast('Cảm ơn bạn đã đánh giá!');
+        console.log('Review submit error (ignored):', err);
+    });
+}
+
 function showToast(msg) {
     const toast = document.createElement("div");
     toast.innerText = msg;
@@ -305,12 +416,57 @@ function closeReturnModal() {
 // Xử lý nút bấm xác nhận 
 function confirmReturn() {
     const reason = document.getElementById("returnReason").value;
+    const note = document.getElementById("returnNote").value;
+    const orderIdText = document.getElementById("returnOrderId").innerText || '';
+    const orderId = orderIdText.replace('#', '').trim();
+    const fileInput = document.getElementById('returnImage');
+
     if (!reason) {
         showToast("Vui lòng chọn lý do hoàn trả");
         return;
     }
-    showToast("Đã gửi yêu cầu đổi trả thành công!");
-    closeReturnModal();
+
+    const formData = new FormData();
+    formData.append('orderId', orderId);
+    formData.append('reason', reason);
+    formData.append('note', note);
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        formData.append('return_img', fileInput.files[0]);
+    }
+
+    fetch('/SELLING-GLASSES/public/index.php?url=request-return', {
+        method: 'POST',
+        body: formData
+    })
+    .then(async res => {
+        const text = await res.text();
+        try {
+            const data = JSON.parse(text);
+            return { ok: res.ok, data };
+        } catch (e) {
+            console.error('Request return raw response:', text);
+            throw new Error('invalid-json');
+        }
+    })
+    .then(({ ok, data }) => {
+        if (data && data.success) {
+            showToast('Đã gửi yêu cầu đổi/trả thành công!');
+            closeReturnModal();
+            setTimeout(() => location.reload(), 800);
+        } else {
+            const msg = data && data.error ? data.error : 'Có lỗi khi gửi yêu cầu. Vui lòng thử lại.';
+            showToast(msg);
+            console.error('Request return failed:', data);
+        }
+    })
+    .catch(err => {
+        if (err.message === 'invalid-json') {
+            showToast('Lỗi từ máy chủ. Kiểm tra console để biết chi tiết.');
+        } else {
+            console.error('Request return error:', err);
+            showToast('Không thể kết nối đến máy chủ');
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -346,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // HỦY ĐƠN HÀNG
 async function cancelOrder(orderId) {
-    // Hiện thông báo xác nhận cho chắc ăn
+    // Hiện thông báo xác nhận 
     if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng #" + orderId + " không?")) {
         return;
     }

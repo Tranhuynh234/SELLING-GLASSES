@@ -2,22 +2,26 @@
 if (!function_exists('getStatusDetails')) {
     function getStatusDetails($status) {
         switch ($status) {
-            case 'Pending': 
+            case 'Pending':
                 return ['text' => 'Chờ xử lý', 'class' => 'status-pending'];
-            case 'Confirmed': 
+            case 'Confirmed':
                 return ['text' => 'Đã xác nhận', 'class' => 'status-confirmed'];
-            case 'Processing': 
+            case 'Processing':
                 return ['text' => 'Đang xử lý', 'class' => 'status-processing'];
-            case 'Shipping': 
+            case 'Shipped':
                 return ['text' => 'Đang giao', 'class' => 'status-shipping'];
-            case 'Completed': 
+            case 'Shipping':
+                return ['text' => 'Đang giao', 'class' => 'status-shipping'];
+            case 'Delivered':
+                return ['text' => 'Đã giao', 'class' => 'status-completed'];
+            case 'Completed':
                 return ['text' => 'Hoàn tất', 'class' => 'status-completed'];
-            case 'Cancelled': 
+            case 'Cancelled':
                 return ['text' => 'Đã hủy', 'class' => 'status-cancelled'];
-            case 'Returned': 
+            case 'Returned':
                 return ['text' => 'Trả hàng', 'class' => 'status-returned'];
-            default: 
-                return ['text' => $status, 'class' => ''];
+            default:
+                return ['text' => $status, 'class' => 'status-returned'];
         }
     }
 }
@@ -49,11 +53,11 @@ $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
                 FROM orders o
                 LEFT JOIN (
                     SELECT oi.orderId, pr.name as first_product_name, pr.imagePath as product_image,
-                    MAX(CASE WHEN pres.prescriptionId IS NOT NULL THEN 1 ELSE 0 END) as has_prescription -- Check xem có dòng nào có đơn thuốc ko
+                    MAX(CASE WHEN pres.prescriptionId IS NOT NULL THEN 1 ELSE 0 END) as has_prescription 
                     FROM order_item oi
                     LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
                     LEFT JOIN product pr ON pv.productId = pr.productId
-                    LEFT JOIN prescription pres ON oi.orderItemId = pres.orderItemId -- Join thêm bảng này
+                    LEFT JOIN prescription pres ON oi.orderItemId = pres.orderItemId 
                     GROUP BY oi.orderId
                 ) p ON o.orderId = p.orderId
                 WHERE o.customerId = :customerId 
@@ -100,7 +104,7 @@ $userPres = $stmtPres->fetch(PDO::FETCH_ASSOC);
 $rightE = ($userPres && !empty($userPres['rightEye'])) ? json_decode($userPres['rightEye'], true) : [];
 $leftE = ($userPres && !empty($userPres['leftEye'])) ? json_decode($userPres['leftEye'], true) : [];
 
-// Tính tổng PD để hiện lên ô 60-70 ở Profile
+// Tính tổng PD để hiện lên ở Profile
 $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
 ?>
 
@@ -283,12 +287,30 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 <span class="status-badge <?= $statusDetail['class'] ?>" style="padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">
                                     <?= $statusDetail['text'] ?>
                                 </span>
+                                <?php
+                                    $statusRaw = strtolower($orderInfo['status'] ?? '');
+                                ?>
 
-                                <?php if ($orderInfo['status'] === 'Pending'): ?>
+                                <?php if ($statusRaw === 'pending'): ?>
                                     <button onclick="cancelOrder('<?= $orderInfo['orderId'] ?>')" 
                                             class="btn-cancel-order" 
                                             style="padding: 6px 15px; border: 1px solid #dc2626; color: #dc2626; background: white; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.3s;">
                                         Hủy đơn hàng
+                                    </button>
+                                <?php endif; ?>
+
+                                <?php if (in_array($statusRaw, ['delivered', 'completed'])): ?>
+
+                                    <button onclick="openReturnModal('<?= $orderInfo['orderId'] ?>')" 
+                                            class="btn-return" 
+                                            style="padding: 6px 14px; border-radius: 8px; font-size: 12px;">
+                                        Trả hàng/ Hoàn tiền
+                                    </button>
+
+                                    <button onclick="openReviewPrompt('<?= $orderInfo['orderId'] ?>')" 
+                                            class="btn-review" 
+                                            style="padding: 6px 14px; border-radius: 8px; font-size: 12px;">
+                                        Đánh giá
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -459,19 +481,6 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
     </main>
 </div>
 
-<div id="passwordModal" class="modal">
-    <div class="modal-box">
-        <h3>Đổi mật khẩu</h3>
-        <input type="password" id="oldPass" placeholder="Mật khẩu cũ">
-        <input type="password" id="newPass" placeholder="Mật khẩu mới">
-        <input type="password" id="confirmPass" placeholder="Xác nhận mật khẩu">
-        <div class="modal-btn">
-            <button onclick="closePassword()">Hủy</button>
-            <button class="save" onclick="savePassword()">Lưu</button>
-        </div>
-    </div>
-</div>
-
 <div id="returnModal" class="modal">
     <div class="modal-box" style="width: 450px;">
         <h3 style="font-family: 'Playfair Display', serif; color: var(--primary);">Yêu cầu Đổi trả / Hoàn tiền</h3>
@@ -499,12 +508,46 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
 
         <div class="form-group" style="margin-top: 15px;">
             <label>Hình ảnh minh họa</label>
-            <input type="file" accept="image/*" style="font-size: 0.8rem; margin-top: 5px;">
+            <input id="returnImage" name="return_img" type="file" accept="image/*" style="font-size: 0.8rem; margin-top: 5px;">
         </div>
 
         <div class="modal-btn" style="margin-top: 20px;">
             <button onclick="closeReturnModal()">Hủy</button>
             <button class="save" onclick="confirmReturn()" style="background: #dc2626;">Gửi yêu cầu</button>
+        </div>
+    </div>
+</div>
+
+<div id="reviewModal" class="modal">
+    <div class="modal-box" style="width: 500px;">
+        <h3 style="font-family: 'Playfair Display', serif; color: var(--primary); margin-bottom: 15px;">Đánh Giá Sản Phẩm</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">
+            Đơn hàng: <span id="reviewOrderId" style="font-weight: bold;">#14</span>
+        </p>
+
+        <div class="form-group">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold;">Đánh Giá (Sao)</label>
+            <div id="starRating" style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <i class="fa-solid fa-star" data-rating="1" style="font-size: 28px; cursor: pointer; color: #ddd; transition: 0.3s;" onclick="setRating(1)"></i>
+                <i class="fa-solid fa-star" data-rating="2" style="font-size: 28px; cursor: pointer; color: #ddd; transition: 0.3s;" onclick="setRating(2)"></i>
+                <i class="fa-solid fa-star" data-rating="3" style="font-size: 28px; cursor: pointer; color: #ddd; transition: 0.3s;" onclick="setRating(3)"></i>
+                <i class="fa-solid fa-star" data-rating="4" style="font-size: 28px; cursor: pointer; color: #ddd; transition: 0.3s;" onclick="setRating(4)"></i>
+                <i class="fa-solid fa-star" data-rating="5" style="font-size: 28px; cursor: pointer; color: #ddd; transition: 0.3s;" onclick="setRating(5)"></i>
+            </div>
+            <input type="hidden" id="selectedRating" value="0">
+            <p id="ratingText" style="font-size: 0.85rem; color: #d97706; min-height: 20px;">Vui lòng chọn số sao</p>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: bold;">Nhận Xét (Tùy Chọn)</label>
+            <textarea id="reviewComment" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." 
+                style="width: 100%; height: 100px; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; resize: none; font-size: 0.9rem;"></textarea>
+            <p style="font-size: 0.75rem; color: #999; margin-top: 5px;">Tối đa 500 ký tự</p>
+        </div>
+
+        <div class="modal-btn" style="margin-top: 25px; gap: 10px;">
+            <button onclick="closeReviewModal()" style="padding: 10px 20px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; font-weight: 500;">Hủy</button>
+            <button class="save" onclick="confirmReview()" style="padding: 10px 20px; background: #d97706; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Gửi Đánh Giá</button>
         </div>
     </div>
 </div>

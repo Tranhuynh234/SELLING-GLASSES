@@ -402,10 +402,26 @@ select {
     box-shadow: 0 2px 5px rgba(239, 68, 68, 0.1);
 }
 
+/* Nút Đánh giá (Review) */
+.btn-review {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+.btn-review:hover {
+    background: #b45309;
+}
+
 /* Responsive cho mobile */
 @media (max-width: 768px) {
     .order-body { grid-template-columns: 1fr; }
-    .order-actions { text-align: left; border-top: 1px solid #eee; pt: 15px; }
+    .order-actions { text-align: left; border-top: 1px solid #eee; padding-top: 15px; }
     .btn-group { justify-content: flex-start; }
 }
 
@@ -482,7 +498,6 @@ select {
 
 .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 /* Màu cho các trạng thái */
-/* Badge trạng thái Tiếng Việt */
 .status-badge {
     display: inline-block;
     text-transform: uppercase;

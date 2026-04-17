@@ -17,7 +17,10 @@ class HomeController {
         $data = $this->homeService->getHomeData($page);
 
         // Trích xuất dữ liệu để trang home.php sử dụng 
-        $products = $data['products'] ?? []; 
+        $products = $data['products'] ?? [];
+        
+        // Lấy danh sách đánh giá từ khách hàng
+        $reviews = $this->homeService->getLatestReviews(5);
 
         // Nhúng file giao diện trang chủ
         require_once __DIR__ . "/../views/home/home.php";

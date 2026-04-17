@@ -13,6 +13,7 @@ require_once "../app/controllers/HomeController.php";
 require_once __DIR__ . "/../app/controllers/UserController.php";
 require_once "../app/controllers/PaymentController.php";
 require_once "../app/controllers/PrescriptionController.php";
+require_once "../app/controllers/ReviewController.php";
 
 $conn = Database::connect();
 
@@ -28,6 +29,7 @@ $homeController = new HomeController();
 $userController = new UserController();
 $paymentController = new PaymentController();
 $prescriptionController = new PrescriptionController($conn);
+$reviewController = new ReviewController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -196,10 +198,6 @@ switch ($url) {
         $orderController->cancelOrder();
         exit();
 
-    // case "return-order":
-    // $orderController->return();
-    // exit();
-
     case "order-stats":
         $orderController->stats();
         exit();
@@ -208,10 +206,6 @@ switch ($url) {
         $controller = new OrderController($conn);
         $controller->showDetail($_GET['id']);
         break;    
-    // case "shipment-tracking":
-    // $trackingNumber = $_GET['trackingNumber'] ?? null;
-    // $orderController->shipmentTracking($trackingNumber);
-    // break;
 
     // --- Promotion Module ---
     case 'create-promotion':
@@ -229,6 +223,7 @@ switch ($url) {
     case 'request-return':
         $promotionController->requestReturn();
         break;
+
     // --- Cart---//
     case 'get-cart':
         $cartController->getCart();
@@ -253,12 +248,10 @@ switch ($url) {
     case "checkout":
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // KIỂM TRA: Nếu khách vào checkout mà KHÔNG phải vừa từ trang nhập độ về
-        // (tức là không có status=saved trên link) thì xóa số tiền 300k cũ đi.
+        // KIỂM TRA: Nếu khách vào checkout mà KHÔNG phải vừa từ trang nhập độ về thì xóa số tiền 300k cũ đi.
         if (!isset($_GET['status']) || $_GET['status'] !== 'saved') {
             unset($_SESSION['prescription_total']);
         }
-
         // Sau đó mới cho hiển thị trang checkout
         require_once "../app/views/order/checkout.php";
         exit();
@@ -275,6 +268,19 @@ switch ($url) {
         if (session_status() === PHP_SESSION_NONE) session_start();
         unset($_SESSION['prescription_total']); 
         echo json_encode(['success' => true]);
+        exit();
+    
+    // --- REVIEW ---
+    case "submit-review":
+        $reviewController->submitReview();
+        exit();
+    
+    case "get-reviews":
+        $reviewController->getReviews();
+        exit();
+
+    case "get-review-by-order":
+        $reviewController->getReviewByOrder();
         exit();
    
     default:
