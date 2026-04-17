@@ -95,6 +95,31 @@ class PromotionController {
         echo json_encode($result);
         exit();
     }
+
+    public function getComplaints() {
+        ob_clean();
+        header("Content-Type: application/json");
+        $type = $_GET['type'] ?? 'all';
+        $data = $this->service->getComplaints($type);
+        echo json_encode(["success" => true, "data" => $data]);
+        exit();
+    }
+
+    public function processRequest() {
+        ob_clean();
+        header("Content-Type: application/json");
+        $returnId = $_POST['returnId'] ?? null;
+        $action = $_POST['action'] ?? null;
+
+        if (!$returnId || !$action) {
+            echo json_encode(["success" => false, "message" => "Thiếu dữ liệu xử lý."]);
+            exit();
+        }
+
+        $result = $this->service->processRequest($returnId, $action);
+        echo json_encode($result);
+        exit();
+    }
 }
 
 

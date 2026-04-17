@@ -19,7 +19,6 @@ class OrderService {
         if (empty($data['customerId'])) {
             return ["success" => false, "message" => "Thiếu customerId"];
         }
-
         $db = Database::connect();
         $data['orderDate'] = date('Y-m-d H:i:s');
         $data['status'] = 'Pending';
