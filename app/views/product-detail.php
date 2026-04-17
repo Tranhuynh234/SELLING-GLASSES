@@ -58,4 +58,6 @@
 
 <?php include 'layout/footer.php'; ?>
 
+<!-- Cart helper (provides window.addToCart) -->
+<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
 <script src="/SELLING-GLASSES/public/assets/js/product-detail.js"></script>

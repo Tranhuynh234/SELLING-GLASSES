@@ -111,4 +111,41 @@ class PaymentController {
             $this->paymentService->approvePayment((int) $paymentId, (int) $user['userId'])
         );
     }
+
+    public function getPaymentHistory() {
+        if (!isset($_SESSION['user']['userId'])) return ['totalSpent' => 0, 'payments' => []];
+        
+        $userId = $_SESSION['user']['userId']; 
+        $db = Database::connect();
+
+        try {
+            // 1. Tính tổng chi tiêu - Dùng customerId 
+            $sqlTotal = "SELECT SUM(o.totalPrice) as total 
+                         FROM payment p
+                         JOIN orders o ON p.orderId = o.orderId
+                         JOIN customers c ON o.customerId = c.customerId
+                         WHERE c.userId = ? AND p.paymentStatus = 'Paid'";
+            $stmtTotal = $db->prepare($sqlTotal);
+            $stmtTotal->execute([$userId]);
+            $totalSpent = $stmtTotal->fetch()['total'] ?? 0;
+
+            // 2. Lấy danh sách giao dịch - Dùng customerId
+            $sqlList = "SELECT p.*, o.totalPrice, o.orderDate 
+                        FROM payment p
+                        JOIN orders o ON p.orderId = o.orderId
+                        JOIN customers c ON o.customerId = c.customerId
+                        WHERE c.userId = ? 
+                        ORDER BY p.paymentId DESC";
+            $stmtList = $db->prepare($sqlList);
+            $stmtList->execute([$userId]);
+            $payments = $stmtList->fetchAll();
+
+            return [
+                'totalSpent' => $totalSpent,
+                'payments' => $payments
+            ];
+        } catch (Exception $e) {
+            return ['totalSpent' => 0, 'payments' => []];
+        }
+    }
 }

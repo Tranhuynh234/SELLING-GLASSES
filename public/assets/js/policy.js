@@ -26,7 +26,6 @@ var policyData = {
         content: `
             <p>EYESGLASS cung cấp các phương thức thanh toán an toàn sau:</p>
             <ul>
-                <li><b>Thanh toán COD:</b> Trả tiền mặt trực tiếp cho nhân viên giao hàng khi nhận sản phẩm.</li>
                 <li><b>Chuyển khoản:</b> Ngân hàng Vietcombank - STK: 123456789 - Chủ TK: EYESGLASS VN.</li>
                 <li>(Lưu ý: Vui lòng ghi rõ Mã đơn hàng và SĐT khi chuyển khoản)</li>
                 <li><b>Ví điện tử:</b> Quét mã QR qua MoMo hoặc ZaloPay để nhận thêm ưu đãi hoàn tiền.</li>

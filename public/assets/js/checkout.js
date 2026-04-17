@@ -157,7 +157,14 @@ function renderItems(items) {
 function renderSummary(summary) {
     setText("subtotal", formatCurrency(summary.subtotal || 0));
     setText("discount", formatCurrency(summary.discount || 0));
-    setText("lens-cost", formatCurrency(summary.lensPrice || 0));
+
+    let lensPrice = Number(summary.lensPrice || 0);
+    if (!lensPrice) {
+        const serverLens = Number(document.getElementById('server-lens-cost')?.value || 0);
+        if (serverLens) lensPrice = serverLens;
+    }
+    setText("lens-cost", formatCurrency(lensPrice || 0));
+
     setText("shipping-fee", formatCurrency(summary.shippingFee || 0));
     setText("grand-total", formatCurrency(summary.total || 0));
 }
@@ -203,6 +210,10 @@ async function submitPendingPayment(event) {
     const formData = new FormData(form);
     formData.append("selectedCartItems", selectedCartItems.join(","));
 
+    const finalTotal = checkoutSummary.summary.total; 
+    formData.append("totalPrice", checkoutSummary.summary.total);
+    formData.append("shippingFee", checkoutSummary.summary.shippingFee);
+
     button.disabled = true;
     button.textContent = "Đang gửi...";
 
@@ -223,9 +234,11 @@ async function submitPendingPayment(event) {
 
         sessionStorage.removeItem("selectedCartItems");
 
-        alert(`Đã tạo đơn #${data.data.orderId}. Đơn đang chờ duyệt.`);
+    alert(`Đã tạo đơn #${data.data.orderId}. Đơn đang chờ duyệt.`);
 
-        window.location.href = `${CHECKOUT_BASE}/profile`;
+    // Chuyển sang trang profile -> tab orders, đồng thời hiển thị chi tiết đơn mới tạo
+    const orderId = encodeURIComponent(data.data.orderId);
+    window.location.href = `${CHECKOUT_BASE}/index.php?url=profile&tab=orders&order_id=${orderId}`;
 
     } catch (error) {
         alert("Không gửi được yêu cầu thanh toán. Vui lòng thử lại.");
@@ -293,4 +306,29 @@ function calculateShippingFee(subtotal) {
     }
 
     return 30000;
+}
+
+function useSavedPrescription() {
+    // 1. Gửi yêu cầu lên server để báo rằng khách dùng số đo hồ sơ
+    // Ở đây mình tận dụng route 'prescription-store' bạn đã có
+    fetch('/SELLING-GLASSES/public/index.php?url=prescription-store', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'use_saved=true' // Gửi một flag báo là dùng đồ có sẵn
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Load lại trang để cập nhật tổng tiền
+        window.location.reload();
+    })
+    .then(response => {
+        // 2. Sau khi server lưu session phí cắt tròng, ta load lại trang
+        // để PHP tính lại tổng tiền mới nhất
+        window.location.href = '/SELLING-GLASSES/public/index.php?url=checkout&status=saved';
+    })
+    .catch(error => console.error('Lỗi:', error));
+    
 }

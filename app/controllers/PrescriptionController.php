@@ -1,5 +1,4 @@
 <?php
-// Gọi file Model vào
 require_once __DIR__ . '/../models/Prescription.php';
 
 class PrescriptionController {
@@ -15,14 +14,50 @@ class PrescriptionController {
     }
 
     public function store() {
-        // ĐẢM BẢO SESSION ĐƯỢC BẬT ĐẦU TIÊN
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) 
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+        $userId = $_SESSION['user']['userId'] ?? null;
+
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Chưa đăng nhập']);
+            exit;
         }
 
+        // CASE: dùng lại từ DB (profile)
+        if (isset($_POST['use_saved']) && $_POST['use_saved'] === 'true') {
+
+            $stmt = $this->conn->prepare("
+                SELECT * FROM prescription 
+                WHERE userId = ? 
+                ORDER BY prescriptionId DESC LIMIT 1
+            ");
+            $stmt->execute([$userId]);
+            $pres = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($pres) {
+                $_SESSION['prescription_data'] = [
+                    'userId' => $userId,
+                    'leftEye' => $pres['leftEye'],
+                    'rightEye' => $pres['rightEye'],
+                    'leftPD' => $pres['leftPD'],
+                    'rightPD' => $pres['rightPD'],
+                    'imagePath' => $pres['imagePath']
+                ];
+            }
+
+            $_SESSION['prescription_total'] = 300000;
+
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
+        // CASE: nhập mới từ form
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            
-            // 1. Gom thông số MẮT PHẢI
+
+            // JSON mắt
             $rightEyeJson = json_encode([
                 'sph'  => $_POST['right_sph'] ?? '',
                 'cyl'  => $_POST['right_cyl'] ?? '',
@@ -30,7 +65,6 @@ class PrescriptionController {
                 'add'  => $_POST['right_add'] ?? ''
             ]);
 
-            // 2. Gom thông số MẮT TRÁI
             $leftEyeJson = json_encode([
                 'sph'  => $_POST['left_sph'] ?? '',
                 'cyl'  => $_POST['left_cyl'] ?? '',
@@ -38,53 +72,64 @@ class PrescriptionController {
                 'add'  => $_POST['left_add'] ?? ''
             ]);
 
-            // 3. Xử lý Upload Ảnh
             $imagePath = null;
-            if (isset($_FILES['prescription_image']) && $_FILES['prescription_image']['error'] == 0) {
-                $uploadDir = __DIR__ . '/../../public/uploads/prescriptions/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-                
-                $fileName = time() . '_' . basename($_FILES['prescription_image']['name']);
-                $targetFile = $uploadDir . $fileName;
 
-                if (move_uploaded_file($_FILES['prescription_image']['tmp_name'], $targetFile)) {
-                    $imagePath = 'uploads/prescriptions/' . $fileName;
+            // LƯU SESSION 
+            $_SESSION['prescription_data'] = [
+                'userId' => $userId,
+                'leftEye' => $leftEyeJson,
+                'rightEye' => $rightEyeJson,
+                'leftPD' => $_POST['left_pd'] ?? '',
+                'rightPD' => $_POST['right_pd'] ?? '',
+                'imagePath' => $imagePath
+            ];
+
+            // TÍNH TIỀN
+            $lensPrice = (int)($_POST['lens_price'] ?? 0);
+            $_SESSION['prescription_total'] = $lensPrice + 50000;
+
+            try {
+                if ($userId) {
+
+                    $check = $this->conn->prepare("SELECT prescriptionId FROM prescription WHERE userId = ? LIMIT 1");
+                    $check->execute([$userId]);
+                    $exists = $check->fetch(PDO::FETCH_ASSOC);
+
+                    if ($exists) {
+                        $upd = $this->conn->prepare("UPDATE prescription SET leftEye = :leftEye, rightEye = :rightEye, leftPD = :leftPD, rightPD = :rightPD, imagePath = :imagePath WHERE userId = :userId");
+                        $upd->execute([
+                            ':leftEye' => $leftEyeJson,
+                            ':rightEye' => $rightEyeJson,
+                            ':leftPD' => $_POST['left_pd'] ?? '',
+                            ':rightPD' => $_POST['right_pd'] ?? '',
+                            ':imagePath' => $imagePath,
+                            ':userId' => $userId
+                        ]);
+                    } else {
+
+                        $ins = $this->conn->prepare("INSERT INTO prescription (userId, orderItemId, leftEye, rightEye, leftPD, rightPD, imagePath) VALUES (:userId, 0, :leftEye, :rightEye, :leftPD, :rightPD, :imagePath)");
+                        $ins->execute([
+                            ':userId' => $userId,
+                            ':leftEye' => $leftEyeJson,
+                            ':rightEye' => $rightEyeJson,
+                            ':leftPD' => $_POST['left_pd'] ?? '',
+                            ':rightPD' => $_POST['right_pd'] ?? '',
+                            ':imagePath' => $imagePath
+                        ]);
+                    }
                 }
+            } catch (Exception $e) {
+
+                error_log("Prescription save error: " . $e->getMessage());
             }
 
-            // 4. Khởi tạo Object Model
-            $prescription = new Prescription();
-            $prescription->orderItemId = $_POST['order_item_id'] ?? 1; 
-            $prescription->leftEye = $leftEyeJson;
-            $prescription->rightEye = $rightEyeJson;
-            $prescription->leftPD = $_POST['left_pd'] ?? '';
-            $prescription->rightPD = $_POST['right_pd'] ?? '';
-            $prescription->imagePath = $imagePath;
-
-            // 5. Lưu vào Database
-            // Tìm hàm store() và sửa đoạn lưu Session
-           // Trong PrescriptionController.php, hàm store()
-            if ($prescription->save($this->conn)) {
-                
-                // 1. Lấy giá tròng kính từ form (Ví dụ: 250000)
-                $lensPrice = isset($_POST['lens_price']) ? (int)$_POST['lens_price'] : 0;
-
-                // 2. Định nghĩa phí gia công cố định (Giống như hiển thị trên giao diện của bạn)
-                $processingFee = 50000;
-
-                // 3. TỔNG CỘNG thực tế sẽ bao gồm cả hai
-                $totalPrescriptionCost = $lensPrice + $processingFee;
-
-                // 4. Lưu TỔNG CỘNG này vào Session
-                if (session_status() === PHP_SESSION_NONE) session_start();
-                $_SESSION['prescription_total'] = $totalPrescriptionCost; 
-
-                // Điều hướng về Checkout
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true]);
+            } else {
                 header("Location: /SELLING-GLASSES/public/index.php?url=checkout&status=saved");
-                exit();
             }
+            exit;
         }
     }
 }

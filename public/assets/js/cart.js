@@ -59,23 +59,6 @@ async function loadCart() {
 
         selectedItems = new Set(saved);
 
-        //const previousSelection = new Set(selectedItems);
-        //cartItems = Array.isArray(data) ? data : [];
-
-        //if (previousSelection.size) {
-          //  selectedItems = new Set(
-            //    cartItems
-              //      .map((item) => String(item.cartItemId))
-                //    .filter((id) => previousSelection.has(id))
-           // );
-        //} else {
-          //  selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
-        //}
-
-       // if (!selectedItems.size && cartItems.length) {
-       //     selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
-        //}
-
         renderCart();
         updateCartCount(cartItems);
     } catch (error) {
@@ -143,7 +126,7 @@ window.addToCart = async function (variantId) {
             credentials: "include"
         });
 
-        // ❗ CHECK HTTP STATUS TRƯỚC
+        // CHECK HTTP STATUS TRƯỚC
         if (!response.ok) {
             const text = await response.text();
             console.error("Server error:", text);

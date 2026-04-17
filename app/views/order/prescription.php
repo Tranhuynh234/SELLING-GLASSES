@@ -156,7 +156,7 @@
                                 </div>
                             </div>
 
-                            <input type="hidden" name="order_item_id" value="<?php echo $orderItemId ?? 1; ?>">
+                            <input type="hidden" name="orderItemId" value="<?php echo $_GET['orderItemId'] ?? 1; ?>">
                             <input type="hidden" name="total_amount_input" id="total_amount_input" value="0">
                             
                             <button type="submit" class="btn-submit-pro w-full flex items-center justify-center gap-3">
@@ -206,6 +206,48 @@
             // Khởi tạo giá mặc định khi load
             updatePrice();
         });
+
+        (function() {
+            const form = document.getElementById('prescriptionForm');
+            if (!form) return;
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = form.querySelector('.btn-submit-pro');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-70');
+                }
+
+                const fd = new FormData(form);
+
+                try {
+                    const res = await fetch('/SELLING-GLASSES/public/index.php?url=prescription-store', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: fd
+                    });
+
+                    const data = await res.json();
+
+                    if (data && data.success) {
+                        alert('Đã lưu thông số vào hồ sơ.');
+                        window.location.href = '/SELLING-GLASSES/public/index.php?url=checkout&status=saved';
+                    } else {
+                        alert('Lưu không thành công: ' + (data.message || 'Lỗi không xác định'));
+                    }
+                } catch (err) {
+                    console.error('Lỗi khi lưu đơn kính:', err);
+                    alert('Lỗi kết nối hoặc phản hồi không hợp lệ. Vui lòng thử lại.');
+                } finally {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-70');
+                    }
+                }
+            });
+        })();
     </script>
 </body>
 </html>

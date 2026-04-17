@@ -1,3 +1,34 @@
+<?php
+// Kiểm tra xem session đã được start chưa 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$lensCost = isset($_SESSION['prescription_total']) ? $_SESSION['prescription_total'] : 0;
+// Kết nối database
+$db = Database::connect();
+$userId = $_SESSION['user']['userId'] ?? null;
+
+$user = null;
+$userPres = null;
+
+if ($userId) {
+    // 1. Lấy thông tin cá nhân để tự điền (Auto-fill) vào form giao hàng
+    $queryUser = "SELECT u.name, u.email, u.phone, c.address 
+                  FROM users u 
+                  LEFT JOIN customers c ON u.userId = c.userId 
+                  WHERE u.userId = :userId";
+    $stmtUser = $db->prepare($queryUser);
+    $stmtUser->execute([':userId' => $userId]);
+    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+    // 2. Lấy thông số đơn kính mẫu đã lưu trong hồ sơ
+    $queryPres = "SELECT * FROM prescription WHERE userId = :userId LIMIT 1";
+    $stmtPres = $db->prepare($queryPres);
+    $stmtPres->execute([':userId' => $userId]);
+    $userPres = $stmtPres->fetch(PDO::FETCH_ASSOC);
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -47,10 +78,10 @@
                         <select name="city" id="city" required>
                             <option value="">Chọn tỉnh / thành phố</option>
                             <option value="Ho Chi Minh">TP. Ho Chi Minh</option>
-                            <option value="Ha Noi">Ha Noi</option>
-                            <option value="Da Nang">Da Nang</option>
-                            <option value="Can Tho">Can Tho</option>
-                            <option value="Hai Phong">Hai Phong</option>
+                            <option value="Ha Noi">Ben Tre</option>
+                            <option value="Da Nang">Long An</option>
+                            <option value="Can Tho">Tay Ninh</option>
+                            <option value="Hai Phong">Kien Giang</option>
                         </select>
                     </label>
                 </div>
@@ -115,6 +146,18 @@
                 <div class="summary-block totals-block">
                     <div class="prescription-promo">
                         <p>Bạn có đơn kính thuốc?</p>
+                        
+                        <?php if ($userPres): ?>
+                            <div style="background: #fffbeb; border: 1px dashed #f59e0b; padding: 12px; border-radius: 12px; margin-top: 10px; margin-bottom: 10px;">
+                                <p style="font-size: 0.8rem; color: #92400e; margin-bottom: 8px; font-weight: 500;">
+                                    <i class="fas fa-eye"></i> Đã tìm thấy số đo mắt trong hồ sơ!
+                                </p>
+                                <button type="button" onclick="useSavedPrescription()" style="background: #d97706; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; width: 100%;">
+                                    Sử dụng số đo đã lưu
+                                </button>
+                            </div>
+                        <?php endif; ?>
+
                         <a href="/SELLING-GLASSES/public/index.php?url=prescription" class="btn-prescription">
                             <i class="icon-plus-custom">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -122,18 +165,21 @@
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                             </i>
-                            <span>Nhập thông số mắt ngay</span>
+                            <span><?php echo ($userPres) ? 'Nhập thông số mắt mới' : 'Nhập thông số mắt ngay'; ?></span>
                         </a>
                     </div>
+
+
+                    <input type="hidden" id="server-lens-cost" value="<?= intval($lensCost) ?>">
 
                     <div class="total-row">
                         <span>Tạm tính</span>
                         <strong id="subtotal">0đ</strong>
                     </div>
 
-                    <div class="total-row" id="lens-cost-row" style="color: #6b7280">
+                    <div class="total-row" id="lens-cost-row">
                         <span>Chi phí tròng kính</span>
-                        <strong id="lens-cost">0đ</strong>
+                        <strong id="lens-cost"><?= number_format($lensCost, 0, ',', '.') ?>đ</strong>
                     </div>
                     <div class="total-row">
                         <span>Giảm giá</span>

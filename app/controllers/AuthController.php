@@ -8,9 +8,7 @@ class AuthController {
         $this->userService = new UserService();
     }
 
-    // =========================
     // REGISTER
-    // =========================
     public function register() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // thông báo trả về json
@@ -25,9 +23,7 @@ class AuthController {
         }
     }
 
-    // =========================
     // LOGIN
-    // =========================
    public function login() {
 
     if (session_status() === PHP_SESSION_NONE) {
@@ -66,9 +62,7 @@ class AuthController {
     require_once __DIR__ . "/../views/auth/login.php";
 }
 
-    // =========================
     // LOGOUT
-    // =========================
     public function logout() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -99,9 +93,7 @@ class AuthController {
         exit;
     }
 
-    // =========================
     // UPDATE PROFILE
-    // =========================
     public function updateProfile() {
         require_once __DIR__ . "/../middleware/AuthMiddleware.php";
 
@@ -118,30 +110,39 @@ class AuthController {
         require_once __DIR__ . "/../views/auth/profile.php";
     }
 
-    // =========================
     // PROFILE VIEW
-    // =========================
     public function profile() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        // Nếu chưa đăng nhập thì đá về trang auth/đăng nhập
+        // Nếu chưa đăng nhập thì trở về trang auth
         if (!isset($_SESSION['user'])) {
             header("Location: /SELLING-GLASSES/public/auth");
             exit();
         }
+
+        // --- KHỞI TẠO DỮ LIỆU THANH TOÁN ---
+        // 1. Nạp file PaymentController
+        require_once __DIR__ . "/PaymentController.php";
         
+        // 2. Khởi tạo và lấy dữ liệu
+        $paymentController = new PaymentController();
+        $paymentData = $paymentController->getPaymentHistory();
+        
+        // 3. Tách dữ liệu ra để file profile.php dễ dùng
+        $payments = $paymentData['payments'] ?? [];
+        $totalSpent = $paymentData['totalSpent'] ?? 0;
+        // ----------------------------------
+
+        // Gọi View - View sẽ nhận được các biến $payments và $totalSpent
         require_once __DIR__ . "/../views/auth/profile.php";
     }
 
-    // =========================
     // SHOW LOGIN VIEW
-    // =========================
     public function showLogin() {
         require_once __DIR__ . "/../views/auth/auth.php";
     }
     
-
 } 
 ?>

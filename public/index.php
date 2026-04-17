@@ -60,7 +60,7 @@ switch ($url) {
         $authController->profile();
         exit();
     case "update-profile":
-        $authController->updateProfile();
+        $userController->updateProfile();
         exit();
     case "staff-save":
         $staffController->save();
@@ -79,24 +79,34 @@ switch ($url) {
         AuthMiddleware::handle(['staff'], ['operation']);
         require_once "../app/views/ops/ops.php";
         exit();
+
     case "register":
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->register();
         }
         exit();
+
     case "get-users":
         AuthMiddleware::handle(['staff'], ['manager']);
         $userController->getAllUsers();
         exit();
+
     case "search-users":
         AuthMiddleware::handle(['staff'], ['manager']);
         $userController->searchUsers();
         exit();
+        
     case "update-user":
         AuthMiddleware::handle(['staff'], ['manager']);
        $userController->updateUser();
         exit();
-     case "create-user":
+
+    case "update-prescription":
+        // Chỉ cho phép khách hàng đã đăng nhập cập nhật đơn kính của họ
+        $userController->updatePrescription();
+        exit();
+
+    case "create-user":
         AuthMiddleware::handle(['staff'], ['manager']);
         $userController->createUser();
         exit();
@@ -106,6 +116,9 @@ switch ($url) {
         $userController->deleteUser();
         exit();
 
+    case "change-password":
+        $userController->changePassword();
+        exit();
     // --- PRESCRIPTION ---
     case "prescription":
         // Hiển thị giao diện nhập đơn kính
@@ -180,7 +193,7 @@ switch ($url) {
         exit();
 
     case "cancel-order":
-        $orderController->cancel();
+        $orderController->cancelOrder();
         exit();
 
     // case "return-order":
@@ -191,6 +204,10 @@ switch ($url) {
         $orderController->stats();
         exit();
 
+    case 'order-detail':
+        $controller = new OrderController($conn);
+        $controller->showDetail($_GET['id']);
+        break;    
     // case "shipment-tracking":
     // $trackingNumber = $_GET['trackingNumber'] ?? null;
     // $orderController->shipmentTracking($trackingNumber);
@@ -256,7 +273,7 @@ switch ($url) {
         
     case "clear-prescription-session":
         if (session_status() === PHP_SESSION_NONE) session_start();
-        unset($_SESSION['prescription_total']); // Xóa sổ con số 300k
+        unset($_SESSION['prescription_total']); 
         echo json_encode(['success' => true]);
         exit();
    

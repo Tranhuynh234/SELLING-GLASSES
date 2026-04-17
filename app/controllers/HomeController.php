@@ -16,10 +16,7 @@ class HomeController {
         // Lấy toàn bộ dữ liệu từ HomeService
         $data = $this->homeService->getHomeData($page);
 
-        /** * TRÍCH XUẤT DỮ LIỆU ĐỂ TRANG HOME.PHP SỬ DỤNG
-         * Giả sử HomeService trả về mảng có dạng ['products' => [...], 'pagination' => ...]
-         * Ta gán mảng products vào biến $products để vòng lặp foreach trong view hoạt động.
-         */
+        // Trích xuất dữ liệu để trang home.php sử dụng 
         $products = $data['products'] ?? []; 
 
         // Nhúng file giao diện trang chủ

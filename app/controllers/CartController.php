@@ -17,9 +17,7 @@ class CartController {
         $this->cartService = new CartService($this->conn);
     }
 
-    /**
-     * Lấy Customer ID từ Session User
-     */
+    /** Lấy Customer ID từ Session User */
     private function getCustomerId() {
         $userId = $_SESSION['user']['userId'] ?? null;
 
@@ -52,9 +50,7 @@ class CartController {
         exit();
     }
 
-    /**
-     * Lấy toàn bộ sản phẩm trong giỏ hàng (Trả về JSON)
-     */
+    /** Lấy toàn bộ sản phẩm trong giỏ hàng (Trả về JSON) */
     public function getCart() {
         header('Content-Type: application/json');
 
@@ -70,9 +66,7 @@ class CartController {
         exit();
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ (Sửa để trả về giỏ hàng mới nhất)
-     */
+    /** Thêm sản phẩm vào giỏ */
     public function add() {
         header('Content-Type: application/json');
         $customerId = $this->getCustomerId();
@@ -90,7 +84,7 @@ class CartController {
             exit();
         }
 
-        // GỌI DUY NHẤT 1 LẦN Ở ĐÂY (Vừa thêm vừa nhận lại giỏ hàng mới nhất)
+        // Vừa thêm vừa nhận lại giỏ hàng mới nhất
         $items = $this->cartService->addToCart($customerId, $variantId, $quantity);
 
         if ($items === false) {
@@ -165,7 +159,7 @@ class CartController {
         // Xóa tiền tròng kính ngay khi rời khỏi giỏ hàng để sang checkout
         unset($_SESSION['prescription_total']);
         
-        // Sau đó mới gọi View hoặc Redirect sang trang Checkout
+        // Sau đó mới gọi View/ Redirect sang trang Checkout
         header("Location: index.php?url=checkout");
         exit();
     }
