@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,900&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -196,20 +197,29 @@
                     <div class="filter-group">
                         <label>Trạng thái</label>
                         <div class="filter-tabs">
-                            <button class="filter-tab active" data-status="all">
+                            <button class="filter-tab active" data-status="All">
                                 Tất cả
                             </button>
-                            <button class="filter-tab" data-status="pending">
+                            <button class="filter-tab" data-status="Pending">
                                 Chờ xử lý
                             </button>
-                            <button class="filter-tab" data-status="confirmed">
+                            <button class="filter-tab" data-status="Confirmed">
                                 Đã xác nhận
                             </button>
-                            <button class="filter-tab" data-status="shipping">
+                            <button class="filter-tab" data-status="Processing">
+                                Đang xử lý
+                            </button>
+                            <button class="filter-tab" data-status="Shipped">
                                 Đang giao
                             </button>
-                            <button class="filter-tab" data-status="completed">
+                            <button class="filter-tab" data-status="Delivered">
                                 Hoàn tất
+                            </button>
+                            <button class="filter-tab" data-status="Cancelled">
+                                Đã hủy
+                            </button>
+                            <button class="filter-tab" data-status="Returned">
+                                Trả hàng
                             </button>
                         </div>
                     </div>
@@ -227,7 +237,7 @@
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody id="all-orders-list"></tbody>
+                            <tbody id="orders-table-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -327,6 +337,117 @@
             </section>
         </main>
     </div>
+
+    <!-- ================= CHI TIẾT ĐƠN HÀNG ================= -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content order-modal-content">
+                <div class="modal-header order-modal-header">
+                    <h5 class="modal-title" id="orderDetailTitle">Chi tiết đơn hàng</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- LAYOUT BÊN TRONG CHI TIẾT ĐƠN -->
+                <div class="modal-body order-details-container">
+                    <div class="custom-modal-content"> <div class="row m-0">
+                            <div class="col-md-5 side-panel">
+                                <h6 class="section-title">BẢNG ĐIỀU KHIỂN SALES</h6>
+                                
+                                <div class="action-box">
+                                    <p class="group-label">XỬ LÝ ĐƠN</p>
+                                    <button class="btn-confirm-order hidden" onclick="handleUpdateStatus('Confirmed')">
+                                        <span><i class="fas fa-check-circle"></i> Xác nhận đơn hàng</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+
+                                    <button class="btn-logistic-order hidden" onclick="handleUpdateStatus('Processing')">
+                                        <span><i class="fas fa-truck"></i> Chuyển Operation</span>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+
+                                <hr style="border-top: 1px solid #000000; margin: 20px 0;">
+
+                                <div class="action-box">
+                                    <p class="group-label">HỖ TRỢ</p>
+                                    <button class="btn-support-contact btn-contact-customer" onclick="handleContactCustomer()">
+                                        <i class="fas fa-phone-alt"></i> Liên hệ khách hàng
+                                    </button>
+                                    <button class="btn-support-edit">
+                                        <i class="fas fa-edit"></i> Chỉnh sửa thông tin
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7 main-panel">
+                                <h6 class="section-title">THÔNG TIN CHI TIẾT</h6>
+
+                                <div class="info-group">
+                                    <p class="group-label">THÔNG TIN KHÁCH HÀNG</p>
+                                    <div id="customerInfoDisplay" class="data-display-box">
+                                        <p><strong>Họ tên:</strong> <span class="info-value" id="custName">---</span></p>
+                                        <p><strong>Số điện thoại:</strong> <span class="info-value" id="custPhone">---</span></p>
+                                        <p><strong>Địa chỉ:</strong> <span class="info-value" id="custAddress">---</span></p>
+                                    </div>
+                                </div>
+
+                                <hr style="border-top: 1px solid #000000; margin: 20px 0;">
+
+                                <div class="info-group">
+                                    <p class="group-label">THÔNG TIN ĐƠN HÀNG</p>
+                                    <div class="table-container">
+                                        <table class="order-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center">Ảnh</th>
+                                                    <th>Sản phẩm</th>
+                                                    <th class="text-center">Số Lượng</th>
+                                                    <th class="text-center">Giá</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="orderDetailBody">
+                                                </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <hr style="border-top: 1px solid #000000; margin: 20px 0;">
+
+                                <div class="timeline-container">
+                                    <p class="group-label">TIMELINE XỬ LÝ</p>
+                                    <div class="timeline-steps">
+                                        <div class="timeline-line"></div>
+                                        <div class="step is-complete">
+                                            <div class="step-icon">✓</div>
+                                            <span class="step-text">Đã tạo đơn</span>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-icon">2</div>
+                                            <span class="step-text">Liên hệ</span>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-icon">3</div>
+                                            <span class="step-text">Xác nhận</span>
+                                        </div>
+                                        <div class="step">
+                                            <div class="step-icon">4</div>
+                                            <span class="step-text">Chuyển Ops</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- FILE JS -->
     <script src="/SELLING-GLASSES/public/assets/js/sale.js"></script>

@@ -32,10 +32,33 @@ class OrderService {
         ];
     }
 
-    public function updateStatus($orderId, $status) {
+    public function getOrderDetail($orderId) {
+        $data = $this->orderModel->getOrderDetailWithCustomer($orderId);
+        
         return [
-            "success" => $this->orderModel->update($orderId, ['status' => $status])
+            "success" => !empty($data),
+            "data" => $data
         ];
+    }
+
+    public function updateStatus($orderId, $status, $isContacted = null) {
+        $updateData = [];
+    if ($status !== null) $updateData['status'] = $status;
+    if ($isContacted !== null) $updateData['is_contacted'] = $isContacted;
+
+    $result = $this->orderModel->update($orderId, $updateData);
+
+        if ($result) {
+            return [
+                "success" => true, 
+                "message" => "Cập nhật trạng thái thành công"
+            ];
+        } else {
+            return [
+                "success" => false, 
+                "message" => "Không có thay đổi nào được thực hiện hoặc lỗi Database"
+            ];
+        }
     }
 
     public function cancelOrder($orderId) {

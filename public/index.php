@@ -183,6 +183,11 @@ switch ($url) {
         $orderController->cancel();
         exit();
 
+    // Thêm chi tiết đơn hàng
+    case "get-order-detail":
+        $orderController->getOrderDetail();
+        exit();
+
     // case "return-order":
     // $orderController->return();
     // exit();
