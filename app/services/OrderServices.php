@@ -9,100 +9,49 @@ class OrderService {
     }
 
     public function createOrder($data) {
-  
-        if (session_status() === PHP_SESSION_NONE) session_start();
-
-        if (session_status() === PHP_SESSION_NONE) session_start();
-
-
         if (empty($data['customerId'])) {
             return ["success" => false, "message" => "Thiếu customerId"];
         }
 
-        $db = Database::connect();
+        $data['orderDate'] = date('Y-m-d H:i:s');
+        $data['status'] = 'Pending';
+        $data['totalPrice'] = $data['totalPrice'] ?? 0;
 
-        try {
-            $db->beginTransaction();
+        $orderId = $this->orderModel->create($data);
 
-            // Tạo order
-            $data['orderDate'] = date('Y-m-d H:i:s');
-            $data['status'] = 'Pending';
-            $data['totalPrice'] = $data['totalPrice'] ?? 0;
-
-            $orderId = $this->orderModel->create($data);
-
-            if (!$orderId) throw new Exception("Không tạo được order");
-
-            // Lấy giỏ hàng từ session
-            $cart = $_SESSION['cart'] ?? [];
-
-            require_once __DIR__ . '/../models/Prescription.php';
-
-            foreach ($cart as $item) {
-
-                // INSERT order_item
-                $stmt = $db->prepare("
-                    INSERT INTO order_items (orderId, productId, quantity, price)
-                    VALUES (?, ?, ?, ?)
-                ");
-
-                $stmt->execute([
-                    $orderId,
-                    $item['productId'],
-                    $item['quantity'],
-                    $item['price']
-                ]);
-
-                $orderItemId = $db->lastInsertId();
-
-                // GẮN PRESCRIPTION
-                if (!empty($_SESSION['prescription_data'])) {
-
-                    $p = $_SESSION['prescription_data'];
-
-                    $pres = new Prescription();
-                    $pres->userId = $p['userId'] ?? ($_SESSION['user']['userId'] ?? null);
-                    $pres->orderItemId = $orderItemId;
-                    $pres->leftEye = $p['leftEye'];
-                    $pres->rightEye = $p['rightEye'];
-                    $pres->leftPD = $p['leftPD'];
-                    $pres->rightPD = $p['rightPD'];
-                    $pres->imagePath = $p['imagePath'];
-
-                    $pres->save($db);
-
-                    unset($_SESSION['prescription_data']);
-                }
-            }
-
-            $db->commit();
-
-            return [
-                "success" => true,
-                "orderId" => $orderId
-            ];
-
-        } catch (Exception $e) {
-            $db->rollBack();
-            return [
-                "success" => false,
-                "message" => $e->getMessage()
-            ];
-        }
+        return [
+            "success" => !!$orderId,
+            "orderId" => $orderId
+        ];
     }
 
     public function getOrdersByStatus($status) {
+        $data = $this->orderModel->getOrdersForOps($status); 
+        return ["success" => true, "data" => $data];
+    }
+
+    public function updateStatus($orderId, $status, $trackingCode = null) {
+    if (!$orderId || !$status) {
         return [
-            "success" => true,
-            "data" => $this->orderModel->findByStatus($status)
+            "success" => false,
+            "message" => "Thiếu dữ liệu"
         ];
     }
 
-    public function updateStatus($orderId, $status) {
-        return [
-            "success" => $this->orderModel->update($orderId, ['status' => $status])
-        ];
-    }
+    // CHỈ update status để tránh lỗi cột không tồn tại
+    $updateData = [
+        'status' => $status
+    ];
+
+    $res = $this->orderModel->updateOrder($orderId, $updateData);
+
+    return [
+        "success" => $res,
+        "message" => $res
+            ? "Cập nhật đơn hàng thành công"
+            : "Lỗi database khi update đơn"
+    ];
+}
 
     public function cancelOrder($orderId) {
         return $this->updateStatus($orderId, 'Cancelled');
@@ -112,10 +61,9 @@ class OrderService {
         return $this->updateStatus($orderId, 'Returned');
     }
 
+    // Thống kê cho Dashboard
     public function getOrderStats() {
-        return [
-            "success" => true,
-            "data" => $this->orderModel->countByStatus()
-        ];
+        $data = $this->orderModel->countByStatus();
+        return ["success" => true, "data" => $data];
     }
 }

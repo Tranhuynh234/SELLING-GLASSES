@@ -1,414 +1,331 @@
 const opsApp = {
-  // --- DỮ LIỆU HỆ THỐNG (STATE) ---
-  state: {
-    user: {
-      name: "ThienTru1612",
-      role: "Nhân viên Vận hành cấp cao",
-      id: "OPS-1612",
-      email: "thientru.ops@eyesglass.com",
-      joinDate: "16/12/2023",
-      processedOrders: 1248,
+    state: {
+        orders: [],
+        currentTab: "dashboard",
+        searchQuery: ""
     },
-    inventory: [
-      {
-        id: "G-TITAN",
-        name: "Gọng Titanium EyesGlass",
-        stock: 13,
-        unit: "Cái",
-      },
-      { id: "L-BLUE", name: "Tròng Blue Control 1.61", stock: 4, unit: "Cặp" },
-      { id: "P-BOX", name: "Hộp kính Da EyesGlass", stock: 0, unit: "Cái" },
-    ],
-    orders: [
-      {
-        id: "EG-1100",
-        customer: "Nguyễn Văn Toàn",
-        status: "Đang xử lý",
-        date: "2026-03-19",
-        total: "850.000đ",
-        tracking: "",
-      },
-      {
-        id: "EG-1101",
-        customer: "Trương Mỹ Nhân",
-        status: "Đang giao",
-        date: "2026-03-18",
-        total: "1.250.000đ",
-        tracking: "GHN-123456",
-      },
-      {
-        id: "EG-1102",
-        customer: "Lê Minh",
-        status: "Hoàn tất",
-        date: "2026-03-15",
-        total: "500.000đ",
-        tracking: "VTP-999888",
-      },
-    ],
-    currentFilter: "all", // Lọc cho Kho
-    orderFilter: "all", // Lọc cho Đơn hàng
-  },
 
-  // --- KHỞI TẠO ---
-  init() {
-    this.renderTab("dashboard"); // Mặc định hiển thị Tổng quan
-    this.bindEvents();
-  },
+    apiUrl: "index.php",
 
-  bindEvents() {
-    // Menu Sidebar điều hướng
-    document.querySelectorAll(".nav-link").forEach((link) => {
-      link.onclick = (e) => {
-        e.preventDefault();
-        const tab = e.currentTarget.getAttribute("data-tab");
-        document
-          .querySelectorAll(".nav-link")
-          .forEach((l) => l.classList.remove("active"));
-        e.currentTarget.classList.add("active");
-        this.renderTab(tab);
-      };
-    });
+    // ==========================================
+    // 1. KHỞI TẠO HỆ THỐNG
+    // ==========================================
+    async init() {
+        await this.fetchData("all");
+        this.renderTab(this.state.currentTab);
+        this.bindEvents();
+    },
 
-    // Nút đăng xuất ở sidebar footer
-    const logoutBtn = document.querySelector(".btn-logout-sidebar");
-    if (logoutBtn) logoutBtn.onclick = () => this.handleLogout();
+    // ==========================================
+    // 2. LOGIC LẤY DỮ LIỆU (FIXED ASYNC & ALL STATUS)
+    // ==========================================
+    async fetchData(status = "all") {
+        try {
+            const response = await fetch(`${this.apiUrl}?url=get-orders-by-status&status=${status}`);
+            const res = await response.json();
+            
+            if (res.success) {
+                this.state.orders = res.data;
+                return res.data; // Trả về để hàm onchange có thể await
+            }
+            this.state.orders = [];
+            return [];
+        } catch (e) {
+            console.error("Lỗi fetch dữ liệu:", e);
+            this.state.orders = [];
+            return [];
+        }
+    },
 
-    // Icon Profile góc trên bên phải
-    const headerProfile = document.querySelector(".header-profile");
-    if (headerProfile) {
-      headerProfile.onclick = () => {
-        document
-          .querySelectorAll(".nav-link")
-          .forEach((l) => l.classList.remove("active"));
-        const accLink = document.querySelector('[data-tab="account"]');
-        if (accLink) accLink.classList.add("active");
-        this.renderTab("account");
-      };
-    }
-  },
+    // ==========================================
+    // 3. XỬ LÝ SỰ KIỆN SIDEBAR
+    // ==========================================
+    bindEvents() {
+        document.querySelectorAll(".nav-link").forEach((link) => {
+            link.onclick = async (e) => {
+                e.preventDefault();
+                const tab = e.currentTarget.getAttribute("data-tab");
+                if (!tab || tab === "account") return;
 
-  renderTab(tab) {
-    const area = document.getElementById("render-area");
-    area.innerHTML = "";
+                this.state.currentTab = tab;
+                document.querySelectorAll(".nav-link").forEach((l) => l.classList.remove("active"));
+                link.classList.add("active");
 
-    switch (tab) {
-      case "dashboard":
-        this.renderDashboard(area);
-        break;
-      case "orders":
-        this.renderOrders(area);
-        break;
-      case "shipping":
-        this.renderShipping(area);
-        break;
-      case "warehouse":
-        this.renderWarehouse(area);
-        break;
-      case "account":
-        this.renderAccount(area);
-        break;
-      default:
-        area.innerHTML = `<div class="card"><h3>Tính năng đang phát triển</h3></div>`;
-    }
-  },
+                // Tải dữ liệu tương ứng tab trước khi vẽ
+                if (tab === "shipping") {
+                    await this.fetchData("Pending");
+                } else {
+                    await this.fetchData("all");
+                }
+                this.renderTab(tab);
+            };
+        });
+    },
 
-  // --- 1. TỔNG QUAN (DASHBOARD) ---
-  renderDashboard(el) {
-    const pendingOrders = this.state.orders.filter(
-      (o) => o.status === "Đang xử lý",
-    ).length;
-    const outOfStock = this.state.inventory.filter((i) => i.stock <= 0).length;
-    const lowStock = this.state.inventory.filter(
-      (i) => i.stock < 5 && i.stock > 0,
-    ).length;
+    // ==========================================
+    // 4. ĐIỀU PHỐI GIAO DIỆN
+    // ==========================================
+    renderTab(tab) {
+        const area = document.getElementById("render-area");
+        if (!area) return;
+        area.innerHTML = "";
 
-    el.innerHTML = `
-            <div class="fade-in">
-                <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                    <div class="card" style="border-left: 5px solid #e67e22;">
-                        <h4>Đơn chờ xử lý</h4>
-                        <h2 style="color: #e67e22; margin-top:10px">${pendingOrders}</h2>
-                    </div>
-                    <div class="card" style="border-left: 5px solid #c0392b;">
-                        <h4>Vật tư đã hết hàng</h4>
-                        <h2 style="color: #c0392b; margin-top:10px">${outOfStock}</h2>
-                    </div>
-                    <div class="card" style="border-left: 5px solid #27ae60;">
-                        <h4>Hiệu suất làm việc</h4>
-                        <h2 style="color: #27ae60; margin-top:10px">98%</h2>
-                    </div>
+        switch (tab) {
+            case "dashboard": this.renderDashboard(area); break;
+            case "orders": this.renderOrders(area); break;
+            case "shipping": this.renderShipping(area); break;
+            default: this.renderDashboard(area);
+        }
+    },
+
+    // ==========================================
+    // 5. GIAO DIỆN TỔNG QUAN (DASHBOARD)
+    // ==========================================
+    renderDashboard(el) {
+        const pendingCount = this.state.orders.filter(o => o.status === "Pending").length;
+        const shippedCount = this.state.orders.filter(o => o.status === "Shipped").length;
+        const total = this.state.orders.length;
+        const efficiency = total > 0 ? Math.round((shippedCount / total) * 100) : 0;
+
+        el.innerHTML = `
+        <div class="dashboard-container fade-in">
+            <div class="stats-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; margin-bottom:25px;">
+                <div class="card" style="border-left:5px solid #e67e22; padding:20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.08);">
+                    <h4 style="margin:0; color:#777;">ĐƠN CHỜ XỬ LÝ</h4>
+                    <h2 style="margin-top:12px; color:#e67e22; font-size:34px;">${pendingCount}</h2>
                 </div>
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-                    <div class="card">
-                        <h3 style="margin-bottom:20px">Hiệu suất vận hành tuần</h3>
-                        <canvas id="dashChart" height="150"></canvas>
-                    </div>
-                    <div class="card">
-                        <h3>Lối tắt nhanh</h3>
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top:15px">
-                            <button class="btn-confirm" onclick="opsApp.renderTab('shipping')" style="width:100%; text-align:left; padding:15px">
-                                <i class="fa-solid fa-truck-fast"></i> Đẩy vận đơn ngay (${pendingOrders})
-                            </button>
-                            <button class="btn-confirm" onclick="opsApp.renderTab('warehouse')" style="width:100%; text-align:left; padding:15px; background:#7f8c8d">
-                                <i class="fa-solid fa-boxes-stacked"></i> Kiểm kho hàng sắp hết (${lowStock})
-                            </button>
-                        </div>
-                    </div>
+                <div class="card" style="border-left:5px solid #3498db; padding:20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.08);">
+                    <h4 style="margin:0; color:#777;">ĐƠN ĐANG GIAO</h4>
+                    <h2 style="margin-top:12px; color:#3498db; font-size:34px;">${shippedCount}</h2>
+                </div>
+                <div class="card" style="border-left:5px solid #27ae60; padding:20px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.08);">
+                    <h4 style="margin:0; color:#777;">HIỆU SUẤT LÀM VIỆC</h4>
+                    <h2 style="margin-top:12px; color:#27ae60; font-size:34px;">${efficiency}%</h2>
                 </div>
             </div>
-        `;
-    this.initDashboardChart();
-  },
 
-  initDashboardChart() {
-    const ctx = document.getElementById("dashChart");
-    if (!ctx) return;
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
-        datasets: [
-          {
-            label: "Đơn hàng",
-            data: [12, 19, 15, 25, 22, 30, 45],
-            borderColor: "#e67e22",
-            tension: 0.4,
-            fill: true,
-            backgroundColor: "rgba(230, 126, 34, 0.05)",
-          },
-        ],
-      },
-      options: { plugins: { legend: { display: false } } },
-    });
-  },
+            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; align-items:start;">
+                <div class="card" style="padding:20px; border-radius:14px;">
+                    <h3 style="margin-bottom:20px;">Hiệu suất vận hành tuần</h3>
+                    <canvas id="dashChart" height="120"></canvas>
+                </div>
 
-  // --- 2. QUẢN LÝ ĐƠN HÀNG ---
-  renderOrders(el) {
-    const filteredOrders = this.state.orders.filter((o) => {
-      if (this.orderFilter === "pending") return o.status === "Đang xử lý";
-      if (this.orderFilter === "shipping") return o.status === "Đang giao";
-      if (this.orderFilter === "completed") return o.status === "Hoàn tất";
-      return true;
-    });
+                <div class="card" style="padding:20px; border-radius:14px;">
+                    <h3 style="margin-bottom:20px;">Lối tắt nhanh</h3>
+                    <button class="btn-confirm" style="width:100%; margin-bottom:12px; background:#e67e22; color:white;"
+                        onclick="opsApp.goShippingFromDashboard()">
+                        🚚 Đẩy vận đơn ngay (${pendingCount})
+                    </button>
+                    <button style="width:100%; background:#7f8c8d; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer;"
+                        onclick="opsApp.fetchData('all').then(() => opsApp.renderTab('orders'))">
+                        📋 Danh sách đơn hàng
+                    </button>
+                </div>
+            </div>
+        </div>`;
+        this.initChart();
+    },
 
-    el.innerHTML = `
-            <div class="warehouse-header">
-                <h3 style="font-size: 1.5rem; font-weight: 800;">Danh sách đơn hàng</h3>
+    async goShippingFromDashboard() {
+        this.state.currentTab = "shipping";
+        await this.fetchData("Pending");
+        document.querySelectorAll(".nav-link").forEach((l) => l.classList.remove("active"));
+        const shippingTab = document.querySelector('.nav-link[data-tab="shipping"]');
+        if (shippingTab) shippingTab.classList.add("active");
+        this.renderTab("shipping");
+    },
+
+    // ==========================================
+    // 6. DANH SÁCH ĐƠN HÀNG (FIXED FILTER & DISPLAY)
+    // ==========================================
+    renderOrders(el) {
+        el.innerHTML = `
+            <div class="warehouse-header fade-in" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2>Danh sách đơn hàng</h2>
                 <div class="header-actions">
-                    <select class="filter-select" onchange="opsApp.handleOrderFilter(this.value)">
-                        <option value="all" ${this.orderFilter === "all" ? "selected" : ""}>Tất cả trạng thái</option>
-                        <option value="pending" ${this.orderFilter === "pending" ? "selected" : ""}>Đang xử lý</option>
-                        <option value="shipping" ${this.orderFilter === "shipping" ? "selected" : ""}>Đang giao</option>
-                        <option value="completed" ${this.orderFilter === "completed" ? "selected" : ""}>Hoàn tất</option>
+                    <select class="filter-select" onchange="(async () => { await opsApp.fetchData(this.value); opsApp.renderTab('orders'); })()" 
+                        style="padding:10px; border-radius:8px; border:1px solid #ddd; font-weight:600; cursor:pointer;">
+                        <option value="all">Tất cả đơn hàng</option>
+                        <option value="Pending">Đang xử lý</option>
+                        <option value="Shipped">Đang giao</option>
+                        <option value="Delivered">Hoàn thành</option>
                     </select>
                 </div>
             </div>
+
             <div class="card fade-in">
                 <table class="table-pro">
                     <thead>
-                        <tr><th>MÃ ĐƠN</th><th>KHÁCH HÀNG</th><th>NGÀY ĐẶT</th><th>TỔNG TIỀN</th><th>TRẠNG THÁI</th><th style="text-align:right">THAO TÁC</th></tr>
+                        <tr>
+                            <th>MÃ ĐƠN</th>
+                            <th>PHÂN LOẠI</th>
+                            <th>KHÁCH HÀNG</th>
+                            <th>TỔNG TIỀN</th>
+                            <th>TRẠNG THÁI</th>
+                            <th style="text-align:right">THAO TÁC</th>
+                        </tr>
                     </thead>
                     <tbody>
-                        ${filteredOrders
-                          .map(
-                            (o) => `
-                            <tr>
-                                <td><code>#${o.id}</code></td>
-                                <td><b>${o.customer}</b></td>
-                                <td>${o.date}</td>
-                                <td>${o.total}</td>
-                                <td><span class="badge ${this.getOrderBadgeClass(o.status)}">${o.status}</span></td>
-                                <td style="text-align:right">
-                                    <button class="btn-action" onclick="opsApp.openUpdateOrderModal('${o.id}')"><i class="fa-solid fa-pen-to-square"></i></button>
-                                </td>
-                            </tr>
-                        `,
-                          )
-                          .join("")}
+                        ${this.state.orders.length ? this.state.orders.map((o) => {
+                            const isCustom = (o.leftEye || o.rightEye);
+                            const typeBadge = isCustom ? 
+                                '<span style="color:#3498db; font-weight:700;">Gia công</span>' : 
+                                '<span style="color:#9b59b6; font-weight:700;">Mua sẵn</span>';
+
+                            return `
+                                <tr>
+                                    <td><code>#${o.orderId}</code></td>
+                                    <td>${typeBadge}</td>
+                                    <td>${o.customerName || "Khách lẻ"}</td>
+                                    <td>${Number(o.totalPrice || 0).toLocaleString("vi-VN")}đ</td>
+                                    <td>
+                                        <span class="badge ${o.status === "Pending" ? "bg-low" : o.status === "Shipped" ? "bg-primary" : "bg-ok"}">
+                                            ${o.status}
+                                        </span>
+                                    </td>
+                                    <td style="text-align:right">
+                                        <button class="btn-action" title="Chỉnh sửa" onclick="opsApp.openEditStatusModal('${o.orderId}', '${o.status}')">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        }).join("") : '<tr><td colspan="6" style="text-align:center; padding:30px;">Không tìm thấy dữ liệu</td></tr>'}
                     </tbody>
                 </table>
-            </div>
-        `;
-  },
+            </div>`;
+    },
 
-  handleOrderFilter(val) {
-    this.orderFilter = val;
-    this.renderOrders();
-  },
-
-  getOrderBadgeClass(status) {
-    if (status === "Đang xử lý") return "bg-low";
-    if (status === "Đang giao") return "bg-shipping";
-    if (status === "Hoàn tất") return "bg-ok";
-    return "";
-  },
-
-  // --- 3. VẬN CHUYỂN ---
-  renderShipping(el) {
-    const pending = this.state.orders.filter(
-      (o) => o.status === "Đang xử lý",
-    );
-    el.innerHTML = `
-            <div class="warehouse-header">
-                <h3 style="font-size: 1.5rem; font-weight: 800;">Tạo vận đơn nhanh</h3>
-            </div>
-            <div class="card fade-in" style="max-width: 600px; margin: 0 auto;">
-                <div class="form-group"><label>Chọn đơn hàng chờ đi</label><select id="ship-order-id" class="input-field">${pending.length > 0 ? pending.map((o) => `<option value="${o.id}">Đơn #${o.id} - ${o.customer} (${o.total})</option>`).join("") : "<option disabled>Hết đơn chờ vận chuyển</option>"}</select></div>
-                <div class="form-group"><label>Đối tác vận chuyển</label><select id="ship-partner" class="input-field"><option value="GHN">GHN</option><option value="VTP">Viettel Post</option></select></div>
-                <button class="btn-confirm" style="width: 100%; padding: 15px;" onclick="opsApp.createShippingTicket()" ${pending.length === 0 ? 'disabled style="opacity:0.5"' : ""}>XÁC NHẬN & XUẤT MÃ</button>
-            </div>
-        `;
-  },
-
-  createShippingTicket() {
-    const orderId = document.getElementById("ship-order-id").value;
-    const partner = document.getElementById("ship-partner").value;
-    const order = this.state.orders.find((o) => o.id === orderId);
-    if (order) {
-      order.tracking = `${partner}-${Math.floor(100000 + Math.random() * 900000)}`;
-      order.status = "Đang giao";
-      alert(`Thành công! Mã vận đơn: ${order.tracking}`);
-      this.renderTab("orders");
-    }
-  },
-
-  // --- 4. QUẢN LÝ KHO ---
-  renderWarehouse(el) {
-    const target = el || document.getElementById("render-area");
-    const filteredData = this.state.inventory.filter((item) => {
-      if (this.currentFilter === "instock") return item.stock >= 5;
-      if (this.currentFilter === "lowstack")
-        return item.stock < 5 && item.stock > 0;
-      if (this.currentFilter === "outofstock") return item.stock <= 0;
-      return true;
-    });
-
-    target.innerHTML = `
-            <div class="warehouse-header">
-                <h3 style="font-size: 1.5rem; font-weight: 800; margin:0">Quản lý vật tư kho</h3>
-                <div class="header-actions">
-                    <select class="filter-select" onchange="opsApp.handleFilter(this.value)">
-                        <option value="all" ${this.currentFilter === "all" ? "selected" : ""}>Tất cả vật tư</option>
-                        <option value="instock" ${this.currentFilter === "instock" ? "selected" : ""}>Còn hàng</option>
-                        <option value="lowstack" ${this.currentFilter === "lowstack" ? "selected" : ""}>Sắp hết hàng</option>
-                        <option value="outofstock" ${this.currentFilter === "outofstock" ? "selected" : ""}>Đã hết hàng</option>
-                    </select>
-                    <button class="btn-confirm" onclick="opsApp.openAddProductModal()">+ Nhập hàng</button>
-                </div>
-            </div>
-            <div class="card fade-in"><table class="table-pro">
-                <thead><tr><th>MÃ SP</th><th>TÊN VẬT TƯ</th><th>SỐ LƯỢNG</th><th>TÌNH TRẠNG</th><th style="text-align:right">THAO TÁC</th></tr></thead>
-                <tbody>${filteredData
-                  .map((item) => {
-                    let stText =
-                      item.stock <= 0
-                        ? "Đã hết hàng"
-                        : item.stock < 5
-                          ? "Sắp hết hàng"
-                          : "Còn hàng";
-                    let stClass =
-                      item.stock <= 0
-                        ? "bg-empty"
-                        : item.stock < 5
-                          ? "bg-low"
-                          : "bg-ok";
-                    let stColor =
-                      item.stock <= 0
-                        ? "#c0392b"
-                        : item.stock < 5
-                          ? "#e67e22"
-                          : "#27ae60";
-                    return `<tr><td><code>${item.id}</code></td><td><b>${item.name}</b></td><td style="color: ${stColor}; font-weight: 800;">${item.stock} ${item.unit}</td><td><span class="badge ${stClass}">${stText}</span></td><td style="text-align:right"><button class="btn-action" onclick="opsApp.adjustStock('${item.id}', 1)">+</button><button class="btn-action" onclick="opsApp.adjustStock('${item.id}', -1)">-</button></td></tr>`;
-                  })
-                  .join("")}</tbody>
-            </table></div>
-        `;
-  },
-
-  handleFilter(val) {
-    this.currentFilter = val;
-    this.renderWarehouse();
-  },
-  adjustStock(id, val) {
-    const item = this.state.inventory.find((i) => i.id === id);
-    if (item) {
-      item.stock = Math.max(0, item.stock + val);
-      this.renderWarehouse();
-    }
-  },
-
-  // --- 5. TÀI KHOẢN (MỚI BỔ SUNG) ---
-  renderAccount(el) {
-    el.innerHTML = `
-            <div class="fade-in">
-                <div class="warehouse-header"><h3 style="font-size: 1.5rem; font-weight: 800;">Hồ sơ cá nhân</h3></div>
-                <div class="card" style="max-width: 800px; margin: 0 auto; display: grid; grid-template-columns: 250px 1fr; gap: 30px; padding: 40px;">
-                    <div style="text-align: center; border-right: 1px solid #eee; padding-right: 30px;">
-                        <img src="https://ui-avatars.com/api/?name=Thien+Tru&background=e67e22&color=fff&size=150" style="width:150px; border-radius: 30px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-                        <h3 style="margin:0">${this.state.user.name}</h3>
-                        <p style="color: #27ae60; font-size: 0.85rem; font-weight: 700; margin-top:5px;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> Đang làm việc</p>
+    // ==========================================
+    // 7. VẬN CHUYỂN
+    // ==========================================
+    renderShipping(el) {
+        const pending = this.state.orders.filter(o => o.status === "Pending");
+        el.innerHTML = `
+            <h2 class="fade-in" style="margin-bottom:20px;">Tạo vận đơn nhanh</h2>
+            <div class="card fade-in" style="max-width:600px; margin:0 auto; padding:30px;">
+                ${pending.length ? `
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-receipt"></i> Chọn đơn hàng</label>
+                        <select id="ship-order-id" class="input-field">
+                            ${pending.map(o => `<option value="${o.orderId}">Đơn #${o.orderId} - ${o.customerName || "Khách"}</option>`).join("")}
+                        </select>
                     </div>
-                    <div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                            <div><small style="color:#888">Mã nhân viên</small><p style="font-weight:700;margin:5px 0">${this.state.user.id}</p></div>
-                            <div><small style="color:#888">Chức vụ</small><p style="font-weight:700;margin:5px 0">${this.state.user.role}</p></div>
-                            <div><small style="color:#888">Email</small><p style="font-weight:700;margin:5px 0">${this.state.user.email}</p></div>
-                            <div><small style="color:#888">Ngày gia nhập</small><p style="font-weight:700;margin:5px 0">${this.state.user.joinDate}</p></div>
-                        </div>
-                        <div style="background:#f8f9fa; padding:20px; border-radius:15px; display:flex; justify-content:space-around; text-align:center; margin-bottom:30px">
-                            <div><h2 style="margin:0;color:var(--primary)">${this.state.user.processedOrders}</h2><small>Đơn đã xử lý</small></div>
-                            <div><h2 style="margin:0;color:var(--primary)">98%</h2><small>Hiệu suất</small></div>
-                        </div>
-                        <button class="btn-logout-sidebar" style="width:100%; padding:15px; font-weight:bold" onclick="opsApp.handleLogout()">
-                            <i class="fa-solid fa-power-off"></i> ĐĂNG XUẤT TÀI KHOẢN
-                        </button>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-truck"></i> Đối tác vận chuyển</label>
+                        <select id="ship-partner" class="input-field">
+                            <option value="GHN">Giao Hàng Nhanh (GHN)</option>
+                            <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
+                        </select>
                     </div>
-                </div>
-            </div>
-        `;
-  },
+                    <button class="btn-confirm" style="width:100%;" onclick="opsApp.handleShip()">XÁC NHẬN & XUẤT MÃ</button>
+                ` : `<div style="text-align:center; padding:30px;"><h3>Không còn đơn chờ xử lý</h3></div>`}
+            </div>`;
+    },
 
-  handleLogout() {
-    if (confirm("Xác nhận đăng xuất khỏi phiên làm việc hiện tại?"))
-      window.location.reload();
-  },
+    // ==========================================
+    // 8. LOGIC XỬ LÝ (SHIP & CẬP NHẬT TRẠNG THÁI)
+    // ==========================================
+    async handleShip() {
+        const id = document.getElementById("ship-order-id")?.value;
+        const partner = document.getElementById("ship-partner")?.value;
+        if (!id) return alert("Vui lòng chọn đơn hàng.");
 
-  // --- MODAL HELPERS ---
-  setModal(title, content, action) {
-    document.getElementById("modal-title-text").innerText = title;
-    document.getElementById("modal-content-body").innerHTML = content;
-    document.getElementById("modal-action-btn").onclick = action;
-    document.getElementById("app-modal").classList.add("active");
-  },
-  closeModal() {
-    document.getElementById("app-modal").classList.remove("active");
-  },
-  openUpdateOrderModal(id) {
-    const order = this.state.orders.find((o) => o.id === id);
-    const body = `<div class="form-group"><label>Trạng thái</label><select id="up-status" class="input-field"><option value="Đang xử lý" ${order.status === "Đang xử lý" ? "selected" : ""}>Đang xử lý</option><option value="Đang giao" ${order.status === "Đang giao" ? "selected" : ""}>Đang giao</option><option value="Hoàn tất" ${order.status === "Hoàn tất" ? "selected" : ""}>Hoàn tất</option></select></div><div class="form-group"><label>Mã Tracking</label><input type="text" id="up-tracking" class="input-field" value="${order.tracking}"></div>`;
-    this.setModal(`Cập nhật đơn #${id}`, body, () => {
-      order.status = document.getElementById("up-status").value;
-      order.tracking = document.getElementById("up-tracking").value;
-      this.closeModal();
-      this.renderOrders();
-    });
-  },
-  openAddProductModal() {
-    const body = `<div class="form-group"><label>Mã SP</label><input type="text" id="n-id" class="input-field" placeholder="G-001"></div><div class="form-group"><label>Tên vật tư</label><input type="text" id="n-name" class="input-field" placeholder="..."></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:15px"><div class="form-group"><label>Số lượng</label><input type="number" id="n-stock" class="input-field" value="0"></div><div class="form-group"><label>Đơn vị</label><input type="text" id="n-unit" class="input-field" value="Cái"></div></div>`;
-    this.setModal("Thêm vật tư mới", body, () => {
-      const id = document.getElementById("n-id").value.toUpperCase();
-      const name = document.getElementById("n-name").value;
-      if (!id || !name) return alert("Nhập đủ thông tin!");
-      this.state.inventory.push({
-        id,
-        name,
-        stock: parseInt(document.getElementById("n-stock").value),
-        unit: document.getElementById("n-unit").value,
-      });
-      this.closeModal();
-      this.renderWarehouse();
-    });
-  },
+        const track = partner + "-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+        const formData = new FormData();
+        formData.append("orderId", id);
+        formData.append("status", "Shipped");
+        formData.append("trackingCode", track);
+        formData.append("carrier", partner);
+
+        try {
+            const response = await fetch(`${this.apiUrl}?url=update-order-status`, { method: "POST", body: formData });
+            const res = await response.json();
+            if (res.success) {
+                alert(`Đã xuất mã vận đơn: ${track}`);
+                await this.init(); 
+            }
+        } catch (e) { alert("Lỗi kết nối server."); }
+    },
+
+    async handleUpdateOrder(orderId, newStatus) {
+        const formData = new FormData();
+        formData.append("orderId", orderId);
+        formData.append("status", newStatus);
+        formData.append("carrier", "GHTK"); 
+
+        try {
+            const response = await fetch(`${this.apiUrl}?url=update-order-status`, { method: "POST", body: formData });
+            const res = await response.json();
+            if (res.success) {
+                alert("Cập nhật thành công đơn #" + orderId);
+                this.closeModal();
+                await this.init(); // Refresh lại dữ liệu Dashboard & Bảng
+            } else {
+                alert(res.message || "Cập nhật thất bại.");
+            }
+        } catch (e) { alert("Lỗi kết nối server!"); }
+    },
+
+    openEditStatusModal(orderId, currentStatus) {
+        const body = `
+            <div class="form-group" style="padding: 10px 0;">
+                <label style="display:block; margin-bottom:10px; font-weight:700;">Chỉnh sửa đơn: #${orderId}</label>
+                <select id="update-status-value" class="input-field" style="width:100%; padding:12px; border-radius:8px;">
+                    <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Đang xử lý</option>
+                    <option value="Shipped" ${currentStatus === 'Shipped' ? 'selected' : ''}>Đang giao</option>
+                    <option value="Delivered" ${currentStatus === 'Delivered' ? 'selected' : ''}>Hoàn thành</option>
+                </select>
+            </div>`;
+        this.setModal("Cập nhật trạng thái", body, () => {
+            const newStatus = document.getElementById("update-status-value").value;
+            this.handleUpdateOrder(orderId, newStatus);
+        });
+    },
+
+    // ==========================================
+    // 9. CÁC HÀM TIỆN ÍCH (SEARCH, MODAL, CHART)
+    // ==========================================
+    handleGlobalSearch(val) {
+        this.state.searchQuery = val.toLowerCase();
+    },
+
+    handleLogout() {
+        if (confirm("Bạn muốn đăng xuất?")) window.location.href = "index.php?url=logout";
+    },
+
+    initChart() {
+        const ctx = document.getElementById("dashChart");
+        if (!ctx || typeof Chart === "undefined") return;
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+                datasets: [{
+                    label: "Số đơn",
+                    data: [18, 25, 20, 35, 28, 45, 60],
+                    borderColor: "#e67e22",
+                    backgroundColor: "rgba(230,126,34,0.1)",
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+        });
+    },
+
+    setModal(t, b, a) {
+        const title = document.getElementById("modal-title-text");
+        const body = document.getElementById("modal-content-body");
+        const btn = document.getElementById("modal-action-btn");
+        if (title) title.innerText = t;
+        if (body) body.innerHTML = b;
+        if (btn) btn.onclick = a;
+        document.getElementById("app-modal")?.classList.add("active");
+    },
+
+    closeModal() {
+        document.getElementById("app-modal")?.classList.remove("active");
+    }
 };
 
 document.addEventListener("DOMContentLoaded", () => opsApp.init());

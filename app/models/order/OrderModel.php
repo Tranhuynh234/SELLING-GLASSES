@@ -5,55 +5,52 @@ class OrderModel extends BaseModel {
     protected $table = "orders";
     protected $primaryKey = "orderId";
 
-    // ================================
-    // LẤY ORDER THEO CUSTOMER
-    // ================================
-    public function findByCustomer($customerId) {
-        if (!$customerId) return [];
-
-        try {
-            $sql = "SELECT * FROM {$this->table} WHERE customerId = :customerId";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':customerId' => $customerId]);
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        } catch (Exception $e) {
-            return [];
-        }
+    // --- 1. CẬP NHẬT ĐƠN HÀNG ---
+    public function updateOrder($orderId, $data) {
+        return $this->update($orderId, $data, "orderId");
     }
 
-    // ================================
-    //  LẤY ORDER THEO STATUS
-    // ================================
-    public function findByStatus($status) {
-        if (!$status) return [];
-
-        try {
-            $sql = "SELECT * FROM {$this->table} WHERE status = :status";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':status' => $status]);
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        } catch (Exception $e) {
-            return [];
+    // --- 2. LẤY ĐƠN HÀNG CHO OPS ---
+    public function getOrdersForOps($status = null) {
+        $sql = "SELECT o.*, u.name as customerName 
+                FROM orders o 
+                JOIN customers c ON o.customerId = c.customerId
+                JOIN users u ON c.userId = u.userId";
+        
+        $params = [];
+        if ($status && $status !== 'all') {
+            $sql .= " WHERE o.status = :status";
+            $params[':status'] = $status;
+            // Nếu có status thì trả về kết quả luôn
+            return $this->queryAll($sql, $params);
         }
+        
+        // Nếu không có status hoặc là 'all' thì nối thêm ORDER BY
+        $sql .= " ORDER BY o.orderDate DESC";
+        return $this->queryAll($sql);
     }
 
-    // ================================
-    //  THỐNG KÊ STATUS
-    // ================================
+    // --- 3. THỐNG KÊ ---
     public function countByStatus() {
+        $sql = "SELECT status, COUNT(*) as total FROM {$this->table} GROUP BY status";
+        return $this->queryAll($sql);
+    }
+
+    // --- 4. TẠO VẬN ĐƠN (LƯU VÀO BẢNG SHIPMENT) ---
+    public function createShipment($data) {
         try {
-            $sql = "SELECT status, COUNT(*) as total FROM {$this->table} GROUP BY status";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
-
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+            $sql = "INSERT INTO shipment (orderId, trackingCode, carrier, status, staffId) 
+                    VALUES (:orderId, :trackingCode, :carrier, :status, :staffId)";
+            return $this->queryAll($sql, [
+                ':orderId'      => $data['orderId'],
+                ':trackingCode' => $data['trackingCode'],
+                ':carrier'      => $data['carrier'],
+                ':status'       => $data['status'] ?? 'In Transit',
+                ':staffId'      => $data['staffId'] ?? 1
+            ]); 
         } catch (Exception $e) {
-            return [];
+            error_log("Lỗi INSERT bảng shipment: " . $e->getMessage());
+            return false;
         }
     }
 }
