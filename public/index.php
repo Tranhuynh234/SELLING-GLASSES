@@ -222,6 +222,18 @@ switch ($url) {
         $orderController->getMessages();
         exit();
 
+    case "get-customer-messages":
+        $orderController->getCustomerMessages();
+        exit();
+
+    case "get-support-unread-count":
+        $orderController->getSupportUnreadCount();
+        exit();
+
+    case "send-customer-message":
+        $orderController->sendCustomerMessage();
+        exit();
+
     case "get-conversation-list":
         $orderController->getConversationList();
         exit();

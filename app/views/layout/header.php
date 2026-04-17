@@ -72,6 +72,12 @@
                     <span id="cart-count"
                         class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
                 </button>
+
+                <!-- Icon chat support -->
+                <button id="btn-home-chat" onclick="openSupportChat()" class="relative text-stone-700 hover:text-amber-700 transition">
+                    <i class="fas fa-comment-dots"></i>
+                    <span id="home-chat-badge" class="absolute -top-2 -right-2 bg-amber-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center" style="display:none;">0</span>
+                </button>
             </div>
         </header>
     </div>

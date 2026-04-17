@@ -394,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await ajaxJson(
         "/SELLING-GLASSES/public/index.php?url=get-conversation-list",
       );
-      container.innerHTML =
+      const conversationHtml =
         result.success && result.data?.length
           ? renderRows(result.data, (item) => {
               const isActive =
@@ -413,6 +413,25 @@ document.addEventListener("DOMContentLoaded", () => {
               </li>`;
             })
           : '<p class="text-center mt-3" style="font-size:12px; color:#999;">Chưa có hội thoại nào</p>';
+
+      container.innerHTML = conversationHtml;
+
+      const badge = document.getElementById("sale-chat-badge");
+      if (badge) {
+        const unreadCount =
+          result.success && Array.isArray(result.data)
+            ? result.data.reduce(
+                (sum, item) => sum + (Number(item.unread_count) || 0),
+                0,
+              )
+            : 0;
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount;
+          badge.style.display = "flex";
+        } else {
+          badge.style.display = "none";
+        }
+      }
     } catch (error) {
       console.error("Lỗi tải danh sách chat:", error);
     }
@@ -450,7 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ======== MỞ HỘP CHAT ======== */
-  window.openChatBox = function (orderId, customerName) {
+  window.openChatBox = async function (orderId, customerName) {
     window.chattingOrderId = orderId;
     const chatWrapper = $id("chat-wrapper");
     if (chatWrapper) chatWrapper.classList.remove("chat-hidden");
@@ -462,9 +481,9 @@ document.addEventListener("DOMContentLoaded", () => {
         el.getAttribute("onclick")?.includes(`'${orderId}'`),
       );
     });
-    loadChatHistory(orderId);
-    typeof window.loadConversationList === "function" &&
-      window.loadConversationList();
+    await loadChatHistory(orderId);
+    if (typeof window.loadConversationList === "function")
+      await window.loadConversationList();
   };
 
   window.processComplaintRequest = async function (

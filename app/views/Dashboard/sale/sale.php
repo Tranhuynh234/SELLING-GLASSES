@@ -91,9 +91,9 @@
 
                 <!-- Nút đăng xuất + Chat -->
                 <div class="topbar-right">
-                    <button id="btn-global-chat" class="chat-nav-btn" onclick="openGlobalChat()" style="margin-right: 10px;">
+                    <button id="btn-global-chat" class="chat-nav-btn" onclick="openGlobalChat()" style="margin-right: 10px; position: relative;">
                         <i class="fas fa-comment-dots"></i>
-                        <!-- <span>Chat</span> -->
+                        <span id="sale-chat-badge" class="chat-badge" style="display:none;">0</span>
                     </button>
                     <a href="/SELLING-GLASSES/public/auth" style="text-decoration: none">
                         <button class="login-btn">

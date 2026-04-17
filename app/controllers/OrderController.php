@@ -145,6 +145,66 @@ class OrderController {
         exit();
     }
 
+    public function getCustomerMessages() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        ob_clean();
+        header('Content-Type: application/json');
+
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập để chat với nhân viên.']);
+            exit();
+        }
+
+        $result = $this->orderService->getCustomerMessagesForUser($userId);
+        echo json_encode([
+            'success' => true,
+            'orderId' => $result['orderId'],
+            'data' => $result['messages']
+        ]);
+        exit();
+    }
+
+    public function getSupportUnreadCount() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        ob_clean();
+        header('Content-Type: application/json');
+
+        $userId = $_SESSION['user']['userId'] ?? null;
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập để xem số tin nhắn chưa đọc.']);
+            exit();
+        }
+
+        $count = $this->orderService->getSupportUnreadCountForUser($userId);
+        echo json_encode(['success' => true, 'unread' => $count]);
+        exit();
+    }
+
+    public function sendCustomerMessage() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        ob_clean();
+        header('Content-Type: application/json');
+
+        $message = $_POST['message'] ?? '';
+        $userId = $_SESSION['user']['userId'] ?? null;
+
+        if (!$userId || empty($message)) {
+            echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập và nhập tin nhắn.']);
+            exit();
+        }
+
+        $cleanMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        $sent = $this->orderService->sendCustomerMessageForUser($userId, $cleanMessage);
+
+        if ($sent) {
+            echo json_encode(['success' => true, 'message' => 'Tin nhắn đã gửi đến nhân viên.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Không thể gửi tin nhắn. Vui lòng kiểm tra lại đơn hàng hoặc đăng nhập.']);
+        }
+        exit();
+    }
+
     // 2. Hàm lấy lịch sử tin nhắn
     public function getMessages() {
         ob_clean();

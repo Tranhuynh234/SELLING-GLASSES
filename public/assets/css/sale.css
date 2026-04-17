@@ -306,6 +306,24 @@ body {
   box-shadow: 0 4px 12px rgba(197, 166, 90, 0.3);
 }
 
+.chat-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .topbar-right {
   display: flex;
   align-items: center;
