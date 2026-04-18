@@ -26,6 +26,41 @@ if (!function_exists('getStatusDetails')) {
     }
 }
 
+if (!function_exists('getRequestTypeLabel')) {
+    function getRequestTypeLabel($reason) {
+        $text = mb_strtolower(trim($reason), 'UTF-8');
+        $returnKeywords = [
+            'đổi',
+            'trả',
+            'return',
+            'exchange',
+            'giao sai',
+            'mẫu kính',
+            'màu sắc',
+            'đeo không vừa',
+            'quá rộng',
+            'quá chật',
+            'size',
+            'kích thước',
+            'sai thông số',
+            'độ cận',
+            'viễn',
+            'broken',
+            'wrong_item',
+            'wrong_prescription',
+            'not_fit',
+        ];
+
+        foreach ($returnKeywords as $keyword) {
+            if (mb_strpos($text, $keyword) !== false) {
+                return 'Đổi trả';
+            }
+        }
+
+        return 'Khiếu nại';
+    }
+}
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 $db = Database::connect();
 $userId = $_SESSION['user']['userId'];
@@ -66,6 +101,24 @@ $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
 $stmtOrders = $db->prepare($queryOrders);
 $stmtOrders->execute([':customerId' => $customerId]);
 $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
+
+// --- 2.5 LẤY YÊU CẦU ĐỔI TRẢ / KHIẾU NẠI ---
+$returnRequests = [];
+$stmtRequests = $db->prepare("SELECT rr.returnId, o.orderId, rr.reason, rr.note, rr.status, rr.imagePath, rr.requestDate
+              FROM return_request rr
+              JOIN order_item oi ON rr.orderItemId = oi.orderItemId
+              JOIN orders o ON oi.orderId = o.orderId
+              JOIN customers c ON o.customerId = c.customerId
+              WHERE c.userId = :userId
+              ORDER BY rr.requestDate DESC");
+$stmtRequests->execute([':userId' => $userId]);
+$returnRequestsData = $stmtRequests->fetchAll(PDO::FETCH_ASSOC);
+foreach ($returnRequestsData as $req) {
+    if (!isset($returnRequests[$req['orderId']])) {
+        $req['request_type'] = getRequestTypeLabel($req['reason']);
+        $returnRequests[$req['orderId']] = $req;
+    }
+}
 
 // --- 3. LẤY CHI TIẾT ĐƠN HÀNG  ---
 $orderId = $_GET['order_id'] ?? null;
@@ -289,6 +342,7 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 </span>
                                 <?php
                                     $statusRaw = strtolower($orderInfo['status'] ?? '');
+                                    $existingOrderRequest = $returnRequests[$orderInfo['orderId']] ?? null;
                                 ?>
 
                                 <?php if ($statusRaw === 'pending'): ?>
@@ -299,8 +353,12 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if (in_array($statusRaw, ['delivered', 'completed'])): ?>
-
+                                <?php if ($existingOrderRequest): ?>
+                                    <div style="margin-left: 10px; margin-top: 8px; padding: 10px 14px; border-radius: 12px; background: #f4f4f4; color: #333; font-size: 0.95rem;">
+                                        <strong>Yêu cầu <?= htmlspecialchars($existingOrderRequest['request_type']) ?>:</strong>
+                                        <?= $existingOrderRequest['status'] === 'Pending' ? 'Đang chờ xử lý' : 'Đã hoàn tất' ?>
+                                    </div>
+                                <?php elseif (in_array($statusRaw, ['delivered', 'completed'])): ?>
                                     <button onclick="openReturnModal('<?= $orderInfo['orderId'] ?>')" 
                                             class="btn-return" 
                                             style="padding: 6px 14px; border-radius: 8px; font-size: 12px;">
@@ -371,6 +429,7 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                     <?php if (empty($orders)): ?>
                         <p>Bạn chưa có đơn hàng nào.</p>
                     <?php else: foreach ($orders as $order): ?>
+                        <?php $orderRequest = $returnRequests[$order['orderId']] ?? null; ?>
                         <div class="order-card-main" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; background: #fff; margin-bottom: 15px; border-radius: 12px;">
                             <div class="order-card-left" style="display: flex; align-items: center; gap: 15px;">
                                 <div class="product-icon">
@@ -396,6 +455,12 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 <span class="status-badge <?= $statusDetail['class'] ?>" style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold;">
                                     <?= $statusDetail['text'] ?>
                                 </span>
+
+                                <?php if ($orderRequest): ?>
+                                    <span style="font-size: 12px; color: #d97706;">Yêu cầu <?= htmlspecialchars($orderRequest['request_type']) ?>: <?= $orderRequest['status'] === 'Pending' ? 'Chờ xử lý' : 'Hoàn tất' ?></span>
+                                <?php elseif (in_array(strtolower($order['status']), ['delivered', 'completed'])): ?>
+                                    <button onclick="openReturnModal('<?= $order['orderId'] ?>')" style="margin-top: 4px; padding: 4px 10px; border: 1px solid #d97706; color: #d97706; background: white; border-radius: 6px; cursor: pointer; font-size: 11px;">Yêu cầu đổi/trả</button>
+                                <?php endif; ?>
 
                                 <div class="price-box">
                                     <p style="font-size: 12px; color: #666; margin: 0;">Tổng thanh toán:</p>
@@ -492,11 +557,11 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
             <label>Lý do hoàn trả</label>
             <select id="returnReason" style="width: 100%; margin-top: 5px;">
                 <option value="">-- Chọn lý do --</option>
-                <option value="broken">Sản phẩm bị nứt, vỡ gọng/tròng</option>
-                <option value="wrong_item">Giao sai mẫu kính/màu sắc</option>
-                <option value="wrong_prescription">Sai thông số độ cận/viễn</option>
-                <option value="not_fit">Đeo không vừa (quá rộng/chật)</option>
-                <option value="other">Lý do khác...</option>
+                <option value="Sản phẩm bị nứt, vỡ gọng/tròng">Sản phẩm bị nứt, vỡ gọng/tròng</option>
+                <option value="Giao sai mẫu kính/màu sắc">Giao sai mẫu kính/màu sắc</option>
+                <option value="Sai thông số độ cận/viễn">Sai thông số độ cận/viễn</option>
+                <option value="Đeo không vừa (quá rộng/chật)">Đeo không vừa (quá rộng/chật)</option>
+                <option value="Lý do khác...">Lý do khác...</option>
             </select>
         </div>
 

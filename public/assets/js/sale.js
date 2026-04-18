@@ -135,6 +135,118 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  const renderRecentOrders = (orders) => {
+    const body = $id("recent-orders");
+    if (!body) return;
+    const rows = orders
+      .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+      .slice(0, 5)
+      .map((order) => {
+        const customer =
+          order.cust_name ||
+          order.customerName ||
+          order.customer_name ||
+          "Khách vãng lai";
+        const statusInfo = orderStatusLabels[order.status] || {
+          vn: order.status,
+          cls: "pending",
+        };
+        return `
+          <tr>
+            <td>#${order.orderId}</td>
+            <td>${customer}</td>
+            <td>${order.orderDate}</td>
+            <td><span class="status-badge status-${statusInfo.cls}">${statusInfo.vn}</span></td>
+            <td><button class="btn-view" onclick="viewOrderDetail('${order.orderId}')"><i class="fas fa-eye"></i> Xem</button></td>
+          </tr>`;
+      })
+      .join("");
+
+    body.innerHTML =
+      rows ||
+      `<tr><td colspan="5" style="text-align:center;">Chưa có đơn hàng mới.</td></tr>`;
+  };
+
+  const fetchDashboard = async () => {
+    const revenueEl = $id("dashboard-revenue-value");
+    const revenueTrend = $id("dashboard-revenue-trend");
+    const newOrdersEl = $id("dashboard-new-orders-value");
+    const newOrdersTrend = $id("dashboard-new-orders-trend");
+    const preorderEl = $id("dashboard-preorder-value");
+    const complaintsEl = $id("dashboard-complaints-value");
+
+    const today = new Date().toISOString().slice(0, 10);
+    let orders = [];
+    let complaints = [];
+
+    try {
+      const ordersResult = await ajaxJson(
+        "/SELLING-GLASSES/public/index.php?url=get-orders-by-status&status=All",
+      );
+      if (ordersResult.success && ordersResult.data) {
+        orders = ordersResult.data;
+      }
+    } catch (err) {
+      console.error("Lỗi tải đơn hàng dashboard:", err);
+    }
+
+    try {
+      const complaintsResult = await ajaxJson(
+        "/SELLING-GLASSES/public/index.php?url=get-complaints&type=all",
+      );
+      if (complaintsResult.success && complaintsResult.data) {
+        complaints = complaintsResult.data;
+      }
+    } catch (err) {
+      console.error("Lỗi tải khiếu nại dashboard:", err);
+    }
+
+    const todayOrders = orders.filter((order) =>
+      order.orderDate?.startsWith(today),
+    );
+    const revenueToday = todayOrders.reduce(
+      (sum, order) => sum + Number(order.totalPrice || 0),
+      0,
+    );
+    const newOrdersCount = orders.filter(
+      (order) => order.status === "Pending",
+    ).length;
+    const pendingComplaints = complaints.filter(
+      (item) => item.status !== "Completed",
+    ).length;
+
+    if (revenueEl)
+      revenueEl.innerHTML = `
+        <span><i class="fas fa-sack-dollar"></i></span>
+        ${new Intl.NumberFormat("vi-VN").format(revenueToday)} đ`;
+    if (revenueTrend)
+      revenueTrend.innerHTML = `
+        <i class="fas fa-caret-up"></i> +${
+          todayOrders.length > 0
+            ? Math.round((todayOrders.length / (orders.length || 1)) * 100)
+            : 0
+        }%`;
+    if (newOrdersEl)
+      newOrdersEl.innerHTML = `
+        <span><i class="fas fa-box"></i></span>
+        ${newOrdersCount} đơn`;
+    if (newOrdersTrend)
+      newOrdersTrend.innerHTML = `
+        <i class="fas fa-caret-${newOrdersCount > 0 ? "up" : "down"}"></i> ${
+          newOrdersCount > 0 ? "+" : "-"
+        }${newOrdersCount}%`;
+    if (preorderEl)
+      preorderEl.innerHTML = `
+        <span><i class="fas fa-hourglass"></i></span>
+        0 đơn`;
+    if (complaintsEl)
+      complaintsEl.innerHTML = `
+        <span><i class="fas fa-exclamation-triangle"></i></span>
+        ${pendingComplaints} đơn`;
+
+    renderRecentOrders(orders);
+  };
+
   const fetchComplaints = async (type = "all") => {
     const body = $id("complaint-list");
     if (!body) return;
@@ -176,9 +288,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ======== SỰ KIỆN UI ======== */
-  btnDashboard?.addEventListener("click", () =>
-    switchPage("dashboard-page", btnDashboard),
-  );
+  btnDashboard?.addEventListener("click", async () => {
+    switchPage("dashboard-page", btnDashboard);
+    await fetchDashboard();
+  });
   btnOrders?.addEventListener("click", () => {
     switchPage("orders-page", btnOrders);
     fetchOrders("All");
@@ -216,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   autoGenerateAvatar();
+  fetchDashboard();
 
   window.currentOrderId = null;
   window.currentOrderStatus = null;

@@ -112,6 +112,28 @@ class ReturnRequestModel {
         }
     }
 
+    public function getRequestByOrderId($orderId) {
+        try {
+            $sql = "SELECT rr.returnId, rr.reason, rr.status, rr.note, rr.imagePath, o.orderId
+                    FROM return_request rr
+                    JOIN order_item oi ON rr.orderItemId = oi.orderItemId
+                    JOIN orders o ON oi.orderId = o.orderId
+                    WHERE o.orderId = :orderId
+                    ORDER BY rr.requestDate DESC
+                    LIMIT 1";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute([':orderId' => $orderId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) return null;
+            $row['request_type'] = $this->determineRequestType($row['reason']);
+            $row['label_status'] = $this->buildStatusLabel($row['status'], $row['request_type']);
+            return $row;
+        } catch (Exception $e) {
+            error_log("Lỗi getRequestByOrderId: " . $e->getMessage());
+            return null;
+        }
+    }
+
     public function updateRequestStatus($returnId, $newStatus) {
         try {
             $sql = "UPDATE return_request SET status = :status WHERE returnId = :returnId";
@@ -165,6 +187,10 @@ class ReturnRequestModel {
             'sai thông số',
             'độ cận',
             'viễn',
+            'broken',
+            'wrong_item',
+            'wrong_prescription',
+            'not_fit',
         ];
 
         foreach ($returnKeywords as $keyword) {

@@ -1,3 +1,4 @@
+<?php if (session_status() === PHP_SESSION_NONE) session_start(); ?>
 <!doctype html>
 <html lang="vi">
 
@@ -71,8 +72,8 @@
 
                 <!-- Thông tin -->
                 <div class="user-details">
-                    <div class="user-name" id="user-footer-name">Sale Staff</div>
-                    <div class="user-id" id="user-footer-id">Số TK: #01</div>
+                    <div class="user-name" id="user-footer-name"><?php echo htmlspecialchars($_SESSION['user']['name'] ?? 'Sale Staff'); ?></div>
+                    <div class="user-id" id="user-footer-id">Số TK: #<?php echo htmlspecialchars($_SESSION['user']['staffId'] ?? $_SESSION['user']['userId'] ?? '01'); ?></div>
                 </div>
 
                 <!-- Icon menu user -->
@@ -117,10 +118,10 @@
                             Doanh thu hôm nay<br />(Today's Revenue)
                         </div>
                         <div class="card-content">
-                            <div class="card-value">
+                            <div class="card-value" id="dashboard-revenue-value">
                                 <i class="fas fa-sack-dollar"></i> 0 VND
                             </div>
-                            <div class="card-trend trend-up">
+                            <div class="card-trend trend-up" id="dashboard-revenue-trend">
                                 <i class="fas fa-caret-up"></i> +0%
                             </div>
                         </div>
@@ -130,8 +131,8 @@
                     <div class="card card-order">
                         <div class="card-label">Số đơn mới<br />(New Orders)</div>
                         <div class="card-content">
-                            <div class="card-value"><i class="fas fa-box"></i> 0 đơn</div>
-                            <div class="card-trend trend-down">
+                            <div class="card-value" id="dashboard-new-orders-value"><i class="fas fa-box"></i> 0 đơn</div>
+                            <div class="card-trend trend-down" id="dashboard-new-orders-trend">
                                 <i class="fas fa-caret-down"></i> -0%
                             </div>
                         </div>
@@ -143,7 +144,7 @@
                             Pre-order CHỜ<br />(Pending Pre-orders)
                         </div>
                         <div class="card-content">
-                            <div class="card-value">
+                            <div class="card-value" id="dashboard-preorder-value">
                                 <i class="fas fa-hourglass"></i> 0 đơn
                             </div>
                         </div>
@@ -155,7 +156,7 @@
                             Khiếu nại ĐANG XỬ LÝ<br />(Processing Complaints)
                         </div>
                         <div class="card-content">
-                            <div class="card-value">
+                            <div class="card-value" id="dashboard-complaints-value">
                                 <i class="fas fa-exclamation-triangle"></i> 0 đơn
                             </div>
                         </div>
@@ -385,6 +386,7 @@
 
                                 <hr style="border-top: 1px solid #000000; margin: 20px 0;">
 
+                                <!-- Yêu cầu khiếu nại / đổi trả -->
                                 <div class="action-box hidden" id="requestContextBox">
                                     <p class="group-label">YÊU CẦU KHIẾU NẠI / ĐỔI TRẢ</p>
                                     <p><strong>Loại:</strong> <span id="requestTypeLabel">-</span></p>
@@ -401,6 +403,7 @@
                                 </div>
                             </div>
 
+                            <!-- Thông tin chi tiết đơn hàng -->
                             <div class="col-md-7 main-panel">
                                 <h6 class="section-title">THÔNG TIN CHI TIẾT</h6>
 

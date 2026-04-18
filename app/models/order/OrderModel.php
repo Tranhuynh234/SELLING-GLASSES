@@ -5,6 +5,7 @@ class OrderModel extends BaseModel {
     protected $table = "orders";
     protected $primaryKey = "orderId";
 
+    // LẤY DANH SÁCH ĐƠN HÀNG CỦA MỘT KHÁCH HÀNG
     public function findByCustomer($customerId) {
         if (!$customerId) return [];
 
@@ -18,6 +19,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
     public function findByStatus($status) {
         try {
             $sql = "SELECT o.*, u.name AS cust_name 
@@ -42,6 +44,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // TÌM ID ĐƠN HÀNG MỚI NHẤT THEO NGƯỜI DÙNG
     public function findLatestOrderIdByUserId($userId) {
         if (!$userId) {
             return null;
@@ -64,6 +67,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // LẤY CHI TIẾT ĐƠN HÀNG ĐẦY ĐỦ
     public function getOrderDetailWithCustomer($orderId) {
         try {
             $sql = "SELECT
@@ -90,10 +94,12 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // CẬP NHẬT THÔNG TIN ĐƠN HÀNG
     public function updateOrder($orderId, $data) {
         return $this->update($orderId, $data, "orderId");
     }
 
+    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI CHO OPS
     public function getOrdersForOps($status = null) {
         $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
                 FROM orders o 
@@ -110,11 +116,13 @@ class OrderModel extends BaseModel {
         return $this->queryAll($sql, $params);
     }
 
+    // THỐNG KÊ SỐ LƯỢNG ĐƠN HÀNG THEO TRẠNG THÁI
     public function countByStatus() {
         $sql = "SELECT status, COUNT(*) as total FROM {$this->table} GROUP BY status";
         return $this->queryAll($sql);
     }
 
+    // TẠO THÔNG TIN VẬN CHUYỂN CHO ĐƠN HÀNG
     public function createShipment($data) {
         try {
             $sql = "INSERT INTO shipment (orderId, trackingCode, carrier, status, staffId) 
@@ -133,6 +141,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // CẬP NHẬT THÔNG TIN
     public function update($orderId, $data, $primaryKey = 'orderId') {
         try {
             $sets = [];
@@ -151,6 +160,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // KIỂM TRA VÀ TỰ ĐỘNG CẬP NHẬT CẤU TRÚC BẢNG MESSAGES
     private function ensureMessageReadColumns() {
         try {
             $columns = [
@@ -170,6 +180,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // LƯU TIN NHẮN HỖ TRỢ VÀ ĐÁNH DẤU ĐÃ LIÊN HỆ
     public function saveMessage($orderId, $senderType, $content) {
         try {
             $this->conn->beginTransaction();
@@ -194,6 +205,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // ĐÁNH DẤU TẤT CẢ TIN NHẮN CỦA KHÁCH HÀNG LÀ ĐÃ ĐỌC
     public function markCustomerMessagesReadForOrder($orderId) {
         try {
             $this->ensureMessageReadColumns();
@@ -206,6 +218,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // ĐÁNH DẤU TẤT CẢ TIN NHẮN CỦA NHÂN VIÊN LÀ ĐÃ ĐỌC
     public function markStaffMessagesReadForUser($userId) {
         try {
             $this->ensureMessageReadColumns();
@@ -224,6 +237,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // ĐẾM SỐ TIN NHẮN CHƯA ĐỌC CỦA KHÁCH HÀNG
     public function getSupportUnreadCountForUser($userId) {
         try {
             $this->ensureMessageReadColumns();
@@ -244,6 +258,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // LẤY TOÀN BỘ LỊCH SỬ CHAT CỦA KHÁCH HÀNG (DỰA TRÊN ID ĐƠN HÀNG GẦN NHẤT)
     public function getMessagesByOrder($orderId) {
         try {
             $sql = "SELECT m.sender_type, m.message_content, m.created_at
@@ -260,6 +275,7 @@ class OrderModel extends BaseModel {
         }
     }
 
+    // LẤY DANH SÁCH TIN NHẮN MỚI NHẤT VÀ SỐ TIN CHƯA ĐỌC CỦA TỪNG KHÁCH HÀNG
     public function getAllCustomerFromOrders() {
         try {
             $this->ensureMessageReadColumns();

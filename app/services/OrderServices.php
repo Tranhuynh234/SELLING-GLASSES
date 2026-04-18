@@ -14,6 +14,7 @@ class OrderService {
         $this->staffModel = new StaffModel();
     }
 
+    // TẠO ĐƠN HÀNG MỚI
     public function createOrder($data) {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -88,11 +89,13 @@ class OrderService {
         }
     }
 
+    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
     public function getOrdersByStatus($status) {
         $data = $this->orderModel->getOrdersForOps($status);
         return ["success" => true, "data" => $data];
     }
 
+    // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG VÀ GÁN NHÂN VIÊN PHÙ HỢP
     public function updateStatus($orderId, $status, $trackingCode = null) {
         if (!$orderId || !$status) {
             return [
@@ -138,10 +141,11 @@ class OrderService {
         $res = $this->orderModel->update($orderId, $updateData);
         return [
             "success" => $res,
-            "message" => $res ? "Cập nhật đơn hàng thành công" : "Lỗi database khi update đơn"
+            "message" => $res ? "Cập nhật thành công" : "Cập nhật thất bại"
         ];
     }
 
+    // LẤY CHI TIẾT ĐƠN HÀNG THEO ID
     public function getOrderDetail($orderId) {
         $data = $this->orderModel->getOrderDetailWithCustomer($orderId);
         return [
@@ -150,6 +154,7 @@ class OrderService {
         ];
     }
 
+    // LẤY TIN NHẮN CỦA KHÁCH HÀNG VÀ ĐÁNH DẤU NHÂN VIÊN ĐÃ ĐỌC
     public function getCustomerMessagesForUser($userId) {
         if (!$userId) {
             return [
@@ -174,6 +179,7 @@ class OrderService {
         ];
     }
 
+    // LẤY SỐ TIN NHẮN CHƯA ĐỌC CỦA KHÁCH HÀNG
     public function getSupportUnreadCountForUser($userId) {
         if (!$userId) {
             return 0;
@@ -182,6 +188,7 @@ class OrderService {
         return $this->orderModel->getSupportUnreadCountForUser($userId);
     }
 
+    // KHÁCH HÀNG YÊU CẦU HỦY ĐƠN HÀNG
     public function sendCustomerMessageForUser($userId, $message) {
         if (!$userId || empty($message)) {
             return false;
@@ -192,22 +199,21 @@ class OrderService {
             return false;
         }
 
-        return $this->orderModel->saveMessage($orderId, 'Customer', $message);
-    }
-
-    public function cancelOrder($orderId) {
         return $this->updateStatus($orderId, 'Cancelled');
     }
 
+    // ĐỔI TRẢ ĐƠN HÀNG
     public function returnOrder($orderId) {
         return $this->updateStatus($orderId, 'Returned');
     }
 
+    // THỐNG KÊ SỐ LƯỢNG ĐƠN HÀNG THEO TRẠNG THÁI
     public function getOrderStats() {
         $data = $this->orderModel->countByStatus();
         return ["success" => true, "data" => $data];
     }
 
+    // ĐÁNH DẤU ĐÃ LIÊN HỆ VÀ GỬI TIN NHẮN XÁC NHẬN
     public function handleContactAndMessage($orderId, $message) {
         $updateStatus = $this->orderModel->update($orderId, ['is_contacted' => 1]);
 
@@ -221,6 +227,7 @@ class OrderService {
         return ["success" => false, "message" => "Có lỗi xảy ra khi lưu dữ liệu."];
     }
 
+    // LIÊN HỆ VỚI KHÁCH HÀNG
     public function contactCustomer($orderId, $message) {
         $result = $this->orderModel->saveMessage($orderId, 'Staff', $message);
         if ($result) {
@@ -229,6 +236,7 @@ class OrderService {
         return ["success" => false, "message" => "Không thể lưu tin nhắn"];
     }
 
+    // NHÂN VIÊN LẤY LỊCH SỬ CHAT VÀ ĐÁNH DẤU ĐÃ ĐỌC
     public function getMessages($orderId) {
         $this->orderModel->markCustomerMessagesReadForOrder($orderId);
         $messages = $this->orderModel->getMessagesByOrder($orderId);
@@ -238,6 +246,7 @@ class OrderService {
         ];
     }
 
+    // LẤY DANH SÁCH CUỘC TRÒ CHUYỆN GIỮA KHÁCH HÀNG VÀ NHÂN VIÊN
     public function getConversationList() {
         $data = $this->orderModel->getAllCustomerFromOrders();
         return ["success" => true, "data" => $data];

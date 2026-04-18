@@ -185,7 +185,6 @@ switch ($url) {
         $orderController->create();
         break;
 
-
     case "get-orders-by-status":
         $orderController->getByStatus();
         exit();
@@ -198,7 +197,6 @@ switch ($url) {
         $orderController->cancelOrder();
         exit();
 
-    // Thêm chi tiết đơn hàng (Yến mới thêm)
     case "get-order-detail":
         $orderController->getOrderDetail();
         exit();
@@ -211,14 +209,11 @@ switch ($url) {
         $promotionController->processRequest();
         exit();
 
-    // --- PHẦN CHAT VÀ LIÊN HỆ (Yến mới thêm) ---
     case "contact-customer":
-        // Dùng để gửi tin nhắn đầu tiên hoặc gửi tin nhắn chat
         $orderController->contactCustomer();
         exit();
 
     case "get-messages":
-        // Dùng để lấy lịch sử tin nhắn khi mở khung chat
         $orderController->getMessages();
         exit();
 

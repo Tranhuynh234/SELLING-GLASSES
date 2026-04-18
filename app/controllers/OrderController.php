@@ -11,18 +11,18 @@ class OrderController {
         $this->orderModel = new OrderModel(); 
     }
 
-    // ================================
-    //  CREATE (POST)
-    // ================================
+    // =========================
+    // QUẢN LÝ ĐƠN HÀNG 
+    // =========================
+
+    // TẠO ĐƠN HÀNG MỚI
     public function create() {
         header("Content-Type: application/json");
         echo json_encode($this->orderService->createOrder($_POST));
         exit();
     }
 
-    // ================================
-    //  GET BY STATUS (GET)
-    // ================================
+    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI 
     public function getByStatus() {
         ob_clean();
         header('Content-Type: application/json');
@@ -32,9 +32,7 @@ class OrderController {
         exit();
     }
 
-    // ================================
-    //  UPDATE STATUS (POST)
-    // ================================
+    // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
     public function updateStatus() {
         header("Content-Type: application/json");
         $orderId = $_POST['orderId'] ?? null;
@@ -66,12 +64,14 @@ class OrderController {
         exit();
     }
 
+    // THỐNG KÊ SỐ LƯỢNG ĐƠN HÀNG THEO TRẠNG THÁI
     public function stats() {
         header("Content-Type: application/json");
         echo json_encode($this->orderService->getOrderStats());
         exit();
     }
 
+    // LẤY CHI TIẾT ĐƠN HÀNG
     public function getOrderDetail() {
         ob_clean();
         header('Content-Type: application/json');
@@ -86,9 +86,7 @@ class OrderController {
         exit();
     }
 
-    // ================================
-    //  XỬ LÝ LIÊN HỆ TỰ ĐỘNG
-    // ================================
+    // TỰ ĐỘNG GỬI TIN NHẮN LIÊN HỆ KHI ĐẶT HÀNG
     public function handleAutoContact() {
         ob_clean();
         header("Content-Type: application/json");
@@ -99,14 +97,16 @@ class OrderController {
             exit();
         }
         $cleanMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
-        // Gọi qua Service để xử lý cả việc update is_contacted và lưu tin nhắn
         $result = $this->orderService->handleContactAndMessage($orderId, $message); 
         echo json_encode($result);
         exit();
     }
 
-    // --- THÊM MỚI ---
-    // 1. Hàm xử lý gửi tin nhắn
+    // ==================================
+    // HỆ THỐNG CHAT & TƯ VẤN KHÁCH HÀNG
+    // ==================================
+
+    // GỬI TIN NHẮN LIÊN HỆ VỚI KHÁCH HÀNG
     public function contactCustomer() {
         ob_clean();
         header("Content-Type: application/json");
@@ -117,16 +117,14 @@ class OrderController {
             exit();
         }
 
-        // --- BƯỚC NÂNG CẤP Ở ĐÂY ---
-        // Loại bỏ các thẻ script, html nguy hiểm
         $cleanMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
-        // Truyền $cleanMessage thay vì $message gốc
         $result = $this->orderService->contactCustomer($orderId, $cleanMessage);
      
         echo json_encode($result);
         exit();
     }
 
+    // LẤY TIN NHẮN CỦA KHÁCH HÀNG THEO ĐƠN HÀNG
     public function getCustomerMessages() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         ob_clean();
@@ -147,6 +145,7 @@ class OrderController {
         exit();
     }
 
+    // LẤY SỐ TIN NHẮN CHƯA ĐỌC CỦA KHÁCH HÀNG
     public function getSupportUnreadCount() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         ob_clean();
@@ -163,6 +162,7 @@ class OrderController {
         exit();
     }
 
+    // GỬI YÊU CẦU HỦY ĐƠN TỪ KHÁCH HÀNG
     public function sendCustomerMessage() {
         if (session_status() === PHP_SESSION_NONE) session_start();
         ob_clean();
@@ -187,25 +187,19 @@ class OrderController {
         exit();
     }
 
-    // 2. Hàm lấy lịch sử tin nhắn
+    // LẤY TIN NHẮN HỖ TRỢ THEO ĐƠN HÀNG
     public function getMessages() {
         ob_clean();
         header("Content-Type: application/json");
 
         $orderId = $_GET['orderId'] ?? null;
-        if (!$orderId) {
-            echo json_encode(['success' => false, 'message' => 'Thiếu ID đơn hàng']);
-            exit();
-        }
 
         $result = $this->orderService->getMessages($orderId);
         echo json_encode($result);
         exit();
     }
 
-    // ================================
-    // LẤY DANH SÁCH HỘI THOẠI (Dựa trên tất cả đơn hàng)
-    // ================================
+    // LẤY DANH SÁCH CUỘC TRÒ CHUYỆN GIỮA KHÁCH HÀNG VÀ NHÂN VIÊN
     public function getConversationList() {
         ob_clean();
         header('Content-Type: application/json');
@@ -214,12 +208,12 @@ class OrderController {
         exit();
     }
 
+    // HIỂN THỊ CHI TIẾT ĐƠN HÀNG TRÊN TRANG CÁ NHÂN
     public function showDetail($orderId) {
         if (session_status() === PHP_SESSION_NONE) session_start();
         
         $db = Database::connect();
         
-        // 1. Lấy thông tin chung của đơn hàng
         $stmtOrder = $db->prepare("SELECT * FROM orders WHERE orderId = :id AND userId = :uid");
         $stmtOrder->execute([':id' => $orderId, ':uid' => $_SESSION['user']['userId']]);
         $order = $stmtOrder->fetch(PDO::FETCH_ASSOC);
@@ -228,7 +222,6 @@ class OrderController {
             die("Đơn hàng không tồn tại hoặc bạn không có quyền xem.");
         }
 
-        // 2. Lấy danh sách sản phẩm và đơn kính đi kèm (JOIN bảng prescription)
         $query = "SELECT oi.*, p.name as product_name, p.image as product_image, 
                         pr.leftEye, pr.rightEye, pr.leftPD, pr.rightPD
                 FROM order_items oi
@@ -240,10 +233,10 @@ class OrderController {
         $stmtItems->execute([':orderId' => $orderId]);
         $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Gọi View hiển thị
         include __DIR__ . '/../views/auth/profile.php';
     }
 
+    // HỦY ĐƠN HÀNG
     public function cancelOrder() {
         header('Content-Type: application/json');
         $orderId = $_POST['orderId'] ?? null;
@@ -256,7 +249,6 @@ class OrderController {
 
         try {
             $db = Database::connect();
-            // 1. Kiểm tra trạng thái đơn hàng và đúng khách đặt đơn
             $stmt = $db->prepare("SELECT status FROM orders o 
                                 JOIN customers c ON o.customerId = c.customerId 
                                 WHERE o.orderId = ? AND c.userId = ?");
@@ -268,7 +260,6 @@ class OrderController {
             } elseif ($order['status'] !== 'Pending') {
                 echo json_encode(['success' => false, 'message' => 'Chỉ được hủy đơn hàng khi đang chờ xử lý']);
             } else {
-                // 2. Cập nhật trạng thái thành Cancelled
                 $update = $db->prepare("UPDATE orders SET status = 'Cancelled' WHERE orderId = ?");
                 $update->execute([$orderId]);
                 echo json_encode(['success' => true]);

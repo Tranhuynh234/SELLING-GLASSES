@@ -59,10 +59,14 @@ class PromotionController {
                 }
             }
 
-            $success = $this->service->requestReturn($data);
+            $result = $this->service->requestReturn($data);
 
             ob_end_clean();
-            echo json_encode(["success" => $success]);
+            if (is_array($result)) {
+                echo json_encode($result);
+            } else {
+                echo json_encode(["success" => $result]);
+            }
         } catch (Throwable $e) {
             if (ob_get_level()) ob_end_clean();
             error_log('requestReturn error: ' . $e->getMessage());

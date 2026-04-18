@@ -32,7 +32,16 @@ class PromotionServices {
     }
 
     public function requestReturn($data) {
-        return $this->returnModel->createRequest($data);
+        $orderId = $data['orderId'] ?? null;
+        if ($orderId && $this->returnModel->getRequestByOrderId($orderId)) {
+            return [
+                'success' => false,
+                'message' => 'Bạn đã gửi yêu cầu đổi/trả cho đơn hàng này. Vui lòng chờ xử lý.'
+            ];
+        }
+
+        $created = $this->returnModel->createRequest($data);
+        return ['success' => $created];
     }
 
     public function getComplaints($type = 'all') {
