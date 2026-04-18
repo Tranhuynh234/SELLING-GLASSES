@@ -75,7 +75,7 @@ class OrderController {
     public function getOrderDetail() {
         ob_clean();
         header('Content-Type: application/json');
-        $orderId = $_GET['orderId'] ?? null;
+        $orderId = $_GET['orderId'] ?? $_GET['order_id'] ?? null;
         if (!$orderId) {
             echo json_encode(['success' => false, 'message' => 'Thiếu Order ID']);
             exit();

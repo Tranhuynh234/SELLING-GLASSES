@@ -81,9 +81,9 @@ class OrderModel extends BaseModel {
             FROM orders o
             JOIN customers c ON o.customerId = c.customerId
             JOIN users u ON c.userId = u.userId
-            JOIN order_item oi ON o.orderId = oi.orderId
-            JOIN product_variant pv ON oi.variantId = pv.variantId
-            JOIN product p ON pv.productId = p.productId
+            LEFT JOIN order_item oi ON o.orderId = oi.orderId
+            LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
+            LEFT JOIN product p ON pv.productId = p.productId
             WHERE o.orderId = :orderId";
 
             $stmt = $this->conn->prepare($sql);
@@ -101,6 +101,23 @@ class OrderModel extends BaseModel {
 
     // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI CHO OPS
     public function getOrdersForOps($status = null) {
+        $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
+                FROM orders o 
+                LEFT JOIN customers c ON o.customerId = c.customerId
+                LEFT JOIN users u ON c.userId = u.userId
+                WHERE o.status IN ('Processing', 'Shipped', 'Delivered')";
+
+        $params = [];
+        if ($status && strcasecmp($status, 'all') !== 0) {
+            $sql .= " AND o.status = :status";
+            $params[':status'] = $status;
+        }
+
+        $sql .= " ORDER BY o.orderDate DESC";
+        return $this->queryAll($sql, $params);
+    }
+
+    public function getOrdersForSales($status = null) {
         $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customerId = c.customerId

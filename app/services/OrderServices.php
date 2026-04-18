@@ -91,8 +91,19 @@ class OrderService {
 
     // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
     public function getOrdersByStatus($status) {
-        $data = $this->orderModel->getOrdersForOps($status);
-        return ["success" => true, "data" => $data];
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $position = strtolower($_SESSION['user']['position'] ?? '');
+        $data = $this->orderModel->getOrdersForSales($status);
+        if ($position === 'operation') {
+            // Filter chỉ 3 trạng thái cho Operation
+            $allowedStatuses = ['Processing', 'Shipped', 'Delivered'];
+            $data = array_filter($data, function($order) use ($allowedStatuses) {
+                return in_array($order['status'], $allowedStatuses);
+            });
+        }
+        return ["success" => true, "data" => array_values($data)];
     }
 
     // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG VÀ GÁN NHÂN VIÊN PHÙ HỢP
@@ -128,13 +139,10 @@ class OrderService {
                 }
             }
         } elseif (in_array($status, $operationStatuses, true)) {
-            if ($currentPosition === 'operation' && $currentStaffId) {
-                $updateData['staffId'] = $currentStaffId;
-            } else {
-                $defaultOperation = $this->staffModel->findByPosition('operation');
-                if ($defaultOperation) {
-                    $updateData['staffId'] = $defaultOperation->getStaffId();
-                }
+            // Gán staffId cho sales để khách hàng vẫn thấy đơn hàng
+            $defaultSales = $this->staffModel->findByPosition('sales');
+            if ($defaultSales) {
+                $updateData['staffId'] = $defaultSales->getStaffId();
             }
         }
 
