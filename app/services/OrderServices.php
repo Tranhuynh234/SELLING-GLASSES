@@ -3,7 +3,6 @@ require_once __DIR__ . "/../models/order/OrderModel.php";
 require_once __DIR__ . "/../models/StaffModel.php";
 require_once __DIR__ . "/../models/Prescription.php";
 
-// Thêm dòng này ở đầu file Service hoặc file cấu hình chung
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 class OrderService {
@@ -15,11 +14,10 @@ class OrderService {
         $this->staffModel = new StaffModel();
     }
 
-    // ==========================================
-    // TẠO ĐƠN HÀNG MỚI (CREATE)
-    // ==========================================
     public function createOrder($data) {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if (empty($data['customerId'])) {
             return ["success" => false, "message" => "Thiếu customerId"];
@@ -48,13 +46,12 @@ class OrderService {
             $cart = $_SESSION['cart'] ?? [];
             foreach ($cart as $item) {
                 $stmt = $db->prepare(
-                    "INSERT INTO order_items (orderId, productId, quantity, price)
-                     VALUES (?, ?, ?, ?)"
+                    "INSERT INTO order_item (orderId, variantId, quantity, price) VALUES (?, ?, ?, ?)"
                 );
 
                 $stmt->execute([
                     $orderId,
-                    $item['productId'],
+                    $item['variantId'] ?? $item['productId'] ?? null,
                     $item['quantity'],
                     $item['price']
                 ]);
@@ -72,7 +69,6 @@ class OrderService {
                     $pres->leftPD = $p['leftPD'];
                     $pres->rightPD = $p['rightPD'];
                     $pres->imagePath = $p['imagePath'];
-
                     $pres->save($db);
                     unset($_SESSION['prescription_data']);
                 }
@@ -92,22 +88,62 @@ class OrderService {
         }
     }
 
-    // ==========================================
-    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
-    // ==========================================
     public function getOrdersByStatus($status) {
+        $data = $this->orderModel->getOrdersForOps($status);
+        return ["success" => true, "data" => $data];
+    }
+
+    public function updateStatus($orderId, $status, $trackingCode = null) {
+        if (!$orderId || !$status) {
+            return [
+                "success" => false,
+                "message" => "Thiếu dữ liệu"
+            ];
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $updateData = [
+            'status' => $status
+        ];
+
+        $currentStaffId = $_SESSION['user']['staffId'] ?? null;
+        $currentPosition = strtolower($_SESSION['user']['position'] ?? '');
+
+        $salesStatuses = ['Pending', 'Confirmed', 'Cancelled', 'Returned'];
+        $operationStatuses = ['Processing', 'Shipped', 'Delivered'];
+
+        if (in_array($status, $salesStatuses, true)) {
+            if ($currentPosition === 'sales' && $currentStaffId) {
+                $updateData['staffId'] = $currentStaffId;
+            } else {
+                $defaultSales = $this->staffModel->findByPosition('sales');
+                if ($defaultSales) {
+                    $updateData['staffId'] = $defaultSales->getStaffId();
+                }
+            }
+        } elseif (in_array($status, $operationStatuses, true)) {
+            if ($currentPosition === 'operation' && $currentStaffId) {
+                $updateData['staffId'] = $currentStaffId;
+            } else {
+                $defaultOperation = $this->staffModel->findByPosition('operation');
+                if ($defaultOperation) {
+                    $updateData['staffId'] = $defaultOperation->getStaffId();
+                }
+            }
+        }
+
+        $res = $this->orderModel->update($orderId, $updateData);
         return [
-            "success" => true,
-            "data" => $this->orderModel->findByStatus($status)
+            "success" => $res,
+            "message" => $res ? "Cập nhật đơn hàng thành công" : "Lỗi database khi update đơn"
         ];
     }
 
-    // ==========================================
-    // LẤY CHI TIẾT ĐƠN HÀNG KÈM THÔNG TIN KHÁCH
-    // ==========================================
     public function getOrderDetail($orderId) {
         $data = $this->orderModel->getOrderDetailWithCustomer($orderId);
-
         return [
             "success" => !empty($data),
             "data" => $data
@@ -159,119 +195,43 @@ class OrderService {
         return $this->orderModel->saveMessage($orderId, 'Customer', $message);
     }
 
-    // ==========================================
-    // CẬP NHẬT TRẠNG THÁI & LIÊN HỆ
-    // ==========================================
-    public function updateStatus($orderId, $status, $isContacted = null) {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $updateData = [];
-        if ($status !== null) {
-            $updateData['status'] = $status;
-        }
-        if ($isContacted !== null) {
-            $updateData['is_contacted'] = $isContacted;
-        }
-
-        $currentStaffId = $_SESSION['user']['staffId'] ?? null;
-        $currentPosition = strtolower($_SESSION['user']['position'] ?? '');
-
-        if ($status !== null) {
-            $salesStatuses = ['Pending', 'Confirmed', 'Cancelled', 'Returned'];
-            $operationStatuses = ['Processing', 'Shipped', 'Delivered'];
-
-            if (in_array($status, $salesStatuses, true)) {
-                if ($currentPosition === 'sales' && $currentStaffId) {
-                    $updateData['staffId'] = $currentStaffId;
-                }
-            } elseif (in_array($status, $operationStatuses, true)) {
-                if ($currentPosition === 'operation' && $currentStaffId) {
-                    $updateData['staffId'] = $currentStaffId;
-                } else {
-                    $defaultOperation = $this->staffModel->findByPosition('operation');
-                    if ($defaultOperation) {
-                        $updateData['staffId'] = $defaultOperation->getStaffId();
-                    }
-                }
-            }
-        }
-
-        $result = $this->orderModel->update($orderId, $updateData);
-
-        if ($result) {
-            return [
-                "success" => true,
-                "message" => "Cập nhật trạng thái thành công"
-            ];
-        } else {
-            return [
-                "success" => false,
-                "message" => "Không có thay đổi nào được thực hiện hoặc lỗi Database"
-            ];
-        }
-    }
-
-    // ==========================================
-    // HỦY ĐƠN HÀNG (CANCEL)
-    // ==========================================
     public function cancelOrder($orderId) {
         return $this->updateStatus($orderId, 'Cancelled');
     }
 
-    // ==========================================
-    // HOÀN TRẢ ĐƠN HÀNG (RETURN)
-    // ==========================================
     public function returnOrder($orderId) {
         return $this->updateStatus($orderId, 'Returned');
     }
 
-    // ==========================================
-    // LẤY THỐNG KÊ SỐ LƯỢNG THEO TRẠNG THÁI
-    // ==========================================
     public function getOrderStats() {
-        return [
-            "success" => true,
-            "data" => $this->orderModel->countByStatus()
-        ];
+        $data = $this->orderModel->countByStatus();
+        return ["success" => true, "data" => $data];
     }
 
-    // ==========================================
-    // XỬ LÝ LIÊN HỆ & LƯU TIN NHẮN TỰ ĐỘNG
-    // ==========================================
     public function handleContactAndMessage($orderId, $message) {
         $updateStatus = $this->orderModel->update($orderId, ['is_contacted' => 1]);
 
         if ($updateStatus) {
             $saveMsg = $this->orderModel->saveMessage($orderId, 'Staff', $message);
-
             if ($saveMsg) {
                 return ["success" => true, "message" => "Đã gửi tin nhắn và cập nhật trạng thái!"];
             }
         }
+
         return ["success" => false, "message" => "Có lỗi xảy ra khi lưu dữ liệu."];
     }
 
-    // ==========================================
-    // 1. GỬI TIN NHẮN (GỌI TỪ CONTROLLER contactCustomer)
-    // ==========================================
     public function contactCustomer($orderId, $message) {
         $result = $this->orderModel->saveMessage($orderId, 'Staff', $message);
         if ($result) {
             return ["success" => true, "message" => "Gửi tin nhắn thành công"];
-        } else {
-            return ["success" => false, "message" => "Không thể lưu tin nhắn"];
         }
+        return ["success" => false, "message" => "Không thể lưu tin nhắn"];
     }
 
-    // ==========================================
-    // 2. LẤY LỊCH SỬ CHAT (GỌI TỪ CONTROLLER getMessages)
-    // ==========================================
     public function getMessages($orderId) {
         $this->orderModel->markCustomerMessagesReadForOrder($orderId);
         $messages = $this->orderModel->getMessagesByOrder($orderId);
-
         return [
             "success" => true,
             "data" => $messages
@@ -282,5 +242,4 @@ class OrderService {
         $data = $this->orderModel->getAllCustomerFromOrders();
         return ["success" => true, "data" => $data];
     }
-
 }

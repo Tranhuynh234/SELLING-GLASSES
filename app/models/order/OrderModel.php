@@ -5,9 +5,6 @@ class OrderModel extends BaseModel {
     protected $table = "orders";
     protected $primaryKey = "orderId";
 
-    // ================================
-    // LẤY ORDER THEO CUSTOMER
-    // ================================
     public function findByCustomer($customerId) {
         if (!$customerId) return [];
 
@@ -21,9 +18,6 @@ class OrderModel extends BaseModel {
         }
     }
 
-    // ================================
-    //  LẤY ORDER THEO STATUS
-    // ================================
     public function findByStatus($status) {
         try {
             $sql = "SELECT o.*, u.name AS cust_name 
@@ -31,7 +25,7 @@ class OrderModel extends BaseModel {
                 JOIN customers c ON o.customerId = c.customerId
                 JOIN users u ON c.userId = u.userId";
 
-            if (strcasecmp($status, 'All') == 0) {
+            if (strcasecmp($status, 'All') === 0) {
                 $sql .= " ORDER BY o.orderDate DESC";
                 $stmt = $this->conn->prepare($sql);
                 $stmt->execute();
@@ -87,34 +81,58 @@ class OrderModel extends BaseModel {
             JOIN product_variant pv ON oi.variantId = pv.variantId
             JOIN product p ON pv.productId = p.productId
             WHERE o.orderId = :orderId";
-                   
+
             $stmt = $this->conn->prepare($sql);
-            $stmt->execute([':orderId' => $orderId]); // Đã khớp với :orderId ở trên
-           
+            $stmt->execute([':orderId' => $orderId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return [];
         }
     }
 
-    // ================================
-    //  THỐNG KÊ STATUS
-    // ================================
+    public function updateOrder($orderId, $data) {
+        return $this->update($orderId, $data, "orderId");
+    }
+
+    public function getOrdersForOps($status = null) {
+        $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
+                FROM orders o 
+                LEFT JOIN customers c ON o.customerId = c.customerId
+                LEFT JOIN users u ON c.userId = u.userId";
+
+        $params = [];
+        if ($status && strcasecmp($status, 'all') !== 0) {
+            $sql .= " WHERE o.status = :status";
+            $params[':status'] = $status;
+        }
+
+        $sql .= " ORDER BY o.orderDate DESC";
+        return $this->queryAll($sql, $params);
+    }
+
     public function countByStatus() {
-        try {
-            $sql = "SELECT status, COUNT(*) as total FROM {$this->table} GROUP BY status";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
+        $sql = "SELECT status, COUNT(*) as total FROM {$this->table} GROUP BY status";
+        return $this->queryAll($sql);
+    }
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    public function createShipment($data) {
+        try {
+            $sql = "INSERT INTO shipment (orderId, trackingCode, carrier, status, staffId) 
+                    VALUES (:orderId, :trackingCode, :carrier, :status, :staffId)";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([
+                ':orderId'      => $data['orderId'],
+                ':trackingCode' => $data['trackingCode'],
+                ':carrier'      => $data['carrier'],
+                ':status'       => $data['status'] ?? 'In Transit',
+                ':staffId'      => $data['staffId'] ?? 1
+            ]);
         } catch (Exception $e) {
-            return [];
+            error_log("Lỗi INSERT bảng shipment: " . $e->getMessage());
+            return false;
         }
     }
 
-    // ================================
-    //  CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
-    // ================================
     public function update($orderId, $data, $primaryKey = 'orderId') {
         try {
             $sets = [];
@@ -125,7 +143,7 @@ class OrderModel extends BaseModel {
                 $params[":{$column}"] = $value;
             }
             $setSql = implode(", ", $sets);
-            $sql = "UPDATE {$this->table} SET {$setSql} WHERE {$primaryKey} = :orderId";   
+            $sql = "UPDATE {$this->table} SET {$setSql} WHERE {$primaryKey} = :orderId";
             $stmt = $this->conn->prepare($sql);
             return $stmt->execute($params);
         } catch (Exception $e) {
@@ -133,9 +151,6 @@ class OrderModel extends BaseModel {
         }
     }
 
-    // ================================
-    //  LƯU TIN NHẮN
-    // ================================
     private function ensureMessageReadColumns() {
         try {
             $columns = [
@@ -157,18 +172,15 @@ class OrderModel extends BaseModel {
 
     public function saveMessage($orderId, $senderType, $content) {
         try {
-            // Dùng Transaction để đảm bảo cả 2 lệnh đều chạy thành công
             $this->conn->beginTransaction();
-
-            // 1. Lưu tin nhắn vào bảng messages
             $this->ensureMessageReadColumns();
+
             $isReadByStaff = $senderType === 'Staff' ? 1 : 0;
             $isReadByCustomer = $senderType === 'Customer' ? 1 : 0;
             $sqlMsg = "INSERT INTO messages (order_id, sender_type, message_content, is_read_by_staff, is_read_by_customer) VALUES (?, ?, ?, ?, ?)";
             $stmtMsg = $this->conn->prepare($sqlMsg);
             $stmtMsg->execute([$orderId, $senderType, $content, $isReadByStaff, $isReadByCustomer]);
 
-            // 2. Cập nhật is_contacted = 1 cho đơn hàng
             $sqlOrder = "UPDATE {$this->table} SET is_contacted = 1 WHERE orderId = ?";
             $stmtOrder = $this->conn->prepare($sqlOrder);
             $stmtOrder->execute([$orderId]);
@@ -232,20 +244,13 @@ class OrderModel extends BaseModel {
         }
     }
 
-    // ================================
-    //  LẤY LỊCH SỬ TIN NHẮN CỦA ĐƠN HÀNG
-    // ================================
     public function getMessagesByOrder($orderId) {
         try {
-            // SQL NÂNG CẤP:
-            // 1. Tìm customerId từ đơn hàng truyền vào
-            // 2. Lấy tất cả tin nhắn của mọi đơn hàng thuộc về customerId đó
             $sql = "SELECT m.sender_type, m.message_content, m.created_at
                 FROM messages m
                 JOIN orders o ON m.order_id = o.orderId
                 WHERE o.customerId = (SELECT customerId FROM orders WHERE orderId = :orderId)
-                ORDER BY m.created_at ASC"; // Sắp xếp theo thời gian để tin nhắn liền mạch
-
+                ORDER BY m.created_at ASC";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([':orderId' => $orderId]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -265,28 +270,24 @@ class OrderModel extends BaseModel {
                 m.sender_type AS last_sender,
                 m.created_at AS last_time,
                 (SELECT COUNT(*) FROM messages m2 JOIN orders o2 ON m2.order_id = o2.orderId WHERE o2.customerId = o.customerId AND m2.sender_type = 'Customer' AND m2.is_read_by_staff = 0) AS unread_count,
-                o.orderDate -- Lấy thêm ngày đặt đơn để dự phòng
+                o.orderDate
                 FROM orders o
                 JOIN customers c ON o.customerId = c.customerId
                 JOIN users u ON c.userId = u.userId
                 LEFT JOIN messages m ON m.message_id = (
-                SELECT m2.message_id
-                FROM messages m2
-                JOIN orders o2 ON m2.order_id = o2.orderId
-                WHERE o2.customerId = o.customerId
-                ORDER BY m2.created_at DESC
-                LIMIT 1
+                    SELECT m2.message_id
+                    FROM messages m2
+                    JOIN orders o2 ON m2.order_id = o2.orderId
+                    WHERE o2.customerId = o.customerId
+                    ORDER BY m2.created_at DESC
+                    LIMIT 1
                 )
-
                 WHERE o.orderId IN (
-                SELECT MAX(orderId)
-                FROM orders
-                GROUP BY customerId
+                    SELECT MAX(orderId)
+                    FROM orders
+                    GROUP BY customerId
                 )
-                
-                -- Sắp xếp: Ưu tiên thời gian tin nhắn, nếu không có thì dùng thời gian đơn hàng
-                ORDER BY COALESCE(m.created_at, o.orderDate) DESC";       
-
+                ORDER BY COALESCE(m.created_at, o.orderDate) DESC";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

@@ -400,3 +400,64 @@ code {
     .nav-link { justify-content: center; padding: 20px 0; }
     .nav-link i { font-size: 1.2rem; margin: 0; }
 }
+
+.bg-primary {
+    background: rgba(230, 126, 34, 0.12);
+    color: var(--primary);
+}
+
+/* Fix bảng không bị bể layout khi thêm cột */
+.card {
+    overflow-x: auto;
+}
+
+.table-pro {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+}
+
+/* Nút đóng modal */
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--danger);
+}
+
+/* Search đẹp hơn */
+.header-search input::placeholder {
+    color: #b0b7bd;
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+    .main-viewport {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .app-container {
+        flex-direction: column;
+    }
+
+    .header-search {
+        width: 100%;
+    }
+
+    .table-pro {
+        min-width: 800px;
+    }
+}

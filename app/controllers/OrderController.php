@@ -1,14 +1,14 @@
 <?php
+require_once __DIR__ . "/../models/order/OrderModel.php";
 require_once __DIR__ . "/../services/OrderServices.php";
-require_once __DIR__ . "/../services/PaymentService.php";
 
 class OrderController {
     private $orderService;
-    private $paymentService;
+    private $orderModel;
 
-    public function __construct() {
+    public function __construct() { 
         $this->orderService = new OrderService();
-        $this->paymentService = new PaymentService();
+        $this->orderModel = new OrderModel(); 
     }
 
     // ================================
@@ -17,6 +17,7 @@ class OrderController {
     public function create() {
         header("Content-Type: application/json");
         echo json_encode($this->orderService->createOrder($_POST));
+        exit();
     }
 
     // ================================
@@ -26,7 +27,6 @@ class OrderController {
         ob_clean();
         header('Content-Type: application/json');
         $status = $_GET['status'] ?? 'All';
-        // Gọi qua Service để lấy dữ liệu đồng bộ
         $result = $this->orderService->getOrdersByStatus($status);
         echo json_encode($result);
         exit();
@@ -39,56 +39,39 @@ class OrderController {
         header("Content-Type: application/json");
         $orderId = $_POST['orderId'] ?? null;
         $status = $_POST['status'] ?? null;
-        $isContacted = $_POST['is_contacted'] ?? null;
-        if (!$orderId) {
-            echo json_encode(["success" => false, "message" => "Thiếu orderId"]);
-            return;
+        $trackingCode = $_POST['trackingCode'] ?? null;
+        $carrier = $_POST['carrier'] ?? 'GHN';
+
+        if (!$orderId || !$status) {
+            echo json_encode([
+                "success" => false,
+                "message" => "Thiếu dữ liệu"
+            ]);
+            exit();
         }
 
-        // Truyền thêm $isContacted vào Service
-        $result = $this->orderService->updateStatus($orderId, $status, $isContacted);
-        echo json_encode($result);
+        $res = $this->orderService->updateStatus($orderId, $status, $trackingCode);
+
+        if ($res['success'] && $status === 'Shipped' && $trackingCode) {
+            $this->orderModel->createShipment([
+                'orderId'      => $orderId,
+                'trackingCode' => $trackingCode,
+                'carrier'      => $carrier,
+                'status'       => 'In Transit',
+                'staffId'      => 1
+            ]);
+        }
+
+        echo json_encode($res);
         exit();
     }
 
-    // ================================
-    //  CANCEL
-    // ================================
-    public function cancel() {
-        header("Content-Type: application/json");
-        $orderId = $_POST['orderId'] ?? null;
-
-        if (!$orderId) {
-            echo json_encode(["success" => false, "message" => "Thiếu orderId"]);
-            return;
-        }
-        echo json_encode($this->orderService->cancelOrder($orderId));
-    }
-
-    // ================================
-    // RETURN
-    // ================================
-    public function return() {
-        header("Content-Type: application/json");
-        $orderId = $_POST['orderId'] ?? null;
-        if (!$orderId) {
-            echo json_encode(["success" => false, "message" => "Thiếu orderId"]);
-            return;
-        }
-        echo json_encode($this->orderService->returnOrder($orderId));
-    }
-
-    // ================================
-    // STATS
-    // ================================
     public function stats() {
         header("Content-Type: application/json");
         echo json_encode($this->orderService->getOrderStats());
+        exit();
     }
 
-    // ================================
-    // GET ORDER DETAIL (Lấy chi tiết đơn hàng)
-    // ================================
     public function getOrderDetail() {
         ob_clean();
         header('Content-Type: application/json');
@@ -98,7 +81,6 @@ class OrderController {
             exit();
         }
 
-        // Gọi hàm getOrderDetail trong Service (hàm này gọi getOrderDetailWithCustomer của Model)
         $result = $this->orderService->getOrderDetail($orderId);
         echo json_encode($result);
         exit();

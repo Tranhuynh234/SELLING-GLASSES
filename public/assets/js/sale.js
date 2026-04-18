@@ -41,6 +41,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
+  const setOrderFilter = (status) => {
+    const filters = document.querySelectorAll("#orders-page .filter-tab");
+    filters.forEach((btn) => {
+      if (
+        btn.dataset.status?.toString().toLowerCase() ===
+        status.toString().toLowerCase()
+      ) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  };
+
   const syncOrderUI = (status, isContacted) => {
     const btnConfirm = $q(".btn-confirm-order");
     const btnLogistic = $q(".btn-logistic-order");
@@ -98,7 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
             cls: "pending",
           };
           const customer =
-            order.cust_name || order.customer_name || "Khách vãng lai";
+            order.cust_name ||
+            order.customerName ||
+            order.customer_name ||
+            "Khách vãng lai";
           return `
             <tr>
               <td>#${order.orderId}</td>
@@ -377,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (result.success) {
         syncOrderUI(newStatus, 1);
         alert("Cập nhật thành công!");
+        setOrderFilter("All");
         await window.viewOrderDetail(orderId);
         typeof fetchOrders === "function" && fetchOrders("All");
       } else alert("Lỗi: " + result.message);
