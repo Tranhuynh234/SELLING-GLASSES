@@ -328,4 +328,4 @@ const opsApp = {
     }
 };
 
-document.addEventListener("DOMContentLoaded", () => opsApp.init());
+document.addEventListener("DOMContentLoaded", () => opsApp.init()); 
