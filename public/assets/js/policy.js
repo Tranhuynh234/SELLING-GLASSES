@@ -43,8 +43,7 @@ var policyData = {
     }
 };
 
-/**
- * Hàm hiển thị Modal chính sách
+/** Hàm hiển thị Modal chính sách
  * @param {string} type - Key của chính sách cần hiển thị
  */
 function showPolicy(type) {

@@ -3,18 +3,13 @@
 require_once __DIR__ . '/../../core/BaseModel.php';
 require_once __DIR__ . '/../../entities/product/Combo.php';
 
-/**
- * ComboModel
- * Quản lý các hoạt động liên quan đến combo sản phẩm
- */
+/** Quản lý các hoạt động liên quan đến combo sản phẩm */
 class ComboModel extends BaseModel
 {
     protected $table = 'combo';
     protected $comboItemTable = 'combo_item';
 
-    /**
-     * Tạo combo mới
-     */
+    /** Tạo combo mới */
     public function create($combo, $products = [])
     {
         try {
@@ -48,9 +43,7 @@ class ComboModel extends BaseModel
         }
     }
 
-    /**
-     * Cập nhật combo
-     */
+    /**  Cập nhật combo */
     public function update($comboId, $data, $products = [])
     {
         try {
@@ -92,9 +85,7 @@ class ComboModel extends BaseModel
         }
     }
 
-    /**
-     * Lấy combo theo ID (kèm danh sách sản phẩm)
-     */
+    /** Lấy combo theo ID (kèm danh sách sản phẩm) */
     public function getById($comboId, $includeDeleted = false)
     {
         $query = "SELECT * FROM {$this->table} WHERE comboId = :comboId";
@@ -120,9 +111,7 @@ class ComboModel extends BaseModel
         return $combo;
     }
 
-    /**
-     * Lấy tất cả combo (hoạt động)
-     */
+    /** Lấy tất cả combo (hoạt động) */
     public function getAll($onlyActive = true, $limit = 100, $offset = 0)
     {
         $query = "SELECT * FROM {$this->table} WHERE deletedAt IS NULL";
@@ -150,9 +139,7 @@ class ComboModel extends BaseModel
         return $combos;
     }
 
-    /**
-     * Xóa mềm combo (soft delete)
-     */
+    /** Xóa mềm combo (soft delete) */
     public function softDelete($comboId)
     {
         $query = "UPDATE {$this->table} SET deletedAt = NOW() WHERE comboId = :comboId";
@@ -160,9 +147,7 @@ class ComboModel extends BaseModel
         return $stmt->execute([':comboId' => $comboId]);
     }
 
-    /**
-     * Xóa cứng combo (hard delete)
-     */
+    /** Xóa cứng combo (hard delete) */
     public function hardDelete($comboId)
     {
         try {
@@ -185,9 +170,7 @@ class ComboModel extends BaseModel
         }
     }
 
-    /**
-     * Khôi phục combo bị xóa mềm
-     */
+    /** Khôi phục combo bị xóa mềm  */
     public function restore($comboId)
     {
         $query = "UPDATE {$this->table} SET deletedAt = NULL WHERE comboId = :comboId";
@@ -195,21 +178,17 @@ class ComboModel extends BaseModel
         return $stmt->execute([':comboId' => $comboId]);
     }
 
-    /**
-     * Cập nhật items của combo (xóa cũ, thêm mới - dùng INSERT ON DUPLICATE KEY)
-     */
+    /** Cập nhật items của combo (xóa cũ, thêm mới - dùng INSERT ON DUPLICATE KEY)  */
     public function updateItems($comboId, $products)
     {
         try {
             error_log("updateItems - Starting for comboId=$comboId with " . count($products) . " products");
             
-            // Get ProductIds to keep
             $newProductIds = array_column($products, 'productId');
             $newProductIds = array_map('intval', $newProductIds);
             
             error_log("updateItems - newProductIds: " . json_encode($newProductIds));
 
-            // Delete items that are NOT in the new list
             if (!empty($newProductIds)) {
                 $placeholders = implode(',', array_fill(0, count($newProductIds), '?'));
                 $deleteQuery = "DELETE FROM {$this->comboItemTable} WHERE comboId = ? AND productId NOT IN ($placeholders)";
@@ -219,13 +198,12 @@ class ComboModel extends BaseModel
                 $stmt->execute($params);
                 error_log("updateItems - Deleted old items not in new list");
             } else {
-                // If no products, delete all
+
                 $stmt = $this->conn->prepare("DELETE FROM {$this->comboItemTable} WHERE comboId = :comboId");
                 $stmt->execute([':comboId' => $comboId]);
                 error_log("updateItems - Deleted all items (empty products list)");
             }
 
-            // Now insert or update existing items using ON DUPLICATE KEY
             $query = "INSERT INTO {$this->comboItemTable} (comboId, productId, quantity, sortOrder) 
                       VALUES (:comboId, :productId, :quantity, :sortOrder)
                       ON DUPLICATE KEY UPDATE quantity = VALUES(quantity), sortOrder = VALUES(sortOrder)";
@@ -250,9 +228,7 @@ class ComboModel extends BaseModel
         }
     }
 
-    /**
-     * Thêm sản phẩm vào combo
-     */
+    /** Thêm sản phẩm vào combo */
     public function addItems($comboId, $products)
     {
         if (empty($products)) {
@@ -260,7 +236,7 @@ class ComboModel extends BaseModel
         }
 
         try {
-            // Check for duplicate entries first
+
             foreach ($products as $product) {
                 $productId = (int)$product['productId'];
                 $stmt = $this->conn->prepare("SELECT COUNT(*) as cnt FROM {$this->comboItemTable} WHERE comboId = :comboId AND productId = :productId");
@@ -269,7 +245,7 @@ class ComboModel extends BaseModel
                 
                 if ($row['cnt'] > 0) {
                     error_log("addItems - Combo $comboId already has product $productId, deleting old entry first");
-                    // Delete existing entry
+
                     $delStmt = $this->conn->prepare("DELETE FROM {$this->comboItemTable} WHERE comboId = :comboId AND productId = :productId");
                     $delStmt->execute([':comboId' => $comboId, ':productId' => $productId]);
                 }
@@ -295,9 +271,7 @@ class ComboModel extends BaseModel
         }
     }
 
-    /**
-     * Xóa sản phẩm khỏi combo
-     */
+    /** Xóa sản phẩm khỏi combo */
     public function removeItem($comboId, $productId)
     {
         $query = "DELETE FROM {$this->comboItemTable} WHERE comboId = :comboId AND productId = :productId";
@@ -308,9 +282,7 @@ class ComboModel extends BaseModel
         ]);
     }
 
-    /**
-     * Lấy danh sách sản phẩm trong combo
-     */
+    /** Lấy danh sách sản phẩm trong combo */
     public function getComboItems($comboId)
     {
         $query = "SELECT ci.comboItemId, ci.productId, ci.quantity, ci.sortOrder, 
@@ -325,9 +297,7 @@ class ComboModel extends BaseModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Tính tổng giá sản phẩm trong combo
-     */
+    /** Tính tổng giá sản phẩm trong combo */
     public function calculateTotalProductPrice($comboId)
     {
         $query = "SELECT SUM(pv.price * ci.quantity) as total
@@ -343,9 +313,7 @@ class ComboModel extends BaseModel
         return (float)($result['total'] ?? 0);
     }
 
-    /**
-     * Tìm combo theo tên
-     */
+    /** Tìm combo theo tên */
     public function searchByName($name)
     {
         $query = "SELECT * FROM {$this->table} 
@@ -366,9 +334,7 @@ class ComboModel extends BaseModel
         return $combos;
     }
 
-    /**
-     * Kiểm tra xem combo có tồn tại không
-     */
+    /** Kiểm tra xem combo có tồn tại không */
     public function exists($comboId)
     {
         $query = "SELECT 1 FROM {$this->table} WHERE comboId = :comboId AND deletedAt IS NULL LIMIT 1";

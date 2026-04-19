@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const allSections = $qa(".dashboard-body");
   const allMenuItems = $qa(".menu-item");
 
-  /* ======== CÁC HÀM HỖ TRỢ ======== */
+  /* CÁC HÀM HỖ TRỢ  */
   const switchPage = (pageId, activeBtn) => {
     allSections.forEach((section) => section.classList.add("hidden"));
     allMenuItems.forEach((item) => item.classList.remove("active"));
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activeBtn.classList.add("active");
   };
 
-  /* ======== XỬ LÝ FILTER ======== */
+  /* XỬ LÝ FILTER */
   const setupFilterEvents = (containerId, callback) => {
     const filters = document.querySelectorAll(`#${containerId} .filter-tab`);
     filters.forEach((btn) => {
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
   const renderRows = (data, rowFn) => data.map(rowFn).join("");
 
-  /* ======== API: ORDERS / COMPLAINTS ======== */
+  /* API: ORDERS / COMPLAINTS */
   const fetchOrders = async (status = "All") => {
     const body = $id("orders-table-body");
     if (!body) return;
@@ -287,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== SỰ KIỆN UI ======== */
+  /* SỰ KIỆN UI */
   btnDashboard?.addEventListener("click", async () => {
     switchPage("dashboard-page", btnDashboard);
     await fetchDashboard();
@@ -315,7 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sidebar?.classList.toggle("collapsed"),
   );
 
-  /* ======== CÁC HÀM HỖ TRỢ ======== */
+  /*  CÁC HÀM HỖ TRỢ  */
   const autoGenerateAvatar = () => {
     const nameEl = $id("user-footer-name");
     const initialsEl = $id("user-initials");
@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.currentRequestContext = null;
   window.chattingOrderId = null;
 
-  /* ======== CHI TIẾT ĐƠN HÀNG ======== */
+  /*  CHI TIẾT ĐƠN HÀNG */
   window.viewOrderDetail = async (orderId, requestContext = null) => {
     window.currentOrderId = orderId;
     window.currentRequestContext = requestContext;
@@ -485,7 +485,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  /* ======== CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG ======== */
+  /* CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG  */
   window.handleUpdateStatus = async (newStatus) => {
     const orderId = window.currentOrderId;
     if (!orderId) return;
@@ -518,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== CHAT / CUỘC ĐỐI THOẠI ======== */
+  /* CHAT */
   window.loadConversationList = async function () {
     const container = $id("conversation-list");
     if (!container) return;
@@ -569,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== LIÊN HỆ KHÁCH HÀNG ======== */
+  /* LIÊN HỆ KHÁCH HÀNG  */
   window.handleContactCustomer = async function (orderIdParam, nameParam) {
     const orderId = orderIdParam || window.currentOrderId;
     const name = nameParam || $id("custName")?.innerText || "Khách hàng";
@@ -600,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== MỞ HỘP CHAT ======== */
+  /* MỞ HỘP CHAT */
   window.openChatBox = async function (orderId, customerName) {
     window.chattingOrderId = orderId;
     const chatWrapper = $id("chat-wrapper");
@@ -674,7 +674,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== BẢNG TRÒ CHUYỆN TỔNG ======== */
+  /* BẢNG TRÒ CHUYỆN TỔNG  */
   window.openGlobalChat = function () {
     const chatWrapper = $id("chat-wrapper");
     if (!chatWrapper) return;
@@ -685,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.loadConversationList();
   };
 
-  /* ======== GỬI TIN NHẮN ======== */
+  /*  GỬI TIN NHẮN */
   window.sendMessage = async function () {
     const input = $id("chat-input");
     const message = input?.value.trim();
@@ -713,10 +713,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  /* ======== ĐÓNG CHAT ======== */
+  /* ĐÓNG CHAT */
   window.closeChat = () => $id("chat-wrapper")?.classList.add("chat-hidden");
 
-  /* ======== TẢI LỊCH SỬ CHAT ======== */
+  /* TẢI LỊCH SỬ CHAT  */
   async function loadChatHistory(orderId) {
     if (!orderId) return;
     const chatBody = $id("chat-body");
@@ -752,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  /* ======== XỬ LÝ NHẤP CHUỘT BÊN NGOÀI ======== */
+  /* XỬ LÝ NHẤP CHUỘT BÊN NGOÀI */
   document.addEventListener("mousedown", (e) => {
     const chatWrapper = $id("chat-wrapper");
     const btnGlobalChat = $id("btn-global-chat");
@@ -767,7 +767,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ======== TÌM KIẾM TRONG BẢNG ======== */
+  /*  TÌM KIẾM TRONG BẢNG  */
   const setupSearchTable = (inputId, tableBodyId) => {
     const searchInput = $id(inputId);
     const tableBody = $id(tableBodyId);
@@ -805,7 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  /* ======== KHỞI TẠO ======== */
+  /* KHỞI TẠO  */
   switchPage("dashboard-page", btnDashboard);
   window.loadConversationList();
 

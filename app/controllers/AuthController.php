@@ -133,7 +133,6 @@ class AuthController {
         // 3. Tách dữ liệu ra để file profile.php dễ dùng
         $payments = $paymentData['payments'] ?? [];
         $totalSpent = $paymentData['totalSpent'] ?? 0;
-        // ----------------------------------
 
         // Gọi View - View sẽ nhận được các biến $payments và $totalSpent
         require_once __DIR__ . "/../views/auth/profile.php";

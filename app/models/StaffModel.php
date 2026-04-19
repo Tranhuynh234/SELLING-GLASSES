@@ -6,13 +6,13 @@ class StaffModel extends BaseModel {
 
     protected $table = "staff";
 
-    // ===== LẤY 1 STAFF =====
+    // LẤY 1 STAFF 
     public function findStaff($id) {
         $data = $this->find($id, "staffId");
         return $data ? new Staff($data) : null;
     }
 
-    // ===== LẤY TẤT CẢ =====
+    // LẤY TẤT CẢ
     public function getAllStaff() {
         $rows = $this->all();
         $staffs = [];
@@ -24,23 +24,23 @@ class StaffModel extends BaseModel {
         return $staffs;
     }
 
-    // ===== TẠO STAFF =====
+    // TẠO STAFF 
     public function createStaff($data) {
         return $this->create($data);
     }
 
-    // ===== UPDATE STAFF =====
+    // UPDATE STAFF 
     public function updateStaff($id, $data) {
         return $this->update($id, $data, "staffId");
     }
 
-    // ===== TÌM THEO userId =====
+    // TÌM THEO userId 
     public function findByUserId($userId) {
         $data = $this->findBy("userId", $userId);
         return $data ? new Staff($data) : null;
     }
 
-    // ===== TÌM THEO position (ví dụ: 'sales', 'operation') =====
+    // TÌM THEO position 
     public function findByPosition($position) {
         if (!$position) return null;
         $sql = "SELECT * FROM {$this->table} WHERE position = ? LIMIT 1";
@@ -50,17 +50,17 @@ class StaffModel extends BaseModel {
         return $row ? new Staff($row) : null;
     }
 
-    // ===== XÓA THEO staffId =====
+    // XÓA THEO staffId 
     public function deleteStaff($id) {
         return $this->delete($id, "staffId");
     }
 
-    // ===== XÓA THEO userId =====
+    // XÓA THEO userId 
     public function deleteByUserId($userId) {
         return $this->delete($userId, "userId");
     }
 
-    // ===== KIỂM TRA QUYỀN MANAGER THEO userId =====
+    // KIỂM TRA QUYỀN MANAGER THEO userId 
     public function isManagerByUserId($userId) {
         $sql = "SELECT COUNT(*) as total 
                 FROM staff 

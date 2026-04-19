@@ -15,7 +15,7 @@ public static function handle($roles = [], $positions = []) {
 
     $user = $_SESSION['user'];
 
-    // ✔ chỉ cần login
+    // chỉ cần login
     if (empty($roles) && empty($positions)) {
         return $user;
     }

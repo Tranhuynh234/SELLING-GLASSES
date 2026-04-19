@@ -13,9 +13,7 @@ class UserService {
         $this->staffModel = new StaffModel();
     }
 
-    // =========================
     // REGISTER
-    // =========================
 public function register($data) {
     $email = trim($data['email'] ?? '');
     $password = trim($data['password'] ?? '');
@@ -83,9 +81,7 @@ public function register($data) {
     }
 }
 
-    // =========================
     // LOGIN
-    // =========================
   public function login($email, $password) {
         $email = trim($email ?? '');
         $password = trim($password ?? '');
@@ -131,17 +127,13 @@ public function register($data) {
             ]);
     }
 
-    // =========================
     // GET USER
-    // =========================
     public function getUserById($id) {
         return $this->userModel->findUser($id);
     }
 
-    // =========================
     // UPDATE USER 
-    // =========================
-    public function updateUser($id, $data) {
+     public function updateUser($id, $data) {
 
     // Check ID
     if (!$id) {
@@ -151,7 +143,7 @@ public function register($data) {
         ];
     }
 
-    //  có email → validate
+    //  có email -> validate
     if (isset($data['email'])) {
 
         $data['email'] = trim(strtolower($data['email']));
@@ -164,14 +156,14 @@ public function register($data) {
         }
     }
 
-    //  có password → hash
+    //  có password -> hash
     if (isset($data['password']) && $data['password'] !== '') {
         $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
     } else {
         unset($data['password']); // không update password rỗng
     }
 
-    //  data rỗng → không update
+    //  data rỗng -> không update
     if (empty($data)) {
         return [
             "success" => false,
@@ -199,9 +191,8 @@ public function register($data) {
         throw $e;
     }
 }
-    // =========================
+
     // DELETE USER
-    // ========================
    public function deleteUser($id) {
       $user = $this->userModel->findUser($id);
 
@@ -304,7 +295,7 @@ public function getAllUsers() {
 
     foreach ($users as $user) {
 
-        //  lấy staff theo userId
+        // lấy staff theo userId
         $staff = $this->staffModel->findByUserId($user->getUserId());
 
         $position = null;
@@ -434,12 +425,6 @@ public function createUserByAdmin($data)
     }
 }
 
-    // =========================
-    // RESPONSE CHUẨN return $this->response(true, "Register success", [
-   // "id" => 1,
-   // "name" => "An"
-    //  ]);
-    // =========================
     private function response($success, $message, $data = null) {
         return [
             "success" => $success,

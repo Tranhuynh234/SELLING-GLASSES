@@ -11,10 +11,7 @@ class OrderController {
         $this->orderModel = new OrderModel(); 
     }
 
-    // =========================
     // QUẢN LÝ ĐƠN HÀNG 
-    // =========================
-
     // TẠO ĐƠN HÀNG MỚI
     public function create() {
         header("Content-Type: application/json");
@@ -102,11 +99,8 @@ class OrderController {
         exit();
     }
 
-    // ==================================
     // HỆ THỐNG CHAT & TƯ VẤN KHÁCH HÀNG
-    // ==================================
-
-    // GỬI TIN NHẮN LIÊN HỆ VỚI KHÁCH HÀNG
+     // GỬI TIN NHẮN LIÊN HỆ VỚI KHÁCH HÀNG
     public function contactCustomer() {
         ob_clean();
         header("Content-Type: application/json");

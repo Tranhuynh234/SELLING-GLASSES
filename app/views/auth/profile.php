@@ -65,7 +65,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $db = Database::connect();
 $userId = $_SESSION['user']['userId'];
 
-// --- 1. LẤY THÔNG TIN USER  ---
+// 1. LẤY THÔNG TIN USER  
 $queryUser = "SELECT u.name, u.email, u.phone, c.address, c.customerId 
               FROM users u 
               LEFT JOIN customers c ON u.userId = c.userId 
@@ -80,7 +80,7 @@ $totalSpent = $paymentData['totalSpent'] ?? 0;
 
 $customerId = $user['customerId'] ?? 0;
 
-// --- 2. LẤY DANH SÁCH ĐƠN HÀNG  ---
+// 2. LẤY DANH SÁCH ĐƠN HÀNG 
 $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
                 o.subtotal, o.lensCost, o.shippingFee, o.discount,
                 p.first_product_name, 
@@ -103,7 +103,7 @@ $stmtOrders = $db->prepare($queryOrders);
 $stmtOrders->execute([':customerId' => $customerId]);
 $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
-// --- 2.5 LẤY YÊU CẦU ĐỔI TRẢ / KHIẾU NẠI ---
+// 2.5 LẤY YÊU CẦU ĐỔI TRẢ / KHIẾU NẠI 
 $returnRequests = [];
 $stmtRequests = $db->prepare("SELECT rr.returnId, o.orderId, rr.reason, rr.note, rr.status, rr.imagePath, rr.requestDate
               FROM return_request rr
@@ -121,7 +121,7 @@ foreach ($returnRequestsData as $req) {
     }
 }
 
-// --- 3. LẤY CHI TIẾT ĐƠN HÀNG  ---
+// 3. LẤY CHI TIẾT ĐƠN HÀNG  
 $orderId = $_GET['order_id'] ?? null;
 $orderInfo = null;
 $items = [];
@@ -152,7 +152,7 @@ if ($orderId) {
     }
 }
 
-// --- 4. LẤY ĐƠN KÍNH MẪU (Lấy cái mới nhất bất kể nguồn nào) ---
+// 4. LẤY ĐƠN KÍNH MẪU (Lấy cái mới nhất bất kể nguồn nào)
 $stmtPres = $db->prepare("SELECT * FROM prescription WHERE userId = :userId ORDER BY prescriptionId DESC LIMIT 1");
 $stmtPres->execute([':userId' => $userId]);
 $userPres = $stmtPres->fetch(PDO::FETCH_ASSOC);
@@ -305,7 +305,6 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 </td>
                                 <td>
                                         <?php
-                                            // Prefer order status for display when appropriate
                                             $orderStatus = $p['orderStatus'] ?? '';
                                             $paymentStatus = $p['paymentStatus'] ?? '';
 
@@ -319,7 +318,6 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                                 $statusClass = 'status-refund';
                                                 $statusText = 'Đã hoàn tiền';
                                             } else {
-                                                // Fallback to payment status
                                                 if ($paymentStatus === 'Paid') { $statusClass = 'status-success'; $statusText = 'Thành công'; }
                                                 elseif ($paymentStatus === 'Pending') { $statusClass = 'status-pending'; $statusText = 'Đang xác thực'; }
                                                 elseif ($paymentStatus === 'Failed') { $statusClass = 'status-failed'; $statusText = 'Thất bại'; }
@@ -389,7 +387,7 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
 
                         <div class="detail-list">
                             <?php 
-                                // 1. Tính toán subtotal TRƯỚC khi vào vòng lặp hiển thị
+                                // 1. Tính toán subtotal trước khi vào vòng lặp hiển thị
                                 $subtotal = 0;
                                 foreach ($items as $item) {
                                     $subtotal += ($item['price'] * $item['quantity']);

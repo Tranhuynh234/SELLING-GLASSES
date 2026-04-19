@@ -1,6 +1,4 @@
-/**
- * Combo Manager - Quản lý Combo
- */
+/** Combo Manager - Quản lý Combo */
 
 const COMBO_API_BASE = "/SELLING-GLASSES/public";
 let comboData = {
@@ -10,17 +8,15 @@ let comboData = {
     selectedProducts: []
 };
 
-// Flag to prevent multiple initialization
 let comboManagerInitialized = false;
 
-// ===== INITIALIZATION =====
+// INITIALIZATION 
 function initComboManager() {
     const comboTable = document.getElementById('comboTableBody');
-    if (!comboTable) return; // Không phải trang combo
+    if (!comboTable) return; 
 
-    // Prevent duplicate initialization
     if (comboManagerInitialized) {
-        loadAllCombos(); // Just reload data on subsequent calls
+        loadAllCombos(); 
         return;
     }
 
@@ -29,12 +25,9 @@ function initComboManager() {
     loadAllCombos();
     loadAllProducts();
 
-    // Event listeners - only add once
     const form = document.getElementById('comboForm');
     if (form) {
-        // Remove any existing listener first
         form.onsubmit = null;
-        // Add fresh listener
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             saveCombo();
@@ -62,9 +55,8 @@ function initComboManager() {
     }
 }
 
-// ===== LOAD COMBOS =====
+// LOAD COMBOS 
 function loadAllCombos() {
-    // Load all combos (both active and inactive)
     fetch(`${COMBO_API_BASE}/index.php?url=get-combos&active=0`)
         .then(res => res.json())
         .then(data => {
@@ -77,7 +69,6 @@ function loadAllCombos() {
 }
 
 function loadAllProducts() {
-    // Request JSON explicitly (ProductController uses ?format=json to return JSON)
     fetch(`${COMBO_API_BASE}/index.php?url=get-all-products&format=json`)
         .then(res => {
             if (!res.ok) {
@@ -106,7 +97,7 @@ function loadAllProducts() {
         });
 }
 
-// ===== RENDER COMBOS TABLE =====
+// RENDER COMBOS TABLE 
 function renderComboTable() {
     const tbody = document.getElementById('comboTableBody');
     if (!tbody) return;
@@ -139,7 +130,7 @@ function renderComboTable() {
     }).join('');
 }
 
-// ===== RENDER PRODUCTS OPTIONS =====
+// RENDER PRODUCTS OPTIONS 
 function renderProductOptions() {
     const list = document.getElementById('productList');
     if (!list) return;
@@ -186,7 +177,7 @@ function filterProductList() {
     }).join('');
 }
 
-// ===== MODAL ACTIONS =====
+// MODAL ACTIONS 
 function openCreateModal() {
     comboData.currentEditingComboId = null;
     comboData.selectedProducts = [];
@@ -197,8 +188,7 @@ function openCreateModal() {
     document.getElementById('imagePreview').style.display = 'none';
     
     renderProductOptions();
-    
-    // Show modal and prevent body scroll
+
     const modal = document.getElementById('comboModal');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -216,7 +206,7 @@ function editCombo(comboId) {
     if (!combo) return;
 
     comboData.currentEditingComboId = comboId;
-    // Normalize selectedProducts: chỉ lấy productId và quantity
+    // selectedProducts: chỉ lấy productId và quantity
     comboData.selectedProducts = (combo.items || []).map(item => ({
         productId: item.productId,
         quantity: item.quantity || 1
@@ -237,14 +227,13 @@ function editCombo(comboId) {
 
     document.getElementById('modalTitle').textContent = 'Sửa Combo';
     renderProductOptions();
-    
-    // Show modal and prevent body scroll
+
     const modal = document.getElementById('comboModal');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-// ===== PRODUCT SELECTION =====
+// PRODUCT SELECTION 
 function toggleComboProduct(productId, isChecked) {
     if (isChecked) {
         if (!comboData.selectedProducts.find(p => p.productId === productId)) {
@@ -255,7 +244,7 @@ function toggleComboProduct(productId, isChecked) {
     }
 }
 
-// ===== IMAGE PREVIEW =====
+// IMAGE PREVIEW 
 function previewComboImage(event) {
     const file = event.target.files[0];
     if (file) {
@@ -269,7 +258,7 @@ function previewComboImage(event) {
     }
 }
 
-// ===== SAVE COMBO =====
+// SAVE COMBO 
 function saveCombo() {
     if (comboData.selectedProducts.length === 0) {
         showComboAlert('Vui lòng chọn ít nhất một sản phẩm', 'error');
@@ -334,7 +323,7 @@ function saveCombo() {
     });
 }
 
-// ===== DELETE COMBO =====
+//  DELETE COMBO 
 function deleteCombo(comboId) {
     if (!confirm('Bạn chắc chắn muốn xóa combo này?')) return;
 
@@ -353,7 +342,7 @@ function deleteCombo(comboId) {
     .catch(err => showComboAlert('Lỗi: ' + err, 'error'));
 }
 
-// ===== SEARCH COMBOS =====
+// SEARCH COMBOS 
 function searchCombos() {
     const searchTerm = document.getElementById('searchInput').value;
     if (!searchTerm) {
@@ -369,7 +358,6 @@ function searchCombos() {
             const contentType = res.headers.get('content-type') || '';
             if (contentType.indexOf('application/json') === -1) {
                 return res.text().then(text => {
-                    // Provide a clearer error when response is not JSON
                     throw new Error('Expected JSON response but received: ' + text);
                 });
             }
@@ -386,13 +374,13 @@ function searchCombos() {
         .catch(err => showComboAlert('Lỗi tìm kiếm: ' + err.message, 'error'));
 }
 
-// ===== RESET SEARCH =====
+//  RESET SEARCH 
 function resetSearch() {
     document.getElementById('searchInput').value = '';
     loadAllCombos();
 }
 
-// ===== UTILITIES =====
+// UTILITIES 
 function formatCurrency(value) {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
@@ -412,7 +400,6 @@ function showComboAlert(message, type = 'info') {
     }, 4000);
 }
 
-// Close modal on outside click
 window.addEventListener('click', (event) => {
     const modal = document.getElementById('comboModal');
     if (event.target === modal) {
@@ -420,7 +407,6 @@ window.addEventListener('click', (event) => {
     }
 });
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initComboManager);
 } else {

@@ -3,10 +3,7 @@
 require_once __DIR__ . '/../models/product/comboModel.php';
 require_once __DIR__ . '/../entities/product/Combo.php';
 
-/**
- * ComboController
- * Xử lý tất cả request liên quan đến combo
- */
+/** Xử lý tất cả request liên quan đến combo */
 class ComboController
 {
     protected $comboModel;
@@ -22,9 +19,7 @@ class ComboController
         $this->staffId = $_SESSION['user']['staffId'] ?? $_SESSION['user']['userId'] ?? null;
     }
 
-    /**
-     * Kiểm tra quyền staff/manager
-     */
+    /** Kiểm tra quyền staff/manager */
     private function checkAuth() {
         if (!isset($_SESSION['user'])) {
             error_log("ComboController::checkAuth - No session user");
@@ -45,10 +40,7 @@ class ComboController
         }
     }
 
-    /**
-     * API: Lấy danh sách combo
-     * GET /index.php?url=get-combos
-     */
+    /** API: Lấy danh sách combo */
     public function getCombos()
     {
         try {
@@ -58,7 +50,6 @@ class ComboController
 
             $combos = $this->comboModel->getAll($onlyActive, $limit, $offset);
 
-            // Format response
             $data = array_map(function ($combo) {
                 return [
                     'comboId' => $combo->comboId,
@@ -78,10 +69,7 @@ class ComboController
         }
     }
 
-    /**
-     * API: Lấy chi tiết combo
-     * GET /index.php?url=get-combo&id=1
-     */
+    /** API: Lấy chi tiết combo */
     public function getCombo()
     {
         try {
@@ -116,18 +104,6 @@ class ComboController
         }
     }
 
-    /**
-     * API: Tạo combo
-     * POST /index.php?url=create-combo
-     * Body: FormData {
-     *   "name": "Combo...",
-     *   "price": 500000,
-     *   "description": "...",
-     *   "isActive": true,
-     *   "products": "[{\"productId\": 1, \"quantity\": 1}, ...]",
-     *   "comboImage": <file>
-     * }
-     */
     public function createCombo()
     {
         try {
@@ -219,19 +195,6 @@ class ComboController
         }
     }
 
-    /**
-     * API: Cập nhật combo
-     * POST /index.php?url=update-combo
-     * Body: FormData {
-     *   "comboId": 1,
-     *   "name": "...",
-     *   "price": 500000,
-     *   "isActive": true,
-     *   "description": "...",
-     *   "products": "[{\"productId\": 1, \"quantity\": 1}, ...]",
-     *   "comboImage": <file (optional)>
-     * }
-     */
     public function updateCombo()
     {
         try {
@@ -279,7 +242,7 @@ class ComboController
                 $data['description'] = $input['description'];
             }
             if (isset($input['isActive'])) {
-                // Handle isActive - can be '0', '1', 0, 1, false, true
+
                 $isActive = $input['isActive'];
                 if (is_string($isActive)) {
                     $data['isActive'] = ($isActive === '1' || strtolower($isActive) === 'true') ? 1 : 0;
@@ -361,10 +324,7 @@ class ComboController
         }
     }
 
-    /**
-     * API: Xóa combo (soft delete - mềm)
-     * DELETE /index.php?url=delete-combo&id=1
-     */
+    /** API: Xóa combo (soft delete - mềm) */
     public function deleteCombo()
     {
         try {
@@ -392,10 +352,7 @@ class ComboController
         }
     }
 
-    /**
-     * API: Khôi phục combo bị xóa
-     * POST /index.php?url=restore-combo&id=1
-     */
+    /** API: Khôi phục combo bị xóa */
     public function restoreCombo()
     {
         try {
@@ -417,13 +374,9 @@ class ComboController
         }
     }
 
-    /**
-     * API: Tìm combo theo tên
-     * GET /index.php?url=search-combos&name=combo
-     */
+    /**  API: Tìm combo theo tên */
     public function searchCombos()
     {
-        // Ensure JSON Content-Type for clients
         header('Content-Type: application/json; charset=utf-8');
 
         try {

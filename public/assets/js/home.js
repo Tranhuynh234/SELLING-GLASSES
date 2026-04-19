@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 'transition-all',
                 'duration-500',
                 'shadow-[0_0_20px_rgba(245,158,11,0.7)]',
-                'rounded-[32px]' // bo góc sát card
+                'rounded-[32px]' 
             );
 
             // Tắt glow sau 3s

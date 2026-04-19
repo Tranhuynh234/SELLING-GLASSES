@@ -182,7 +182,7 @@ class ProductController {
         } else {
             // Trả về view chi tiết
             $product = $result['data'] ?? $result;
-            $viewPath = __DIR__ . '/../views/product-detail.php';
+            $viewPath = __DIR__ . '/../views/products/product-detail.php';
             if (file_exists($viewPath)) {
                 include $viewPath;
             } else {
@@ -192,7 +192,6 @@ class ProductController {
         }
     }
 
-    // Hàm bổ trợ để xử lý lỗi nhanh cho cả 2 loại yêu cầu
     private function handleError($message) {
         $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
         if ($isJson) {

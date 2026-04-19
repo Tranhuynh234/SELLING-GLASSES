@@ -108,7 +108,7 @@ function toggleChatbox() {
   }
 }
 
-// Bấm phím ESC để đóng chatbox cho chuyên nghiệp
+// Bấm phím ESC để đóng chatbox 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && isChatOpen) {
     toggleChatbox();

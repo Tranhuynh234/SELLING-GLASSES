@@ -10,7 +10,7 @@ class Staff {
         $this->position = $data['position'] ?? null;
     }
 
-    // ===== Getter =====
+    // Getter 
     public function getStaffId() {
         return $this->staffId;
     }
@@ -23,7 +23,7 @@ class Staff {
         return $this->position;
     }
 
-    // ===== Setter =====
+    // Setter 
     public function setUserId($userId) {
         $this->userId = $userId;
     }

@@ -64,7 +64,7 @@
         border: 1px solid #f5c6cb;
     }
 
-/* ===== COMBO MODAL STYLES ===== */
+/* COMBO MODAL STYLES  */
 #comboModal.modal-overlay {
     position: fixed;
     top: 0;
@@ -79,7 +79,6 @@
     padding: 15px;
 }
 
-/* Show modal ONLY when JavaScript explicitly sets display: block */
 #comboModal[style*="display: block"] {
     display: flex !important;
 }

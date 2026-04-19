@@ -365,31 +365,26 @@ function escapeHtml(value) {
 function calculateShippingFee(subtotal) {
     const city = document.getElementById("city")?.value;
 
-    // New signature: calculateShippingFee(subtotal, lensPrice = 0, discount = 0)
-    // Compute the order total used for shipping decision: subtotal + lensPrice - discount
-    // Note: discount is assumed to be a positive number (amount to subtract)
+    // calculateShippingFee(subtotal, lensPrice = 0, discount = 0)
+    // shipping decision: subtotal + lensPrice - discount
     const lensPrice = arguments.length > 1 ? Number(arguments[1] || 0) : 0;
     const discount = arguments.length > 2 ? Number(arguments[2] || 0) : 0;
 
     const orderAmount = Number(subtotal || 0) + lensPrice - discount;
 
-    // Free shipping for Ho Chi Minh (by city selection)
     if (city && city.toLowerCase().includes("ho chi minh")) {
         return 0;
     }
 
-    // Free shipping for orders >= 500,000 VND (across all regions)
     if (orderAmount >= 500000) {
         return 0;
     }
 
-    // Otherwise apply flat 30,000 VND
     return 30000;
 }
 
 function useSavedPrescription() {
     // 1. Gửi yêu cầu lên server để báo rằng khách dùng số đo hồ sơ
-    // Ở đây mình tận dụng route 'prescription-store' bạn đã có
     fetch('/SELLING-GLASSES/public/index.php?url=prescription-store', {
         method: 'POST',
         headers: {

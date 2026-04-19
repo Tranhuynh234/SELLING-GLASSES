@@ -20,18 +20,14 @@ const opsApp = {
     }
   },
 
-  // ==========================================
-  // 1. KHỞI TẠO HỆ THỐNG
-  // ==========================================
+  //  1. KHỞI TẠO HỆ THỐNG
   async init() {
     await this.fetchData("all");
     this.renderTab(this.state.currentTab);
     this.bindEvents();
   },
 
-  // ==========================================
   // 2. LOGIC LẤY DỮ LIỆU (FIXED ASYNC & ALL STATUS)
-  // ==========================================
   async fetchData(status = "all") {
     try {
       const response = await fetch(
@@ -52,9 +48,7 @@ const opsApp = {
     }
   },
 
-  // ==========================================
   // 3. XỬ LÝ SỰ KIỆN SIDEBAR
-  // ==========================================
   bindEvents() {
     document.querySelectorAll(".nav-link").forEach((link) => {
       link.onclick = async (e) => {
@@ -79,9 +73,7 @@ const opsApp = {
     });
   },
 
-  // ==========================================
   // 4. ĐIỀU PHỐI GIAO DIỆN
-  // ==========================================
   renderTab(tab) {
     const area = document.getElementById("render-area");
     if (!area) return;
@@ -102,9 +94,7 @@ const opsApp = {
     }
   },
 
-  // ==========================================
   // 5. GIAO DIỆN TỔNG QUAN (DASHBOARD)
-  // ==========================================
   renderDashboard(el) {
     const pendingCount = this.state.orders.filter(
       (o) => o.status === "Processing",
@@ -167,9 +157,7 @@ const opsApp = {
     this.renderTab("shipping");
   },
 
-  // ==========================================
   // 6. DANH SÁCH ĐƠN HÀNG (FIXED FILTER & DISPLAY)
-  // ==========================================
   renderOrders(el) {
     el.innerHTML = `
             <div class="warehouse-header fade-in" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -233,9 +221,7 @@ const opsApp = {
             </div>`;
   },
 
-  // ==========================================
   // 7. VẬN CHUYỂN
-  // ==========================================
 renderShipping(el) {
   // Lấy cả đơn hàng status 'Pending' và 'Processing'
   const pending = this.state.orders.filter(
@@ -267,10 +253,8 @@ renderShipping(el) {
     </div>`;
 },
 
-  // ==========================================
   // 8. LOGIC XỬ LÝ (SHIP & CẬP NHẬT TRẠNG THÁI)
-  // ==========================================
-  async handleShip() {
+   async handleShip() {
   const id = document.getElementById("ship-order-id")?.value;
   const partner = document.getElementById("ship-partner")?.value;
   if (!id) return alert("Vui lòng chọn đơn hàng.");
@@ -350,9 +334,8 @@ renderShipping(el) {
     });
   },
 
-  // ==========================================
+ 
   // 9. CÁC HÀM TIỆN ÍCH (SEARCH, MODAL, CHART)
-  // ==========================================
   handleGlobalSearch(val) {
     this.state.searchQuery = val.toLowerCase();
   },

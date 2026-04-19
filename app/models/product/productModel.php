@@ -59,7 +59,7 @@ class ProductModel extends BaseModel {
    }
 
 
-   // --- CRUD SẢN PHẨM ---
+   // CRUD SẢN PHẨM 
 public function addProduct($data) {
         return $this->create([
             'name'        => $data['name'],
@@ -85,7 +85,7 @@ public function addProduct($data) {
         ]);
     }
 
-    // 3. Xóa sản phẩm hoàn toàn (Dùng Transaction để không bị lỗi dữ liệu mồ côi)
+    // 3. Xóa sản phẩm hoàn toàn 
     public function deleteProductComplete($id) {
         try {
             $this->conn->beginTransaction(); 

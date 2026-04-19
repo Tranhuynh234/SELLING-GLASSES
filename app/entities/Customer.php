@@ -8,7 +8,7 @@ class  Customer{
         $this->userId = $data['userId'] ?? null; 
         $this->address = $data['address'] ?? null;
     }
-    // === getter==== 
+    // getter
     public function getCustomerId(){
         return $this->customerId;
     }
@@ -18,7 +18,7 @@ class  Customer{
      public function getAddress(){
         return $this->address;
     }
-    //=====setter============
+    // setter
     public function setCustomerId($customerId)
     {
         $this->customerId = $customerId;

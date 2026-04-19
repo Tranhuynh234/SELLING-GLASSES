@@ -262,7 +262,6 @@ class PaymentService {
         ]);
 
         foreach ($rows as &$row) {
-            // If order status indicates confirmed or returned, prefer showing that on payment UI
             $orderStatus = $row['orderStatus'] ?? '';
             if ($orderStatus === 'Confirmed') {
                 $row['uiStatus'] = 'Đã xác thực';

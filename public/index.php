@@ -243,6 +243,14 @@ switch ($url) {
         $orderController->stats();
         exit();
 
+    case "dashboard-stats":
+        $homeController->getDashboardStats();
+        exit();
+
+    case "order-revenue-stats":
+        $homeController->getOrderRevenueStats();
+        exit();
+
     case 'order-detail':
         $controller = new OrderController($conn);
         $controller->showDetail($_GET['id']);

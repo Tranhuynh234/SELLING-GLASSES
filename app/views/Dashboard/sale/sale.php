@@ -15,7 +15,7 @@
 
 <body>
     <div class="app-container">
-        <!-- ================= SIDEBAR ================= -->
+        <!-- SIDEBAR -->
         <aside class="sidebar">
             <!-- LOGO / BRAND -->
             <div class="sidebar-header-wrapper">
@@ -81,14 +81,9 @@
             </div>
         </aside>
 
-        <!-- ================= MAIN CONTENT ================= -->
+        <!-- MAIN CONTENT -->
         <main class="content">
             <header class="topbar">
-                <!-- Ô tìm kiếm -->
-                <!-- <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search" />
-                </div> -->
 
                 <!-- Nút đăng xuất + Chat -->
                 <div class="topbar-right">
@@ -105,7 +100,7 @@
                 </div>
             </header>
 
-            <!-- ================= DASHBOARD ================= -->
+            <!-- DASHBOARD -->
             <section id="dashboard-page" class="dashboard-body">
                 <!-- TIÊU ĐỀ TRANG -->
                 <h1 class="page-title">DASHBOARD TỔNG QUAN HIỆU SUẤT</h1>
@@ -186,7 +181,7 @@
                 </div>
             </section>
 
-            <!-- ================= DANH SÁCH ĐƠN ================= -->
+            <!-- DANH SÁCH ĐƠN -->
             <section id="orders-page" class="dashboard-body hidden">
                 <h1 class="page-title">DANH SÁCH ĐƠN HÀNG</h1>
 
@@ -248,7 +243,7 @@
                 </div>
             </section>
 
-            <!-- ================= PRE-ORDER ================= -->
+            <!--  PRE-ORDER  -->
             <section id="preorder-page" class="dashboard-body hidden">
                 <h1 class="page-title">DANH SÁCH ĐƠN HÀNG PRE-ORDER</h1>
 
@@ -299,7 +294,7 @@
                 </div>
             </section>
 
-            <!-- ================= KHIẾU NẠI ================= -->
+            <!--  KHIẾU NẠI -->
             <section id="complaint-page" class="dashboard-body hidden">
                 <h1 class="page-title">DANH SÁCH KHIẾU NẠI / ĐỔI TRẢ</h1>
 
@@ -342,7 +337,7 @@
         </main>
     </div>
 
-    <!-- ================= CHI TIẾT ĐƠN HÀNG ================= -->
+    <!-- CHI TIẾT ĐƠN HÀNG -->
     <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content order-modal-content">

@@ -170,7 +170,6 @@ select {
     display: none !important;
 }
 
-/* Hiệu ứng mượt mà (fade) cho chữ và ô nhập */
 #nameText, #emailText, #phoneText, #addressText, 
 #nameInput, #emailInput, #phoneInput, #addressInput {
     transition: opacity 0.2s ease-in-out;
@@ -324,7 +323,7 @@ select {
 /* CONTAINER & CARD */
 .order-card {
     margin-bottom: 20px;
-    padding: 0 !important; /* Reset padding để header ôm sát */
+    padding: 0 !important; 
     overflow: hidden;
 }
 
@@ -398,7 +397,7 @@ select {
 }
 
 .btn-return:hover {
-    background: #fef2f2; /* Nền đỏ cực nhẹ khi hover */
+    background: #fef2f2; 
     box-shadow: 0 2px 5px rgba(239, 68, 68, 0.1);
 }
 
@@ -582,7 +581,7 @@ select {
 }
 
 .save-pres-btn {
-    background-color: #d97706; /* Màu cam đậm */
+    background-color: #d97706; 
     color: white;
     border: none;
     padding: 10px 20px;
@@ -593,5 +592,5 @@ select {
 }
 
 .save-pres-btn:hover {
-    background-color: #b45309; /* Màu cam tối hơn khi di chuột vào */
+    background-color: #b45309; 
 }

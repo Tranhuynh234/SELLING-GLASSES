@@ -16,7 +16,7 @@ class User {
         $this->role = $data['role']??null;
     }
 
-    // ===== Getter =====
+    // Getter 
     public function getUserId() {
         return $this->userId;
     }
@@ -39,7 +39,7 @@ class User {
     public function getRole(){
         return $this->role;
     }
-    // ===== Setter =====
+    // Setter 
     public function setName($name) {
         $this->name = $name;
     }

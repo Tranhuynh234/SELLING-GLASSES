@@ -19,21 +19,18 @@ function showTab(tabId) {
   } else if (tabId === "product") {
     loadProducts(1); // Gọi trang 1 khi chuyển tab
   } else if (tabId === "combo") {
-    // Initialize combo manager when combo tab is clicked
     if (typeof initComboManager === 'function') {
       initComboManager();
     }
   }
 }
 
-/* =========================================
-   1. FETCH & RENDER (LẤY DỮ LIỆU)
-   ========================================= */
+/* 1. FETCH & RENDER (LẤY DỮ LIỆU) */
 let productPage = 1;
 const productPageSize = 10; // Mỗi trang 10 sản phẩm
 let allProducts = []; // Lưu toàn bộ dữ liệu sản phẩm từ server
 function loadProducts() {
-  // Lấy toàn bộ sản phẩm, không cần truyền page lên server nữa vì mình phân trang bằng JS
+  // Lấy toàn bộ sản phẩm, không cần truyền page lên server vì phân trang bằng JS
   const url = `/SELLING-GLASSES/public/index.php?url=get-all-products&format=json`;
 
   fetch(url, {
@@ -92,7 +89,7 @@ function renderProductTable() {
     .join("");
 }
 function renderProductPagination() {
-  const container = document.getElementById("productPagination"); // Nhớ ID này trong HTML
+  const container = document.getElementById("productPagination"); 
   if (!container) return;
 
   const totalPages = Math.ceil(allProducts.length / productPageSize);
@@ -130,9 +127,7 @@ function changeProductPage(page) {
   renderProductPagination();
 }
 
-/* =========================================
-   2. XEM CHI TIẾT (DETAIL MODAL)
-   ========================================= */
+/* 2. XEM CHI TIẾT (DETAIL MODAL) */
 function viewDetail(id) {
   // Thêm Header Accept để Backend biết bạn muốn nhận JSON
   fetch(`/SELLING-GLASSES/public/index.php?url=detail&id=${id}`, {
@@ -142,8 +137,7 @@ function viewDetail(id) {
   })
     .then((response) => response.json())
     .then((res) => {
-      // Vì Backend trả về {success: true, data: {...}}
-      // nên chúng ta dùng res.success để kiểm tra
+
       if (!res.success) return alert(res.message);
 
       const product = res.data;
@@ -181,9 +175,7 @@ function viewDetail(id) {
     });
 }
 
-/* =========================================
-   3. LƯU SẢN PHẨM (XỬ LÝ DỮ LIỆU TỪ FORM)
-   ========================================= */
+/* 3. LƯU SẢN PHẨM (XỬ LÝ DỮ LIỆU TỪ FORM) */
 // Khai báo cấu hình Toast ở ngoài để dùng chung cho cả Add và Update
 const Toast = Swal.mixin({
   toast: true,
@@ -250,7 +242,7 @@ function saveData() {
     formData.append("image", imageInput.files[0]);
   }
 
-  // QUAN TRỌNG: Đẩy từng dòng biến thể vào mảng variants[]
+  // Đẩy từng dòng biến thể vào mảng variants[]
   lines.forEach((line) => {
     formData.append("variants[]", line);
   });
@@ -277,16 +269,14 @@ function saveData() {
     .catch((err) => console.error("Lỗi kết nối:", err));
 }
 
-/* =========================================
-   4. XÓA SẢN PHẨM (TRANSACTION)
-   ========================================= */
+/* 4. XÓA SẢN PHẨM (TRANSACTION) */
 function confirmDelete(id) {
   Swal.fire({
     title: "Xác nhận xóa?",
     text: "Bạn chắc chắn muốn xóa sản phẩm này? Hệ thống sẽ xóa cả các màu và size liên quan!",
     icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: "#e67e22", // Màu cam giống nút Thêm mới của bạn
+    confirmButtonColor: "#e67e22", 
     cancelButtonColor: "#6c757d",
     confirmButtonText: "Đồng ý xóa",
     cancelButtonText: "Hủy bỏ",
@@ -319,23 +309,20 @@ function confirmDelete(id) {
   });
 }
 
-/* =========================================
-   5. Reset form về trạng thái trống
-   ========================================= */
+/* 5. Reset form về trạng thái trống */
 function openModal() {
-  // 1. Đổi tiêu đề modal về "Thêm mới"
   document.getElementById("modalTitle").innerText = "Thêm mới sản phẩm";
 
-  // 2. Xóa sạch dữ liệu trong form
+  // Xóa sạch dữ liệu trong form
   document.getElementById("productForm").reset();
 
-  // 3. Xóa ID ẩn (vì đang thêm mới nên không có ID)
+  // Xóa ID ẩn 
   document.getElementById("editProductId").value = "";
 
-  // 4. Xóa tên ảnh cũ đang hiển thị (nếu có)
+  // Xóa tên ảnh cũ đang hiển thị (nếu có)
   document.getElementById("currentImageName").innerText = "";
 
-  // 5. Hiển thị Modal
+  //  Hiển thị Modal
   document.getElementById("modal").style.display = "flex";
 }
 
@@ -344,9 +331,47 @@ function closeModal() {
   document.getElementById("modal").style.display = "none";
 }
 
-/* =========================================
-   6. Hàm để đóng Modal Chi tiết sản phẩm
-   ========================================= */
+/* Policy Modal Functions */
+function openPolicyModal() {
+  // Reset form
+  document.getElementById("policyForm").reset();
+  document.getElementById("editPolicyId").value = "";
+  document.getElementById("policyModalTitle").innerText = "Thêm chính sách mới";
+  
+  // Show modal
+  document.getElementById("policyModal").style.display = "flex";
+}
+
+function closePolicyModal() {
+  document.activeElement.blur();
+  document.getElementById("policyModal").style.display = "none";
+}
+
+function savePolicyData() {
+  const title = document.getElementById("policyTitle").value;
+  const content = document.getElementById("policyContent").value;
+  const type = document.getElementById("policyType").value;
+  const status = document.getElementById("policyStatus").value;
+
+  if (!title || !content || !type) {
+    alert("Vui lòng điền đầy đủ thông tin!");
+    return;
+  }
+
+  // Hiển thị thông báo thành công
+  Swal.fire({
+    icon: "success",
+    title: "Thành công!",
+    text: "Chính sách đã được thêm thành công.",
+    confirmButtonColor: "#d97706"
+  });
+
+  // Reset form
+  document.getElementById("policyForm").reset();
+  closePolicyModal();
+}
+
+/* 6. Hàm để đóng Modal Chi tiết sản phẩm */
 function closeDetailModal() {
   const modal = document.getElementById("detailModal");
   if (modal) {
@@ -354,9 +379,7 @@ function closeDetailModal() {
   }
 }
 
-/* =========================================
-   7. MỞ MODAL ĐỂ CHỈNH SỬA
-   ========================================= */
+/* 7. MỞ MODAL ĐỂ CHỈNH SỬA */
 function openEditModal(id) {
   document.getElementById("modalTitle").innerText = "Chỉnh sửa sản phẩm";
 
@@ -374,7 +397,7 @@ function openEditModal(id) {
       document.getElementById("input2").value = product.description;
       document.getElementById("inputProductPrice").value = product.price ?? "";
 
-      // ✅ Load danh mục rồi mới set value
+      // Load danh mục rồi mới set value
       fetch("/SELLING-GLASSES/public/index.php?url=get-all-categories", {
         headers: { Accept: "application/json" },
       })
@@ -388,7 +411,6 @@ function openEditModal(id) {
               const option = document.createElement("option");
               option.value = cat.categoryId;
               option.textContent = cat.name;
-              // ✅ So sánh == thay vì === để tránh lỗi kiểu dữ liệu số vs chuỗi
               if (cat.categoryId == product.categoryId) {
                 option.selected = true;
               }
@@ -418,8 +440,7 @@ function loadCategories() {
   })
     .then((response) => response.json())
     .then((res) => {
-      // Vì Server trả về mảng trực tiếp [ {...}, {...} ]
-      // Ta kiểm tra xem res có phải là mảng không
+
       if (Array.isArray(res)) {
         const selectCat = document.getElementById("inputCatId");
         if (!selectCat) return;
@@ -443,8 +464,222 @@ function loadPromotions() {
   if (tableBody)
     tableBody.innerHTML = "<tr><td colspan='5'>Đang cập nhật...</td></tr>";
 }
+
+/** Lấy và cập nhật thống kê dashboard */
+function loadDashboardStats() {
+  const url = `/SELLING-GLASSES/public/index.php?url=dashboard-stats`;
+
+  fetch(url, {
+    headers: { Accept: "application/json" },
+  })
+    .then((response) => response.json())
+    .then((res) => {
+      if (res.success && res.data) {
+        // Cập nhật số sản phẩm
+        const totalProductEl = document.getElementById("totalProduct");
+        if (totalProductEl) {
+          totalProductEl.textContent = res.data.productCount || 0;
+        }
+
+        // Cập nhật số mã giảm giá
+        const totalPromoEl = document.getElementById("totalPromo");
+        if (totalPromoEl) {
+          totalPromoEl.textContent = res.data.promoCount || 0;
+        }
+
+        // Cập nhật số chính sách
+        const totalPolicyEl = document.getElementById("totalPolicy");
+        if (totalPolicyEl) {
+          totalPolicyEl.textContent = res.data.policyCount || 0;
+        }
+
+        // Cập nhật số khách hàng
+        const totalCustomerEl = document.getElementById("totalCustomer");
+        if (totalCustomerEl) {
+          totalCustomerEl.textContent = res.data.customerCount || 0;
+        }
+      } else {
+        console.error("Lỗi dữ liệu:", res.message);
+      }
+    })
+    .catch((error) => console.error("Lỗi lấy dữ liệu thống kê:", error));
+}
+
+/** Tạo và cập nhật biểu đồ doanh thu */
+let revenueChartInstance = null;
+
+function loadRevenueChart(period = 'daily') {
+  const url = `/SELLING-GLASSES/public/index.php?url=order-revenue-stats&period=${period}`;
+
+  fetch(url, {
+    headers: { Accept: "application/json" },
+  })
+    .then((response) => response.json())
+    .then((res) => {
+      if (res.success && res.data) {
+        renderRevenueChart(res.data);
+      } else {
+        console.error("Lỗi dữ liệu biểu đồ:", res.message);
+      }
+    })
+    .catch((error) => console.error("Lỗi lấy dữ liệu biểu đồ:", error));
+}
+
+function renderRevenueChart(data) {
+  const chartCanvas = document.getElementById("revenueChart");
+  if (!chartCanvas) return;
+
+  const ctx = chartCanvas.getContext("2d");
+
+  // Hủy biểu đồ cũ nếu tồn tại
+  if (revenueChartInstance) {
+    revenueChartInstance.destroy();
+  }
+
+  // Tạo biểu đồ mới
+  revenueChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: data.labels,
+      datasets: [
+        {
+          label: "Doanh thu (VNĐ)",
+          data: data.revenues,
+          borderColor: "#ff6b6b",
+          backgroundColor: "rgba(255, 107, 107, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: "#ff6b6b",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          yAxisID: "y",
+        },
+        {
+          label: "Số đơn hàng",
+          data: data.orderCounts,
+          borderColor: "#4ecdc4",
+          backgroundColor: "rgba(78, 205, 196, 0.1)",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: "#4ecdc4",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          yAxisID: "y1",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+          labels: {
+            usePointStyle: true,
+            padding: 15,
+            font: {
+              size: 12,
+              weight: "500",
+            },
+          },
+        },
+        tooltip: {
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          padding: 12,
+          titleFont: {
+            size: 13,
+            weight: "bold",
+          },
+          bodyFont: {
+            size: 12,
+          },
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderWidth: 1,
+          callbacks: {
+            label: function (context) {
+              let label = context.dataset.label || "";
+              if (label) label += ": ";
+              if (context.dataset.yAxisID === "y") {
+                // Định dạng tiền tệ cho doanh thu
+                label += new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(context.parsed.y);
+              } else {
+                // Số nguyên cho đơn hàng
+                label += context.parsed.y + " đơn";
+              }
+              return label;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          type: "linear",
+          display: true,
+          position: "left",
+          title: {
+            display: true,
+            text: "Doanh thu (VNĐ)",
+            font: {
+              size: 12,
+              weight: "bold",
+            },
+          },
+          ticks: {
+            callback: function (value) {
+              return new Intl.NumberFormat("vi-VN", {
+                notation: "compact",
+                compactDisplay: "short",
+              }).format(value);
+            },
+          },
+        },
+        y1: {
+          type: "linear",
+          display: true,
+          position: "right",
+          title: {
+            display: true,
+            text: "Số đơn hàng",
+            font: {
+              size: 12,
+              weight: "bold",
+            },
+          },
+          grid: {
+            drawOnChartArea: false,
+          },
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 11,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Kiểm tra xem hàm có tồn tại không trước khi gọi để tránh lỗi dừng script
   if (typeof loadProducts === "function") loadProducts();
   if (typeof loadCategories === "function") loadCategories();
+  if (typeof loadDashboardStats === "function") loadDashboardStats();
+  if (typeof loadRevenueChart === "function") loadRevenueChart("daily");
 });
+

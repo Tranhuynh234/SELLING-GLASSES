@@ -161,7 +161,7 @@ faceMesh.onResults(results => {
         const x2 = right.x * canvas.width;
         const yTop = top.y * canvas.height;
 
-        // SCALE (chỉnh size ở đây)
+        // SCALE 
         const scaleBunny = 3.5;
         const width = Math.abs(x2 - x1) * scaleBunny;
 

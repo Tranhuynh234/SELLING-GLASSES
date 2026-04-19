@@ -14,9 +14,7 @@ class ProductServices {
         $this->categoryModel = new CategoryModel();
     }
 
-    // ==========================================
     // 1. QUẢN LÝ DANH MỤC (CATEGORY)
-    // ==========================================
     public function getAllCategories() {
         // Trả về mảng trực tiếp giúp Frontend dễ xử lý map/foreach
         return $this->categoryModel->getAllCategories() ?: [];
@@ -37,9 +35,7 @@ class ProductServices {
         return $res ? ['success' => true] : ['success' => false];
     }
 
-    // ==========================================
     // 2. QUẢN LÝ SẢN PHẨM (PRODUCT)
-    // ==========================================
     public function getAllProducts($categoryId = null) {
         // Đảm bảo khớp với Controller->index()
         return $this->productModel->getAllProductsWithVariants($categoryId) ?: [];
@@ -87,9 +83,7 @@ class ProductServices {
         return $res ? ['success' => true] : ['success' => false];
     }
 
-    // ==========================================
     // 3. QUẢN LÝ BIẾN THỂ (VARIANT)
-    // ==========================================
     public function addVariant($data) {
         $res = $this->productModel->addVariant($data);
         return $res ? ['success' => true] : ['success' => false];
@@ -105,12 +99,12 @@ class ProductServices {
         return $res ? ['success' => true] : ['success' => false];
     }
 
-    // HÀM dành cho nút Thêm mới: Xử lý Upload Ảnh + Lưu Sản phẩm + Lưu Biến thể
+    // Hàm dành cho nút thêm mới: Xử lý Upload Ảnh + Lưu Sản phẩm + Lưu Biến thể
    public function addFullProductAndVariants($postData, $fileData) {
     $this->productModel->beginTransaction();
 
     try {
-        // --- BƯỚC 1: Xử lý file ảnh ---
+        //  BƯỚC 1: Xử lý file ảnh 
         $imageName = null; 
         if (isset($fileData['image']) && $fileData['image']['error'] === 0) {
             $ext = strtolower(pathinfo($fileData['image']['name'], PATHINFO_EXTENSION));
@@ -125,7 +119,7 @@ class ProductServices {
             }
         }
 
-        // --- BƯỚC 2: Xử lý giá (Price) cho bảng products ---
+        // BƯỚC 2: Xử lý giá (Price) cho bảng products 
         // Lấy giá từ POST, nếu không có hoặc bằng 0 thì lấy từ biến thể đầu tiên
         $rawPrice = $postData['price'] ?? 0;
         
@@ -143,7 +137,7 @@ class ProductServices {
             throw new Exception("Lỗi: Giá sản phẩm chính không hợp lệ (phải lớn hơn 0).");
         }
 
-        // --- BƯỚC 3: Thêm sản phẩm chính ---
+        // BƯỚC 3: Thêm sản phẩm chính 
         $resProduct = $this->addProduct($postData);
         if (!$resProduct['success']) {
             throw new Exception("Lỗi: Không thể lưu thông tin sản phẩm chính vào Database.");
@@ -151,7 +145,7 @@ class ProductServices {
 
         $newProductId = $resProduct['productId'];
 
-        // --- BƯỚC 4: Thêm các biến thể ---
+        //  BƯỚC 4: Thêm các biến thể 
         $variantsArray = is_array($postData['variants']) ? $postData['variants'] : [$postData['variants']];
         
         if (empty($variantsArray) || (count($variantsArray) === 1 && empty($variantsArray[0]))) {

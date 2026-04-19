@@ -1,9 +1,6 @@
 <?php
 
-/**
- * Combo Entity
- * Đại diện cho một combo sản phẩm
- */
+/** Đại diện cho một combo sản phẩm */
 class Combo
 {
     public $comboId;
@@ -18,7 +15,7 @@ class Combo
     public $deletedAt;
     
     // Danh sách sản phẩm trong combo
-    public $items = []; // Array of ['productId' => int, 'quantity' => int, ...]
+    public $items = []; 
 
     public function __construct(
         $name,
@@ -36,9 +33,7 @@ class Combo
         $this->staffId = $staffId;
     }
 
-    /**
-     * Thêm sản phẩm vào combo
-     */
+    /** Thêm sản phẩm vào combo */
     public function addItem($productId, $quantity = 1)
     {
         $this->items[] = [
@@ -47,9 +42,7 @@ class Combo
         ];
     }
 
-    /**
-     * Loại bỏ sản phẩm khỏi combo
-     */
+    /** Loại bỏ sản phẩm khỏi combo */
     public function removeItem($productId)
     {
         $this->items = array_filter($this->items, function ($item) use ($productId) {
@@ -57,25 +50,19 @@ class Combo
         });
     }
 
-    /**
-     * Xóa tất cả sản phẩm trong combo
-     */
+    /** Xóa tất cả sản phẩm trong combo */
     public function clearItems()
     {
         $this->items = [];
     }
 
-    /**
-     * Lấy tổng số sản phẩm trong combo
-     */
+    /** Lấy tổng số sản phẩm trong combo */
     public function getItemCount()
     {
         return count($this->items);
     }
 
-    /**
-     * Chuyển đổi entity thành array
-     */
+    /** Chuyển đổi entity thành array */
     public function toArray()
     {
         return [
@@ -93,9 +80,7 @@ class Combo
         ];
     }
 
-    /**
-     * Tạo entity từ array
-     */
+    /** Tạo entity từ array */
     public static function fromArray($data)
     {
         $combo = new self(

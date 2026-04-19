@@ -21,9 +21,17 @@
                     500k</span>
             </div>
             <div id="auth-box" class="flex space-x-4">
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
-                <span>|</span>
-                <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng ký</a>
+                <?php if (isset($_SESSION['user'])): ?>
+                    <span class="flex items-center gap-2 cursor-default">
+                        <i class="fa-solid fa-user"></i> Xin chào, <?php echo htmlspecialchars($_SESSION['user']['name']); ?>
+                    </span>
+                    <span>|</span>
+                    <a href="/SELLING-GLASSES/public/logout" class="hover:text-amber-500">Đăng xuất</a>
+                <?php else: ?>
+                    <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng nhập</a>
+                    <span>|</span>
+                    <a href="/SELLING-GLASSES/public/auth" class="hover:text-amber-500">Đăng ký</a>
+                <?php endif; ?>
             </div>
         </div>
         <header class="bg-white py-4 px-6 md:px-12 flex justify-between items-center border-b border-stone-100">
@@ -65,13 +73,11 @@
                 </a>
 
                 <!-- Icon giỏ hàng -->
-                <button class="relative">
-                    <a href="/SELLING-GLASSES/public/cart">
-                        <i class="fa fa-shopping-cart"></i>
-                    </a>
+                <a href="/SELLING-GLASSES/public/cart" class="relative hover:text-amber-700 transition">
+                    <i class="fa fa-shopping-cart"></i>
                     <span id="cart-count"
-                        class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
-                </button>
+                        class="absolute -top-2 -right-2 bg-amber-700 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+                </a>
 
                 <!-- Icon chat support -->
                 <button id="btn-home-chat" onclick="openSupportChat()" class="relative text-stone-700 hover:text-amber-700 transition">

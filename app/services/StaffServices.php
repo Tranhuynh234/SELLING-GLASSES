@@ -14,9 +14,7 @@ class StaffService {
         $this->customerModel = new CustomerModel;
     }
 
-    // =========================
     // CREATE OR UPDATE STAFF
-    // =========================
     public function createOrUpdateStaff($userId, $position) {
         // 1. Kiểm tra nếu chọn về làm Customer
     if ($position === 'customer') {
@@ -61,9 +59,7 @@ class StaffService {
         }
     }
 
-    // =========================
     // DELETE STAFF
-    // =========================
  public function deleteUser($userId)
 {
     // 1. lấy user
