@@ -70,7 +70,7 @@ const opsApp = {
 
         // Tải dữ liệu tương ứng tab trước khi vẽ
         if (tab === "shipping") {
-          await this.fetchData("Pending");
+          await this.fetchData("Processing");
         } else {
           await this.fetchData("all");
         }
@@ -142,11 +142,11 @@ const opsApp = {
                     <h3 style="margin-bottom:20px;">Lối tắt nhanh</h3>
                     <button class="btn-confirm" style="width:100%; margin-bottom:12px; background:#e67e22; color:white;"
                         onclick="opsApp.goShippingFromDashboard()">
-                        🚚 Đẩy vận đơn ngay (${pendingCount})
+                        Đẩy vận đơn ngay (${pendingCount})
                     </button>
                     <button style="width:100%; background:#7f8c8d; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer;"
                         onclick="opsApp.fetchData('all').then(() => opsApp.renderTab('orders'))">
-                        📋 Danh sách đơn hàng
+                        Danh sách đơn hàng
                     </button>
                 </div>
             </div>
@@ -236,64 +236,79 @@ const opsApp = {
   // ==========================================
   // 7. VẬN CHUYỂN
   // ==========================================
-  renderShipping(el) {
-    const pending = this.state.orders.filter((o) => o.status === "Processing");
-    el.innerHTML = `
-            <h2 class="fade-in" style="margin-bottom:20px;">Tạo vận đơn nhanh</h2>
-            <div class="card fade-in" style="max-width:600px; margin:0 auto; padding:30px;">
-                ${
-                  pending.length
-                    ? `
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-receipt"></i> Chọn đơn hàng</label>
-                        <select id="ship-order-id" class="input-field">
-                            ${pending.map((o) => `<option value="${o.orderId}">Đơn #${o.orderId} - ${o.customerName || "Khách"}</option>`).join("")}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-truck"></i> Đối tác vận chuyển</label>
-                        <select id="ship-partner" class="input-field">
-                            <option value="GHN">Giao Hàng Nhanh (GHN)</option>
-                            <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
-                        </select>
-                    </div>
-                    <button class="btn-confirm" style="width:100%;" onclick="opsApp.handleShip()">XÁC NHẬN & XUẤT MÃ</button>
-                `
-                    : `<div style="text-align:center; padding:30px;"><h3>Không còn đơn chờ xử lý</h3></div>`
-                }
-            </div>`;
-  },
+renderShipping(el) {
+  // Lấy cả đơn hàng status 'Pending' và 'Processing'
+  const pending = this.state.orders.filter(
+    (o) => o.status === "Pending" || o.status === "Processing"
+  );
+  el.innerHTML = `
+    <h2 class="fade-in" style="margin-bottom:20px;">Tạo vận đơn nhanh</h2>
+    <div class="card fade-in" style="max-width:600px; margin:0 auto; padding:30px;">
+      ${
+        pending.length
+          ? `
+            <div class="form-group">
+              <label><i class="fa-solid fa-receipt"></i> Chọn đơn hàng</label>
+              <select id="ship-order-id" class="input-field">
+                ${pending.map((o) => `<option value="${o.orderId}">Đơn #${o.orderId} - ${o.customerName || "Khách"}</option>`).join("")}
+              </select>
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-truck"></i> Đối tác vận chuyển</label>
+              <select id="ship-partner" class="input-field">
+                <option value="GHN">Giao Hàng Nhanh (GHN)</option>
+                <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
+              </select>
+            </div>
+            <button class="btn-confirm" style="width:100%;" onclick="opsApp.handleShip()">XÁC NHẬN & XUẤT MÃ</button>
+          `
+          : `<div style="text-align:center; padding:30px;"><h3>Không còn đơn chờ xử lý</h3></div>`
+      }
+    </div>`;
+},
 
   // ==========================================
   // 8. LOGIC XỬ LÝ (SHIP & CẬP NHẬT TRẠNG THÁI)
   // ==========================================
   async handleShip() {
-    const id = document.getElementById("ship-order-id")?.value;
-    const partner = document.getElementById("ship-partner")?.value;
-    if (!id) return alert("Vui lòng chọn đơn hàng.");
+  const id = document.getElementById("ship-order-id")?.value;
+  const partner = document.getElementById("ship-partner")?.value;
+  if (!id) return alert("Vui lòng chọn đơn hàng.");
 
-    const track =
-      partner + "-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-    const formData = new FormData();
-    formData.append("orderId", id);
-    formData.append("status", "Shipped");
-    formData.append("trackingCode", track);
-    formData.append("carrier", partner);
+  const track =
+    partner + "-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  const formData = new FormData();
+  formData.append("orderId", id);
+  formData.append("status", "Shipped");
+  formData.append("trackingCode", track);
+  formData.append("carrier", partner);
 
-    try {
-      const response = await fetch(`${this.apiUrl}?url=update-order-status`, {
-        method: "POST",
-        body: formData,
-      });
-      const res = await response.json();
-      if (res.success) {
-        alert(`Đã xuất mã vận đơn: ${track}`);
-        await this.init();
-      }
-    } catch (e) {
-      alert("Lỗi kết nối server.");
+  try {
+    const response = await fetch(`${this.apiUrl}?url=update-order-status`, {
+      method: "POST",
+      body: formData,
+    });
+    const res = await response.json();
+    if (res.success) {
+      this.setModal(
+        "Xuất mã vận đơn thành công",
+        `<div style="text-align:center">
+          <div style="font-size:18px; margin-bottom:10px;">Mã vận đơn:</div>
+          <div style="font-size:28px; font-weight:bold; color:#e67e22; margin-bottom:16px;">${track}</div>
+          <div>Đơn hàng #${id} đã được chuyển sang trạng thái <b>Đang giao</b>.</div>
+        </div>`,
+        async () => {
+          this.closeModal();
+          await this.init();
+        }
+      );
+    } else {
+      alert(res.message || "Tạo vận đơn thất bại.");
     }
-  },
+  } catch (e) {
+    alert("Lỗi kết nối server.");
+  }
+},
 
   async handleUpdateOrder(orderId, newStatus) {
     const formData = new FormData();
