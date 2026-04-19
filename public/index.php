@@ -14,6 +14,7 @@ require_once __DIR__ . "/../app/controllers/UserController.php";
 require_once "../app/controllers/PaymentController.php";
 require_once "../app/controllers/PrescriptionController.php";
 require_once "../app/controllers/ReviewController.php";
+require_once "../app/controllers/ReturnController.php";
 
 $conn = Database::connect();
 
@@ -30,6 +31,7 @@ $userController = new UserController();
 $paymentController = new PaymentController();
 $prescriptionController = new PrescriptionController($conn);
 $reviewController = new ReviewController();
+$returnController = new ReturnController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -200,15 +202,18 @@ switch ($url) {
     case "get-order-detail":
         $orderController->getOrderDetail();
         exit();
-
+        // chuyen thay file 
     case "get-complaints":
-        $promotionController->getComplaints();
+        $returnController->getComplaints();
         exit();
 
     case "process-complaint-request":
-        $promotionController->processRequest();
+        $returnController->processRequest();
         exit();
-
+    case 'request-return':
+        $returnController->requestReturn();
+        break;
+// ===============
     case "contact-customer":
         $orderController->contactCustomer();
         exit();
@@ -246,22 +251,35 @@ switch ($url) {
         $controller->showDetail($_GET['id']);
         break;    
 
-    // --- Promotion Module ---
-    case 'create-promotion':
-        $promotionController->createPromotion();
-        break;
-
-    case 'apply-promotion':
+ // =====================
+// PROMOTION MODULE
+// =====================
+    case "promotion-apply":
         $promotionController->applyPromotion();
-        break;
+        exit();
+    case "promotion-create":
+        $promotionController->createPromotion();
+        exit();
 
-    case 'upload-prescription':
-        $promotionController->uploadPrescription();
-        break;
+    case "promotion-update":
+        $promotionController->updatePromotion();
+        exit();
 
-    case 'request-return':
-        $promotionController->requestReturn();
-        break;
+    case "promotion-delete":
+        $promotionController->deletePromotion();
+        exit();
+
+    case "promotion-detail":
+        $promotionController->getPromotionDetail();
+        exit();
+
+    case "promotion-search":
+        $promotionController->searchPromotions();
+        exit();
+
+    case "promotion-active-product":
+        $promotionController->getActivePromotionByProduct();
+        exit();
 
     // --- Cart---//
     case 'get-cart':

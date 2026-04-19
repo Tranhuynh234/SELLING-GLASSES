@@ -196,7 +196,7 @@ class OrderService {
         return $this->orderModel->getSupportUnreadCountForUser($userId);
     }
 
-    // KHÁCH HÀNG YÊU CẦU HỦY ĐƠN HÀNG
+    // KHÁCH HÀNG gửi tin nhắn cho nhân viên
     public function sendCustomerMessageForUser($userId, $message) {
         if (!$userId || empty($message)) {
             return false;
@@ -207,7 +207,7 @@ class OrderService {
             return false;
         }
 
-        return $this->updateStatus($orderId, 'Cancelled');
+        return $this->orderModel->saveMessage($orderId, 'Customer', $message);
     }
 
     // ĐỔI TRẢ ĐƠN HÀNG

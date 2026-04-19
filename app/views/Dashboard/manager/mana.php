@@ -7,6 +7,7 @@
     <title>Manager System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/mana.css" />
+    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/promotion.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
@@ -343,6 +344,7 @@
                             <tbody id="promoTable"></tbody>
                         </table>
                     </div>
+                    <div id="promoPagination" class="pagination-container"></div>
                 </section>
 
                 <section id="policy" class="tab-pane">
@@ -453,6 +455,7 @@
     </div>
     <script src="/SELLING-GLASSES/public/assets/js/mana.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/user.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/promotion.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

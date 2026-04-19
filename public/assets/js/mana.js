@@ -15,7 +15,9 @@ function showTab(tabId) {
   if (activeBtn) activeBtn.classList.add("active");
 
   if (tabId === "promo") {
-    loadPromotions();
+    if (typeof loadPromotions === "function") {
+      loadPromotions();
+    }
   } else if (tabId === "product") {
     loadProducts(1); // Gọi trang 1 khi chuyển tab
   }
@@ -431,12 +433,6 @@ function loadCategories() {
       }
     })
     .catch((err) => console.error("Lỗi load danh mục:", err));
-}
-function loadPromotions() {
-  console.log("Tính năng khuyến mãi đang phát triển...");
-  const tableBody = document.getElementById("promoTable");
-  if (tableBody)
-    tableBody.innerHTML = "<tr><td colspan='5'>Đang cập nhật...</td></tr>";
 }
 document.addEventListener("DOMContentLoaded", () => {
   // Kiểm tra xem hàm có tồn tại không trước khi gọi để tránh lỗi dừng script

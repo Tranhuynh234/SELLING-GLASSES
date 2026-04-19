@@ -28,12 +28,12 @@ public function rollBack() {
     }
 
     //  Tìm theo ID
-    public function find($id, $primaryKey = "id") {
-        $sql = "SELECT * FROM {$this->table} WHERE {$primaryKey} = :id LIMIT 1";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        return $stmt->fetch();
-    }
+public function find($id, $primaryKey = "id") {
+    $sql = "SELECT * FROM {$this->table} WHERE {$primaryKey} = :id LIMIT 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([':id' => $id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
     //  Insert (auto)
     public function create($data) {
@@ -71,12 +71,12 @@ public function rollBack() {
     }
 
     // Find by field (custom)
-    public function findBy($field, $value) {
-        $sql = "SELECT * FROM {$this->table} WHERE {$field} = :value LIMIT 1";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':value' => $value]);
-        return $stmt->fetch();
-    }
+public function findBy($field, $value) {
+    $sql = "SELECT * FROM {$this->table} WHERE {$field} = :value LIMIT 1";
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([':value' => $value]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
         // SELECT nhiều dòng
     public function queryAll($sql, $params = []) {
         $stmt = $this->conn->prepare($sql);

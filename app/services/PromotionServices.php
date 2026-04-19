@@ -1,78 +1,191 @@
-<?php
+    <?php
 
-require_once __DIR__ . "/../models/promotion/PromotionModel.php";
-require_once __DIR__ . "/../models/promotion/PromotionProductModel.php";
-require_once __DIR__ . "/../models/promotion/PrescriptionModel.php";
-require_once __DIR__ . "/../models/promotion/ReturnRequestModel.php";
+    require_once __DIR__ . "/../models/promotion/PromotionModel.php";
 
-class PromotionServices {
+    class PromotionService {
 
-    private $promotionModel;
-    private $promotionProductModel;
-    private $prescriptionModel;
-    private $returnModel;
+        private $promotionModel;
 
-    public function __construct($conn) {
-        $this->promotionModel = new PromotionModel($conn);
-        $this->promotionProductModel = new PromotionProductModel($conn);
-        $this->prescriptionModel = new PrescriptionModel($conn);
-        $this->returnModel = new ReturnRequestModel($conn);
+        public function __construct() {
+            $this->promotionModel = new PromotionModel();
+        }
+
+        // =========================
+        // CREATE PROMOTION (ADMIN)
+        // =========================
+     public function createPromotion($data) {
+
+    // VALIDATION
+    if (empty($data['name'])) {
+        return $this->response(false, "Thiếu tên khuyến mãi");
     }
 
-    public function createPromotion($data) {
-        return $this->promotionModel->createPromotion($data);
+    if (!isset($data['discount']) || $data['discount'] < 0) {
+        return $this->response(false, "Giảm giá không hợp lệ");
     }
 
-    public function applyPromotion($promotionId, $productId) {
-        return $this->promotionProductModel->applyPromotion($promotionId, $productId);
+    if (empty($data['startDate']) || empty($data['endDate'])) {
+        return $this->response(false, "Thiếu ngày bắt đầu/kết thúc");
     }
 
-    public function uploadPrescription($data) {
-        return $this->prescriptionModel->uploadPrescription($data);
+    if (strtotime($data['startDate']) > strtotime($data['endDate'])) {
+        return $this->response(false, "Ngày bắt đầu phải nhỏ hơn ngày kết thúc");
     }
 
-    public function requestReturn($data) {
-        $orderId = $data['orderId'] ?? null;
-        if ($orderId && $this->returnModel->getRequestByOrderId($orderId)) {
+    try {
+        $this->promotionModel->beginTransaction();
+
+        // CHỈ TẠO PROMOTION
+        $promotionId = $this->promotionModel->createPromotion([
+            "name"         => $data['name'],
+            "discount"     => $data['discount'],
+            "discountType" => $data['discountType'] ?? 'percent',
+            "startDate"    => $data['startDate'],
+            "endDate"      => $data['endDate'],
+            "staffId"      => $data['staffId'] ?? null,
+            "status"       => $data['status'] ?? 'active'
+        ]);
+
+        if (!$promotionId) {
+            throw new Exception("Tạo khuyến mãi thất bại");
+        }
+
+        $this->promotionModel->commit();
+
+        return $this->response(true, "Tạo khuyến mãi thành công", [
+            "promotionId" => $promotionId
+        ]);
+
+    } catch (Exception $e) {
+        $this->promotionModel->rollBack();
+
+        return $this->response(false, "Lỗi: " . $e->getMessage());
+    }
+}
+        // =========================
+        // UPDATE PROMOTION
+        // =========================
+        public function updatePromotion($id, $data) {
+
+            if (!$id) {
+                return $this->response(false, "Thiếu promotionId");
+            }
+
+            if (isset($data['discount']) && $data['discount'] < 0) {
+                return $this->response(false, "Discount không hợp lệ");
+            }
+
+            try {
+                $this->promotionModel->beginTransaction();
+
+                $result = $this->promotionModel->updatePromotion(
+                    $id,
+                    $data,
+                    $data['productIds'] ?? []
+                );
+
+                $this->promotionModel->commit();
+
+                return $this->response(
+                    $result > 0,
+                    $result > 0 ? "Cập nhật thành công" : "Không có thay đổi"
+                );
+
+            } catch (Exception $e) {
+                $this->promotionModel->rollBack();
+
+                return $this->response(false, "Lỗi: " . $e->getMessage());
+            }
+        }
+
+        // =========================
+        // DELETE PROMOTION
+        // =========================
+        public function deletePromotion($id) {
+
+            if (!$id) {
+                return $this->response(false, "Thiếu promotionId");
+            }
+
+            try {
+                $this->promotionModel->beginTransaction();
+
+                $result = $this->promotionModel->deletePromotion($id);
+
+                $this->promotionModel->commit();
+
+                return $this->response(
+                    $result > 0,
+                    $result > 0 ? "Xóa thành công" : "Không tìm thấy khuyến mãi"
+                );
+
+            } catch (Exception $e) {
+                $this->promotionModel->rollBack();
+
+                return $this->response(false, "Lỗi: " . $e->getMessage());
+            }
+        }
+
+        // =========================
+        // GET DETAIL PROMOTION
+        // =========================
+        public function getPromotionDetail($id) {
+
+            if (!$id) {
+                return $this->response(false, "Thiếu promotionId");
+            }
+
+            $data = $this->promotionModel->getPromotionDetail($id);
+
+            if (!$data) {
+                return $this->response(false, "Không tìm thấy khuyến mãi");
+            }
+
+            return $this->response(true, "Lấy chi tiết thành công", $data);
+        }
+
+        // =========================
+        // SEARCH PROMOTION
+        // =========================
+        public function searchPromotions($filters = [], $page = 1, $limit = 10) {
+
+            $data = $this->promotionModel->searchPromotions($filters, $page, $limit);
+            $total = $this->promotionModel->countSearch($filters);
+
+            return $this->response(true, "Search success", [
+                "data" => $data,
+                "total" => $total,
+                "page" => $page,
+                "limit" => $limit
+            ]);
+        }
+
+        // =========================
+        // ACTIVE PROMOTION FOR PRODUCT
+        // =========================
+        public function getActivePromotionByProduct($productId) {
+
+            if (!$productId) {
+                return $this->response(false, "Thiếu productId");
+            }
+
+            $data = $this->promotionModel->getActivePromotionByProductId($productId);
+
+            return $this->response(true, "OK", $data);
+        }
+        public function applyPromotion($promotionId, $productIds) {
+            return $this->promotionModel->saveRelationProducts($promotionId, $productIds);
+        }
+        // =========================
+        // RESPONSE FORMAT
+        // =========================
+        private function response($success, $message, $data = null) {
             return [
-                'success' => false,
-                'message' => 'Bạn đã gửi yêu cầu đổi/trả cho đơn hàng này. Vui lòng chờ xử lý.'
+                "success" => $success,
+                "message" => $message,
+                "data" => $data
             ];
         }
 
-        $created = $this->returnModel->createRequest($data);
-        return ['success' => $created];
     }
-
-    public function getComplaints($type = 'all') {
-        return $this->returnModel->fetchRequests($type);
-    }
-
-    public function processRequest($returnId, $action) {
-        $request = $this->returnModel->getRequestById($returnId);
-        if (!$request) {
-            return ["success" => false, "message" => "Yêu cầu không tồn tại."];
-        }
-
-        $requestType = $request['request_type'];
-        $newStatus = 'Completed';
-        $orderStatus = null;
-
-        if ($action === 'resolve' && $requestType === 'complaint') {
-            $orderStatus = 'Cancelled';
-        } elseif ($action === 'approve_return' && $requestType === 'return') {
-            $orderStatus = 'Returned';
-        } else {
-            return ["success" => false, "message" => "Hành động không hợp lệ cho loại yêu cầu này."];
-        }
-
-        $okRequest = $this->returnModel->updateRequestStatus($returnId, $newStatus);
-        $okOrder = $this->returnModel->updateOrderStatus($request['orderId'], $orderStatus);
-
-        if ($okRequest && $okOrder) {
-            return ["success" => true, "message" => "Cập nhật thành công."];
-        }
-
-        return ["success" => false, "message" => "Không thể cập nhật yêu cầu hoặc đơn hàng."];
-    }
-}
+ ?>
