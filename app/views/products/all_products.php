@@ -6,12 +6,52 @@
         <nav class="flex text-sm text-stone-500 mb-8">
             <a href="/SELLING-GLASSES/public/home" class="hover:text-amber-700">Trang chủ</a>
             <span class="mx-2">/</span>
-            <span class="text-stone-900 font-medium">Tất cả sản phẩm</span>
+            <span class="text-stone-900 font-medium">
+                <?php 
+                $categoryNames = [
+                    1 => 'Gọng Nam',
+                    2 => 'Gọng Nữ',
+                    3 => 'Gọng Trẻ Em',
+                    4 => 'Chống Ánh Sáng Xanh',
+                    5 => 'Kính Đổi Màu',
+                    6 => 'Kính Siêu Mỏng'
+                ];
+                
+                // Lấy category từ $_GET trực tiếp
+                $selectedCat = isset($_GET['category']) ? (int)$_GET['category'] : null;
+                
+                if ($selectedCat && isset($categoryNames[$selectedCat])) {
+                    echo $categoryNames[$selectedCat];
+                } else {
+                    echo 'Tất cả sản phẩm';
+                }
+                ?>
+            </span>
         </nav>
 
         <div class="flex justify-between items-end mb-10">
             <div>
-                <h1 class="text-4xl font-bold text-stone-900 mb-2">Bộ Sưu Tập Mắt Kính</h1>
+                <h1 class="text-4xl font-bold text-stone-900 mb-2">
+                    <?php 
+                    $categoryNames = [
+                        1 => 'Gọng Nam',
+                        2 => 'Gọng Nữ',
+                        3 => 'Gọng Trẻ Em',
+                        4 => 'Chống Ánh Sáng Xanh',
+                        5 => 'Kính Đổi Màu',
+                        6 => 'Kính Siêu Mỏng'
+                    ];
+                    
+                    // Lấy category từ $_GET trực tiếp
+                    $selectedCat = isset($_GET['category']) ? (int)$_GET['category'] : null;
+                    
+                    if ($selectedCat && isset($categoryNames[$selectedCat])) {
+                        echo 'Bộ Sưu Tập ' . $categoryNames[$selectedCat];
+                    } else {
+                        echo 'Bộ Sưu Tập Mắt Kính';
+                    }
+                    ?>
+                </h1>
                 <p class="text-stone-500">Khám phá hàng trăm mẫu gọng kính và tròng kính hiện đại nhất 2026.</p>
             </div>
             <span class="text-sm font-medium text-stone-400 uppercase tracking-widest">
@@ -44,10 +84,11 @@
                     </p>
                     <div class="flex justify-between items-center pt-2">
                         <span class="text-amber-700 font-black text-lg">
-                            <?php echo number_format($item['price'], 0, ',', '.'); ?>đ
+                            <?php echo number_format($item['minPrice'], 0, ',', '.'); ?>đ
                         </span>
-                        <button
-                            class="w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg">
+                        <button class="add-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
+                            data-product-id="<?php echo $item['productId']; ?>"
+                            data-variant-id="<?php echo $item['variantId'] ?? 0; ?>">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -83,3 +124,38 @@
 </main>
 
 <?php include_once __DIR__ . "/../layout/footer.php"; ?>
+
+<!-- Essential Scripts -->
+<script src="/SELLING-GLASSES/public/assets/js/main.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/home.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/product-detail.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý click vào nút dấu cộng để thêm vào giỏ hàng
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-quick');
+        
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                const variantId = this.getAttribute('data-variant-id');
+                
+                if (!variantId || variantId === '0') {
+                    alert('Vui lòng chọn màu sắc & kích thước trước khi thêm vào giỏ hàng');
+                    return;
+                }
+                
+                // Gọi hàm addToCart từ cart.js
+                if (typeof addToCart === 'function') {
+                    addToCart(variantId, 1);
+                } else {
+                    alert('Hệ thống giỏ hàng chưa sẵn sàng. Vui lòng thử lại!');
+                }
+            });
+        });
+    });
+</script>

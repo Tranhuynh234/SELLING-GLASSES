@@ -65,7 +65,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $db = Database::connect();
 $userId = $_SESSION['user']['userId'];
 
-// --- 1. LẤY THÔNG TIN USER  ---
+// 1. LẤY THÔNG TIN USER  
 $queryUser = "SELECT u.name, u.email, u.phone, c.address, c.customerId 
               FROM users u 
               LEFT JOIN customers c ON u.userId = c.userId 
@@ -80,8 +80,9 @@ $totalSpent = $paymentData['totalSpent'] ?? 0;
 
 $customerId = $user['customerId'] ?? 0;
 
-// --- 2. LẤY DANH SÁCH ĐƠN HÀNG  ---
+// 2. LẤY DANH SÁCH ĐƠN HÀNG 
 $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
+                o.subtotal, o.lensCost, o.shippingFee, o.discount,
                 p.first_product_name, 
                 p.product_image,
                 p.has_prescription 
@@ -102,7 +103,7 @@ $stmtOrders = $db->prepare($queryOrders);
 $stmtOrders->execute([':customerId' => $customerId]);
 $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
-// --- 2.5 LẤY YÊU CẦU ĐỔI TRẢ / KHIẾU NẠI ---
+// 2.5 LẤY YÊU CẦU ĐỔI TRẢ / KHIẾU NẠI 
 $returnRequests = [];
 $stmtRequests = $db->prepare("SELECT rr.returnId, o.orderId, rr.reason, rr.note, rr.status, rr.imagePath, rr.requestDate
               FROM return_request rr
@@ -120,13 +121,16 @@ foreach ($returnRequestsData as $req) {
     }
 }
 
-// --- 3. LẤY CHI TIẾT ĐƠN HÀNG  ---
+// 3. LẤY CHI TIẾT ĐƠN HÀNG  
 $orderId = $_GET['order_id'] ?? null;
 $orderInfo = null;
 $items = [];
 
 if ($orderId) {
-    $stmtDetail = $db->prepare("SELECT * FROM orders WHERE orderId = :id AND customerId = :cid");
+    $stmtDetail = $db->prepare("SELECT o.*, 
+                                      o.subtotal, o.lensCost, o.shippingFee, o.discount
+                               FROM orders o
+                               WHERE o.orderId = :id AND o.customerId = :cid");
     $stmtDetail->execute([':id' => $orderId, ':cid' => $customerId]);
     $orderInfo = $stmtDetail->fetch(PDO::FETCH_ASSOC);
 
@@ -148,7 +152,7 @@ if ($orderId) {
     }
 }
 
-// --- 4. LẤY ĐƠN KÍNH MẪU (Lấy cái mới nhất bất kể nguồn nào) ---
+// 4. LẤY ĐƠN KÍNH MẪU (Lấy cái mới nhất bất kể nguồn nào)
 $stmtPres = $db->prepare("SELECT * FROM prescription WHERE userId = :userId ORDER BY prescriptionId DESC LIMIT 1");
 $stmtPres->execute([':userId' => $userId]);
 $userPres = $stmtPres->fetch(PDO::FETCH_ASSOC);
@@ -300,21 +304,28 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                     -<?= number_format($p['totalPrice'], 0, ',', '.') ?>đ
                                 </td>
                                 <td>
-                                    <?php 
-                                        $status = $p['paymentStatus'];
-                                        // Map màu sắc theo đúng Enum 
-                                        $statusClass = 'status-pending'; // Mặc định là Pending
-                                        if ($status === 'Paid') $statusClass = 'status-success';
-                                        if ($status === 'Failed') $statusClass = 'status-failed';
-                                        if ($status === 'Refunded') $statusClass = 'status-refund';
-                                        
-                                        $statusText = $status;
-                                        if ($status === 'Paid') $statusText = 'Thành công';
-                                        if ($status === 'Pending') $statusText = 'Đang xác thực';
-                                        if ($status === 'Failed') $statusText = 'Thất bại';
-                                        if ($status === 'Refunded') $statusText = 'Đã hoàn tiền';
-                                    ?>
-                                    <span class="badge-pay <?= $statusClass ?>"><?= $statusText ?></span>
+                                        <?php
+                                            $orderStatus = $p['orderStatus'] ?? '';
+                                            $paymentStatus = $p['paymentStatus'] ?? '';
+
+                                            $statusClass = 'status-pending';
+                                            $statusText = '';
+
+                                            if ($orderStatus === 'Confirmed') {
+                                                $statusClass = 'status-confirmed';
+                                                $statusText = 'Đã xác thực';
+                                            } elseif ($orderStatus === 'Returned') {
+                                                $statusClass = 'status-refund';
+                                                $statusText = 'Đã hoàn tiền';
+                                            } else {
+                                                if ($paymentStatus === 'Paid') { $statusClass = 'status-success'; $statusText = 'Thành công'; }
+                                                elseif ($paymentStatus === 'Pending') { $statusClass = 'status-pending'; $statusText = 'Đang xác thực'; }
+                                                elseif ($paymentStatus === 'Failed') { $statusClass = 'status-failed'; $statusText = 'Thất bại'; }
+                                                elseif ($paymentStatus === 'Refunded') { $statusClass = 'status-refund'; $statusText = 'Đã hoàn tiền'; }
+                                                else { $statusText = $paymentStatus; }
+                                            }
+                                        ?>
+                                        <span class="badge-pay <?= $statusClass ?>"><?= $statusText ?></span>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -376,7 +387,7 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
 
                         <div class="detail-list">
                             <?php 
-                                // 1. Tính toán subtotal TRƯỚC khi vào vòng lặp hiển thị
+                                // 1. Tính toán subtotal trước khi vào vòng lặp hiển thị
                                 $subtotal = 0;
                                 foreach ($items as $item) {
                                     $subtotal += ($item['price'] * $item['quantity']);
@@ -403,13 +414,29 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                             <?php endforeach; ?>
 
                             <div class="price-info" style="text-align: right; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                                <p>Tiền hàng: <strong><?= number_format($subtotal) ?>đ</strong></p>
-                                
+                                <!-- Nếu database không lưu subtotal, tính lại từ items -->
                                 <?php 
-                                    // Tính phí ship dựa trên cột totalPrice trong database
-                                    $shippingFee = $orderInfo['totalPrice'] - $subtotal; 
+                                    $displaySubtotal = !empty($orderInfo['subtotal']) && $orderInfo['subtotal'] > 0 
+                                        ? $orderInfo['subtotal'] 
+                                        : $subtotal;
+                                    $displayLensCost = $orderInfo['lensCost'] ?? 0;
+                                    $displayShippingFee = $orderInfo['shippingFee'] ?? 0;
+                                    $displayDiscount = $orderInfo['discount'] ?? 0;
                                 ?>
-                                <p>Phí vận chuyển: <strong><?= number_format($shippingFee) ?>đ</strong></p>
+                                
+                                <p>Tiền hàng: <strong><?= number_format($displaySubtotal) ?>đ</strong></p>
+                                
+                                <?php if ($displayLensCost > 0): ?>
+                                    <p>Chi phí tròng kính: <strong><?= number_format($displayLensCost) ?>đ</strong></p>
+                                <?php endif; ?>
+                                
+                                <?php if ($displayShippingFee > 0): ?>
+                                    <p>Phí vận chuyển: <strong><?= number_format($displayShippingFee) ?>đ</strong></p>
+                                <?php endif; ?>
+                                
+                                <?php if ($displayDiscount > 0): ?>
+                                    <p>Giảm giá: <strong style="color: #16a34a;">-<?= number_format($displayDiscount) ?>đ</strong></p>
+                                <?php endif; ?>
                                 
                                 <h3 style="color: #dc2626; margin-top: 10px;">
                                     Tổng thanh toán: <?= number_format($orderInfo['totalPrice']) ?>đ

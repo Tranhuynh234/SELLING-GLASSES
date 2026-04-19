@@ -178,7 +178,6 @@ function showToast(msg) {
     setTimeout(() => toast.remove(), 2500);
 }
 
-// CÁC LOGIC TỰ ĐỘNG THÌ ĐỂ XUỐNG DƯỚI CÙNG
 document.addEventListener("DOMContentLoaded", function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('order_id') || urlParams.get('tab') === 'orders') {
@@ -369,8 +368,7 @@ async function savePassword() {
 function showToast(msg) {
     const toast = document.createElement("div");
     toast.innerText = msg;
-    
-    // Đảm bảo không bị đè CSS
+
     Object.assign(toast.style, {
         position: "fixed",
         bottom: "30px",

@@ -5,7 +5,7 @@ require_once __DIR__ . "/../../entities/order/Shipment.php";
 class ShipmentModel extends BaseModel {
     protected $table = "shipments"; 
 
-    //  tìm theo orderId (service cần)
+    //  tìm theo orderId 
     public function findByOrderId($orderId) {
         $data = $this->findBy("orderId", $orderId);
         return $data ? new Shipment($data) : null;

@@ -30,7 +30,7 @@ class CartService {
         return (int) $this->conn->lastInsertId();
     }
 
-    // ================= UPDATE =================
+    // UPDATE 
     public function updateItem($cartItemId, $quantity) {
         if (!$cartItemId || $quantity <= 0) {
             return ["success" => false, "message" => "Invalid data"];
@@ -46,7 +46,7 @@ class CartService {
         return ["success" => true];
     }
 
-    // ================= REMOVE =================
+    //  REMOVE 
     public function removeItem($cartItemId) {
         if (!$cartItemId) {
             return ["success" => false, "message" => "Invalid cartItemId"];
@@ -61,7 +61,7 @@ class CartService {
         return ["success" => true];
     }
 
-    // ================= GET CART =================
+    //  GET CART 
     public function getCart($customerId) {
         if (!$customerId) return [];
 
@@ -73,7 +73,7 @@ class CartService {
         }
     }
 
-    // ================= ADD TO CART =================
+    // ADD TO CART 
     public function addToCart($customerId, $variantId, $quantity) {
         try {
             $vId = (int)$variantId;

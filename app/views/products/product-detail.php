@@ -1,4 +1,4 @@
-<?php include 'layout/header.php'; ?>
+<?php include __DIR__ . '/../layout/header.php'; ?>
 
 <main class="w-full bg-stone-50 pt-[120px] pb-24">
     <div class="max-w-7xl mx-auto px-6 md:px-10">
@@ -56,6 +56,34 @@
     </div>
 </main>
 
-<?php include 'layout/footer.php'; ?>
+<?php include __DIR__ . '/../layout/footer.php'; ?>
 
+<!-- Essential Scripts -->
+<script src="/SELLING-GLASSES/public/assets/js/main.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/home.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
 <script src="/SELLING-GLASSES/public/assets/js/product-detail.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof renderAuth === 'function') {
+            renderAuth();
+        }
+        
+        if (typeof updateCartCount === 'function') {
+            fetch('/SELLING-GLASSES/public/get-cart', {
+                credentials: 'include'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.data && Array.isArray(data.data)) {
+                    const totalQty = data.data.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+                    updateCartCount(totalQty);
+                }
+            })
+            .catch(err => console.log('Cart load error:', err));
+        }
+    });
+</script>

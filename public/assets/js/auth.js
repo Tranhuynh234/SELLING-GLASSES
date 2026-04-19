@@ -55,7 +55,7 @@ async function handleLogin(event) {
     if (result.success) {
       localStorage.setItem("user", JSON.stringify(result.data));
 
-      renderAuth(); // thêm dòng này
+      renderAuth(); 
 
       setTimeout(() => {
         window.location.href = result.redirect;
@@ -109,14 +109,13 @@ async function handleRegister(event) {
     alert("Có lỗi xảy ra trong quá trình kết nối với máy chủ.");
   }
 }
-//=========================
+
 function renderAuth() {
   const user = JSON.parse(localStorage.getItem("user"));
   const authBox = document.getElementById("auth-box");
 
   if (!authBox) return;
 
-  // Nếu có user trong localStorage thì in ra giao diện có kèm link Profile
   if (user) {
     authBox.innerHTML = `
       <span class="flex items-center gap-2 cursor-default">

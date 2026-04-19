@@ -182,6 +182,10 @@ class PaymentService {
                 "customerId" => $customerId,
                 "orderDate" => date("Y-m-d H:i:s"),
                 "status" => "Pending",
+                "subtotal" => (float)($payload['subtotal'] ?? 0),
+                "lensCost" => (float)($payload['lensCost'] ?? 0),
+                "shippingFee" => (float)($payload['shippingFee'] ?? 0),
+                "discount" => (float)($payload['discount'] ?? 0),
                 "totalPrice" => (float)($payload['totalPrice'] ?? $summary['total']),
                 "staffId" => null
             ]);
@@ -231,6 +235,7 @@ class PaymentService {
                     o.orderId,
                     o.orderDate,
                     o.totalPrice,
+                    o.status AS orderStatus,
                     u.name AS customerName,
                     u.email AS customerEmail,
                     u.phone AS customerPhone,
@@ -257,7 +262,14 @@ class PaymentService {
         ]);
 
         foreach ($rows as &$row) {
-            $row['uiStatus'] = $this->mapPaymentStatusLabel($row['paymentStatus']);
+            $orderStatus = $row['orderStatus'] ?? '';
+            if ($orderStatus === 'Confirmed') {
+                $row['uiStatus'] = 'Đã xác thực';
+            } elseif ($orderStatus === 'Returned') {
+                $row['uiStatus'] = 'Đã hoàn tiền';
+            } else {
+                $row['uiStatus'] = $this->mapPaymentStatusLabel($row['paymentStatus']);
+            }
         }
 
         return $this->response(true, "Lấy danh sách thanh toán thành công", $rows);

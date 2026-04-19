@@ -3,13 +3,11 @@ class Prescription {
     public $prescriptionId;
     public $userId;
     public $orderItemId;
-    public $leftEye;   // Sẽ chứa chuỗi JSON
-    public $rightEye;  // Sẽ chứa chuỗi JSON
+    public $leftEye;   
+    public $rightEye;  
     public $leftPD;
     public $rightPD;
     public $imagePath;
-
-    /** Sử dụng PDO Prepare Statement để chống lỗi bảo mật SQL Injection */
 
     public function save($conn) {
         try {

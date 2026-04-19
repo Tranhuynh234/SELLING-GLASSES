@@ -1,12 +1,7 @@
-/* EYESGLASS OPERATIONS SYSTEM - FULL STYLESHEET
-    Author: Gemini Assistant for ThienTru1612
-    Version: 3.0 (Updated Inventory & Modal UI)
-*/
-
 :root {
-    --primary: #e67e22;      /* Màu cam EyesGlass */
+    --primary: #e67e22;      
     --primary-light: rgba(230, 126, 34, 0.1);
-    --sidebar-bg: #1a1614;   /* Màu than chì đặc trưng */
+    --sidebar-bg: #1a1614;   
     --sidebar-hover: #2d2826;
     --bg-light: #f8f9fa;
     --white: #ffffff;
@@ -31,7 +26,7 @@ body {
     overflow-x: hidden;
 }
 
-/* --- HỆ THỐNG SIDEBAR --- */
+/* HỆ THỐNG SIDEBAR */
 .sidebar { 
     width: 260px; 
     background: var(--sidebar-bg); 
@@ -116,7 +111,7 @@ body {
 
 .btn-logout-sidebar:hover { background: var(--danger); }
 
-/* --- KHU VỰC NỘI DUNG CHÍNH --- */
+/* KHU VỰC NỘI DUNG CHÍNH  */
 .main-viewport { 
     margin-left: 260px; 
     flex: 1; 
@@ -171,7 +166,7 @@ body {
     border: 2px solid white;
 }
 
-/* --- QUẢN LÝ KHO & BỘ LỌC --- */
+/*  QUẢN LÝ KHO & BỘ LỌC  */
 .warehouse-header {
     display: flex;
     justify-content: space-between;
@@ -233,7 +228,7 @@ code {
     font-size: 0.85rem;
 }
 
-/* --- BADGES TRẠNG THÁI (3 MỨC) --- */
+/*  BADGES TRẠNG THÁI (3 MỨC)  */
 .badge { 
     padding: 6px 14px; 
     border-radius: 20px; 
@@ -250,7 +245,7 @@ code {
     border: 1px solid rgba(192, 57, 43, 0.1); 
 } /* Đã hết hàng */
 
-/* --- BUTTONS --- */
+/* BUTTONS  */
 .btn-confirm { 
     background: var(--primary); 
     color: white; 
@@ -284,7 +279,7 @@ code {
     background: var(--primary-light);
 }
 
-/* --- MODAL NÂNG CẤP (FORM GIAO DIỆN MỚI) --- */
+/* MODAL NÂNG CẤP */
 .modal-overlay { 
     position: fixed; 
     inset: 0; 
@@ -406,7 +401,6 @@ code {
     color: var(--primary);
 }
 
-/* Fix bảng không bị bể layout khi thêm cột */
 .card {
     overflow-x: auto;
 }
@@ -431,7 +425,7 @@ code {
     color: var(--danger);
 }
 
-/* Search đẹp hơn */
+/* Search */
 .header-search input::placeholder {
     color: #b0b7bd;
 }

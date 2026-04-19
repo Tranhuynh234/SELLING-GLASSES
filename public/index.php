@@ -14,7 +14,11 @@ require_once __DIR__ . "/../app/controllers/UserController.php";
 require_once "../app/controllers/PaymentController.php";
 require_once "../app/controllers/PrescriptionController.php";
 require_once "../app/controllers/ReviewController.php";
+
 require_once "../app/controllers/ReturnController.php";
+
+require_once "../app/controllers/ComboController.php";
+
 
 $conn = Database::connect();
 
@@ -31,7 +35,10 @@ $userController = new UserController();
 $paymentController = new PaymentController();
 $prescriptionController = new PrescriptionController($conn);
 $reviewController = new ReviewController();
+
 $returnController = new ReturnController();
+
+$comboController = new ComboController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -82,12 +89,6 @@ switch ($url) {
     case "operation":
         AuthMiddleware::handle(['staff'], ['operation']);
         require_once "../app/views/ops/ops.php";
-        exit();
-
-    case "register":
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $authController->register();
-        }
         exit();
 
     case "get-users":
@@ -246,9 +247,17 @@ switch ($url) {
         $orderController->stats();
         exit();
 
+    case "dashboard-stats":
+        $homeController->getDashboardStats();
+        exit();
+
+    case "order-revenue-stats":
+        $homeController->getOrderRevenueStats();
+        exit();
+
     case 'order-detail':
-        $controller = new OrderController($conn);
-        $controller->showDetail($_GET['id']);
+       
+        $orderController->showDetail($_GET['id']);
         break;    
 
  // =====================
@@ -279,6 +288,32 @@ switch ($url) {
 
     case "promotion-active-product":
         $promotionController->getActivePromotionByProduct();
+        exit();
+
+    // --- Combo Module ---
+    case 'get-combos':
+        $comboController->getCombos();
+        exit();
+
+    case 'get-combo':
+        $comboController->getCombo();
+        exit();
+
+    case 'search-combos':
+        // Search combos by name (used by combo-manager.js)
+        $comboController->searchCombos();
+        exit();
+
+    case 'create-combo':
+        $comboController->createCombo();
+        exit();
+
+    case 'update-combo':
+        $comboController->updateCombo();
+        exit();
+
+    case 'delete-combo':
+        $comboController->deleteCombo();
         exit();
 
     // --- Cart---//

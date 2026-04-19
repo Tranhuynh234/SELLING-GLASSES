@@ -1,18 +1,16 @@
-// =============================
 // USER MODULE (API ONLY)
-// =============================
 let currentPage = 1;
 const pageSize = 5;
 let allUsers = [];
 
 const USER_API = "/SELLING-GLASSES/public/get-users";
 
-// =============================
 // LOAD USERS
-// =============================
 async function loadUsers() {
   try {
-    const res = await fetch(USER_API);
+    const res = await fetch(USER_API, {
+      credentials: 'include'
+    });
     const result = await res.json();
 
     if (!result.success) {
@@ -31,9 +29,7 @@ async function loadUsers() {
   }
 }
 
-// =============================
 // RENDER TABLE
-// =============================
 function renderUsers() {
   const tbody = document.getElementById("userTable");
   if (!tbody) return;
@@ -146,9 +142,8 @@ function changePage(page) {
   renderUsers();
   renderPagination();
 }
-// ========== thêm user ===========
+
 // user.js
-// =============================
 // Hàm mở/đóng modal
 function openUserModal() {
   document.getElementById("userModal").style.display = "flex";
@@ -187,6 +182,7 @@ async function saveUser() {
   try {
     const response = await fetch("/SELLING-GLASSES/public/create-user", {
       method: "POST",
+      credentials: 'include',
       body: formData, // Gửi dưới dạng Form
     });
 
@@ -204,13 +200,11 @@ async function saveUser() {
     alert("Lỗi kết nối server!");
   }
 }
-// =============== tìm kiếm user
+//  tìm kiếm user
 // Biến lưu trữ timeout để xử lý debounce (tránh gọi API quá nhiều lần khi đang gõ)
 let searchTimer;
 
-/**
- * Hàm xử lý sự kiện khi người dùng gõ vào ô tìm kiếm
- */
+/** Hàm xử lý sự kiện khi người dùng gõ vào ô tìm kiếm */
 function handleSearchUser(event) {
   const keyword = event.target.value.trim();
 
@@ -223,9 +217,7 @@ function handleSearchUser(event) {
   }, 500);
 }
 
-/**
- * Hàm thực hiện gọi API tìm kiếm
- */
+/** Hàm thực hiện gọi API tìm kiếm */
 async function executeSearch(keyword) {
   if (!keyword) {
     loadUsers(); // Nếu trống thì quay về danh sách gốc
@@ -235,6 +227,9 @@ async function executeSearch(keyword) {
   try {
     const response = await fetch(
       `/SELLING-GLASSES/public/search-users?keyword=${encodeURIComponent(keyword)}`,
+      {
+        credentials: 'include'
+      }
     );
     const result = await response.json();
 
@@ -259,9 +254,7 @@ async function executeSearch(keyword) {
   }
 }
 
-/**
- * Hàm bổ trợ để vẽ dữ liệu lên bảng (Render Table)
- */
+/** Hàm bổ trợ để vẽ dữ liệu lên bảng (Render Table) */
 function displayUsers(users) {
   const tableBody = document.getElementById("userTable");
   let html = "";
@@ -307,16 +300,15 @@ function showEditUser(id, name, email, phone) {
 function dongModal() {
   document.getElementById("modalUpdate").style.display = "none";
 }
-// ======= delete user
-// =============================
+
 // DELETE USER
-// =============================
 async function deleteUser(userId) {
   if (!confirm("Bạn có chắc muốn xóa user này không?")) return;
 
   try {
     const response = await fetch(`/SELLING-GLASSES/public/delete-user`, {
       method: "POST",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -338,7 +330,7 @@ async function deleteUser(userId) {
     alert("Không thể kết nối server!");
   }
 }
-// =========== logout =========
+//  logout
 async function logout() {
   if (!confirm("Bạn có chắc muốn đăng xuất không?")) return;
 
@@ -364,16 +356,16 @@ async function logout() {
     alert("Không thể logout!");
   }
 }
-// ======== phân quyền =============
-// =============================
-// PERMISSION MODULE
-// =============================
+
+// PERMISSION MODULE (phân quyền)
 let permissionPage = 1;
 const permissionPageSize = 5;
 let allPermissions = [];
 async function loadPermissions() {
   try {
-    const res = await fetch("/SELLING-GLASSES/public/get-users");
+    const res = await fetch("/SELLING-GLASSES/public/get-users", {
+      credentials: 'include'
+    });
     const result = await res.json();
 
     if (!result.success) {
@@ -483,14 +475,15 @@ async function updatePermission(userId) {
   try {
     // 2. Gọi ĐÚNG đường dẫn API và truyền ĐÚNG tham số như ảnh Thunder Client
     const res = await fetch("/SELLING-GLASSES/public/staff-save", {
-      // Thay đổi route ở đây
+      // Thay đổi route 
       method: "POST",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        position: user.role, // Tương ứng với 'position' trong ảnh
-        email: user.email, // Tương ứng với 'email' trong ảnh
+        position: user.role, 
+        email: user.email, 
       }),
     });
 
@@ -506,9 +499,8 @@ async function updatePermission(userId) {
     alert("Không thể kết nối đến máy chủ.");
   }
 }
-// ======================
+
 // AUTO LOAD WHEN CLICK TAB
-// =============================
 document.addEventListener("DOMContentLoaded", () => {
   const btnPermission = document.getElementById("btn-permission");
 
@@ -553,6 +545,7 @@ if (formUpdate) {
     try {
       const response = await fetch("/SELLING-GLASSES/public/update-user", {
         method: "POST",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },

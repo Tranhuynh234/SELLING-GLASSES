@@ -1,0 +1,246 @@
+.combo-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.combo-toolbar input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.combo-toolbar button {
+        background: #2196F3;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+}
+
+.combo-toolbar button:hover {
+        background: #0b7dda;
+}
+
+    #productList {
+        background: white;
+    }
+
+    #productList label {
+        display: block;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+    }
+
+    #productList label:hover {
+        background: #f9f9f9;
+    }
+
+    #productList input[type="checkbox"] {
+        margin-right: 8px;
+    }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+/* COMBO MODAL STYLES  */
+#comboModal.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none !important;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 15px;
+}
+
+#comboModal[style*="display: block"] {
+    display: flex !important;
+}
+
+#comboModal .modal-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    max-height: 60vh;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.2);
+}
+
+#comboForm {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+#comboForm .modal-head {
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fffbeb;
+    border-bottom: 1px solid rgba(217, 119, 6, 0.1);
+    flex-shrink: 0;
+}
+
+#comboForm .modal-head .head-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#comboForm .modal-head .head-title i {
+    font-size: 1.2rem;
+    color: #d97706;
+}
+
+#comboForm .modal-head .head-title h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1c1917;
+}
+
+#comboForm .close-modal {
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #999;
+    background: none;
+    border: none;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#comboForm .close-modal:hover {
+    color: #333;
+}
+
+#comboForm .modal-body {
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+#comboForm .input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#comboForm .input-field label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+#comboForm .input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border: 1.5px solid #e7e5e4;
+    border-radius: 12px;
+    padding: 0 18px;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+#comboForm .input-wrapper:focus-within {
+    border-color: #d97706;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+}
+
+#comboForm .input-wrapper i {
+    color: #d97706;
+    font-size: 1.1rem;
+    width: 30px;
+}
+
+#comboForm .input-wrapper input,
+#comboForm select,
+#comboForm textarea {
+    border: none !important;
+    background: none;
+    width: 100%;
+    outline: none;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #1c1917;
+    font-weight: 500;
+}
+
+#comboForm .modal-foot {
+    padding: 18px 30px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #fcfcfb;
+    border-top: 1px solid #e7e5e4;
+    flex-shrink: 0;
+}
+
+#comboForm .modal-foot button {
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+#comboForm .btn-ghost {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+#comboForm .btn-ghost:hover {
+    background: #e5e7eb;
+}
+
+#comboForm .btn-confirm {
+    background: #d97706;
+    color: white;
+}
+
+#comboForm .btn-confirm:hover {
+    background: #b45309;
+}
+
+

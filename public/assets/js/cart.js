@@ -137,6 +137,7 @@ window.addToCart = async function (variantId) {
         const data = await response.json();
 
         if (data.success) {
+            await loadCart();
             updateCartCount(data.data);
             alert("Đã thêm vào giỏ hàng thành công!");
         } else {
@@ -394,3 +395,40 @@ function updateCartCount(data) {
 
     badge.innerText = totalQty;
 }
+
+// Add combo to cart
+window.addComboToCart = async function (comboId) {
+    const formData = new FormData();
+    formData.append("comboId", comboId);
+    formData.append("quantity", 1);
+
+    try {
+        const response = await fetch(`${CART_BASE}/add-combo-to-cart`, {
+            method: "POST",
+            body: formData,
+            credentials: "include"
+        });
+
+        // CHECK HTTP STATUS TRƯỚC
+        if (!response.ok) {
+            const text = await response.text();
+            console.error("Server error:", text);
+            alert("Lỗi server khi thêm combo vào giỏ hàng!");
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await loadCart();
+            updateCartCount(data.data);
+            alert("Đã thêm combo vào giỏ hàng thành công!");
+        } else {
+            alert("Lỗi: " + (data.message || "Unknown error"));
+        }
+
+    } catch (error) {
+        console.error("Lỗi khi thêm combo vào giỏ:", error);
+        alert("Không thể thêm combo vào giỏ hàng!");
+    }
+};

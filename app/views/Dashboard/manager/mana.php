@@ -8,12 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/mana.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/promotion.css" />
+
+    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/combo.css" />
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
     <input type="hidden" id="sessionStaffId" value="<?php echo $_SESSION['user']['staffId'] ?? ''; ?>">
-    <div id="modalUpdate" class="modal-overlay">
+    <div id="modalUpdate" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <div class="modal-header">
                 <h2>Cập nhật thông tin</h2>
@@ -94,7 +97,7 @@
             </div>
         </div>
     </div>
-    <div id="modal" class="modal-overlay">
+    <div id="modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <form id="productForm" onsubmit="event.preventDefault(); saveData();">
                 <div class="modal-glow"></div>
@@ -194,6 +197,78 @@
         </div>
     </div>
 
+    <!-- Policy Modal -->
+    <div id="policyModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <form id="policyForm" onsubmit="event.preventDefault(); savePolicyData();">
+                <div class="modal-glow"></div>
+                <div class="modal-head">
+                    <div class="head-title">
+                        <i class="fas fa-file-shield"></i>
+                        <h3 id="policyModalTitle">Thêm chính sách mới</h3>
+                    </div>
+                    <span class="close-modal" onclick="closePolicyModal()">&times;</span>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="editPolicyId" value="" />
+
+                    <div class="input-field">
+                        <label>Tiêu đề chính sách</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-heading"></i>
+                            <input type="text" id="policyTitle" placeholder="Ví dụ: Chính sách giao hàng..." required />
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Nội dung chính sách</label>
+                        <div class="input-wrapper" style="align-items: flex-start;">
+                            <i class="fas fa-align-left" style="margin-top: 10px;"></i>
+                            <textarea id="policyContent" placeholder="Nhập nội dung chính sách chi tiết..." rows="6"
+                                style="width: 100%; border: none; outline: none; padding: 10px; font-family: inherit; resize: vertical;"></textarea>
+                        </div>
+                        <small class="helper-text-amber">* Bạn có thể sử dụng nhiều dòng để định dạng nội dung</small>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Loại chính sách</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-list"></i>
+                            <select id="policyType" required>
+                                <option value="">-- Chọn loại chính sách --</option>
+                                <option value="shipping">Chính sách giao hàng</option>
+                                <option value="warranty">Chính sách bảo hành</option>
+                                <option value="return">Chính sách đổi trả</option>
+                                <option value="other">Chính sách khác</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Trạng thái</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-toggle-on"></i>
+                            <select id="policyStatus" required>
+                                <option value="active">Kích hoạt</option>
+                                <option value="inactive">Vô hiệu hóa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-foot">
+                    <button type="button" class="btn-ghost" onclick="closePolicyModal()">
+                        <i class="fas fa-times"></i> Hủy bỏ
+                    </button>
+                    <button type="submit" class="btn-confirm">
+                        <i class="fas fa-check"></i> Xác nhận lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="admin-layout">
         <aside class="sidebar">
             <div class="sidebar-brand">
@@ -275,7 +350,7 @@
                             <div class="stat-icon"><i class="fas fa-users-gear"></i></div>
                             <div class="stat-val">
                                 <small>Khách hàng</small>
-                                <h2>1,250</h2>
+                                <h2 id="totalCustomer">0</h2>
                             </div>
                         </div>
                     </div>
@@ -350,22 +425,96 @@
                 <section id="policy" class="tab-pane">
                     <div class="pane-header">
                         <h2>Quy chuẩn & Chính sách</h2>
-                        <button class="btn-confirm" onclick="openModal('policy')">
+                        <button class="btn-confirm" onclick="openPolicyModal()">
                             <i class="fas fa-shield"></i> Thêm chính sách
                         </button>
                     </div>
-                    <div class="table-wrapper glass">
-                        <table class="vip-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tiêu đề chính sách</th>
-                                    <th>Nội dung</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody id="policyTable"></tbody>
-                        </table>
+                    <div class="policies-grid">
+                        <!-- Chính sách 1: Giao hàng -->
+                        <div class="policy-card glass">
+                            <div class="policy-header">
+                                <i class="fas fa-truck policy-icon"></i>
+                                <h3>Chính sách giao hàng</h3>
+                            </div>
+                            <div class="policy-content">
+                                <ul>
+                                    <li><strong>1. Phí vận chuyển</strong>
+                                        <ul>
+                                            <li>Miễn phí giao hàng toàn quốc cho mỗi hóa đơn từ 500.000đ.</li>
+                                            <li>Đơn hàng dưới 500k áp dụng phí ship đồng giá 30.000đ.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>2. Thời gian dự kiến</strong>
+                                        <ul>
+                                            <li>Khu vực nội thành TP.HCM: 1 - 2 ngày làm việc.</li>
+                                            <li>Các khu vực khác: 3 - 5 ngày làm việc.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Chính sách 2: Bảo hành -->
+                        <div class="policy-card glass">
+                            <div class="policy-header">
+                                <i class="fas fa-shield-alt policy-icon"></i>
+                                <h3>Chính sách bảo hành</h3>
+                            </div>
+                            <div class="policy-content">
+                                <ul>
+                                    <li><strong>1. Bảo hành Gọng kính</strong>
+                                        <ul>
+                                            <li>Bảo hành 12 tháng đối với các lỗi kỹ thuật (mới hàn, ốc vít, lỏ xo) từ
+                                                nhà sản xuất.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>2. Bảo hành Tròng kính</strong>
+                                        <ul>
+                                            <li>Bảo hành 06 tháng cho lớp vàng phủ (coating) nếu có hiện tượng bong trắc
+                                                từ nhiên.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>3. Dịch vụ miễn phí trọn đời</strong>
+                                        <ul>
+                                            <li>Thay đệm mũi, vệ sinh kính bằng sóng siêu âm và năn chính form kính hoàn
+                                                toàn miễn phí.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Chính sách 3: Đổi trả -->
+                        <div class="policy-card glass">
+                            <div class="policy-header">
+                                <i class="fas fa-undo policy-icon"></i>
+                                <h3>Chính sách đổi trả</h3>
+                            </div>
+                            <div class="policy-content">
+                                <ul>
+                                    <li><strong>1. Thời gian áp dụng</strong>
+                                        <ul>
+                                            <li>Khách hàng có quyền đổi trả sản phẩm trong vòng 07 ngày kể từ ngày nhận
+                                                hàng.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>2. Điều kiện đổi trả</strong>
+                                        <ul>
+                                            <li>Sản phẩm còn đầy đủ hộp, bao bì và quà tặng (nếu có).</li>
+                                            <li>Tem niêm phong trên trong kính/gọng kính còn nguyên vẹn.</li>
+                                            <li>Sản phẩm không có dấu hiệu đã qua sử dụng hoặc bị tác động ngoại lực gây
+                                                trầy xước sau khi nhận hàng.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>3. Quy trình thực hiện</strong>
+                                        <ul>
+                                            <li>Liên hệ Hotline 1900 1234 hoặc chọn "Hỗ trợ khách hàng" để được hướng
+                                                dẫn gửi hàng về trung tâm bảo hành.</li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -403,25 +552,7 @@
                 </section>
 
                 <section id="combo" class="tab-pane">
-                    <div class="pane-header">
-                        <h2>Quản lý Combo</h2>
-                        <button class="btn-confirm" onclick="openModal('combo')">
-                            <i class="fas fa-plus"></i> Thêm Combo
-                        </button>
-                    </div>
-                    <div class="table-wrapper glass">
-                        <table class="vip-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tên Combo</th>
-                                    <th>Giá tiền</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody id="comboTable"></tbody>
-                        </table>
-                    </div>
+                    <?php include __DIR__ . '/combo.php'; ?>
                 </section>
 
                 <section id="permission" class="tab-pane">
@@ -455,7 +586,10 @@
     </div>
     <script src="/SELLING-GLASSES/public/assets/js/mana.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/user.js"></script>
+
     <script src="/SELLING-GLASSES/public/assets/js/promotion.js"></script>
+
+    <script src="/SELLING-GLASSES/public/assets/js/combo-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

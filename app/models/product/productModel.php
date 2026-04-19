@@ -59,7 +59,7 @@ class ProductModel extends BaseModel {
    }
 
 
-   // --- CRUD SẢN PHẨM ---
+   // CRUD SẢN PHẨM 
 public function addProduct($data) {
         return $this->create([
             'name'        => $data['name'],
@@ -85,7 +85,7 @@ public function addProduct($data) {
         ]);
     }
 
-    // 3. Xóa sản phẩm hoàn toàn (Dùng Transaction để không bị lỗi dữ liệu mồ côi)
+    // 3. Xóa sản phẩm hoàn toàn 
     public function deleteProductComplete($id) {
         try {
             $this->conn->beginTransaction(); 
@@ -107,17 +107,34 @@ public function addProduct($data) {
     }
 
     // 4. Lấy dữ liệu kèm giá/kho và Tên danh mục để hiện lên bảng Manager
-    public function getAllProductsWithVariants() {
-        $sql = "SELECT p.*, c.name as categoryName,
-            GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
-            MIN(v.price) as minPrice,
-            SUM(v.stock) as totalStock
-            FROM product p 
-            LEFT JOIN product_variant v ON p.productId = v.productId 
-            LEFT JOIN category c ON p.categoryId = c.categoryId
-            GROUP BY p.productId
-            ORDER BY p.productId DESC"; 
-        return $this->queryAll($sql);
+    public function getAllProductsWithVariants($categoryId = null) {
+        if ($categoryId) {
+            $sql = "SELECT p.*, c.name as categoryName,
+                GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
+                MIN(v.price) as minPrice,
+                SUM(v.stock) as totalStock
+                FROM product p 
+                LEFT JOIN product_variant v ON p.productId = v.productId 
+                LEFT JOIN category c ON p.categoryId = c.categoryId
+                WHERE p.categoryId = :categoryId
+                GROUP BY p.productId
+                ORDER BY p.productId DESC"; 
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $sql = "SELECT p.*, c.name as categoryName,
+                GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
+                MIN(v.price) as minPrice,
+                SUM(v.stock) as totalStock
+                FROM product p 
+                LEFT JOIN product_variant v ON p.productId = v.productId 
+                LEFT JOIN category c ON p.categoryId = c.categoryId
+                GROUP BY p.productId
+                ORDER BY p.productId DESC"; 
+            return $this->queryAll($sql);
+        }
     }
 
     public function deleteProduct($id) {

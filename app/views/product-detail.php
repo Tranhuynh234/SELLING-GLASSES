@@ -1,4 +1,4 @@
-<?php include 'layout/header.php'; ?>
+<?php include __DIR__ . '/layout/header.php'; ?>
 
 <main class="w-full bg-stone-50 pt-[120px] pb-24">
     <div class="max-w-7xl mx-auto px-6 md:px-10">
@@ -56,8 +56,6 @@
     </div>
 </main>
 
-<?php include 'layout/footer.php'; ?>
+<?php include __DIR__ . '/layout/footer.php'; ?>
 
-<!-- Cart helper (provides window.addToCart) -->
-<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
 <script src="/SELLING-GLASSES/public/assets/js/product-detail.js"></script>

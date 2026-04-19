@@ -1,8 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:ital,wght@1,600&display=swap");
 
-/* =========================================
-   2. ROOT VARIABLES - BẢNG MÀU AMBER 
-   ========================================= */
+/* 2. ROOT VARIABLES - BẢNG MÀU AMBER  */
 :root {
   --primary: #d97706; /* amber-600 */
   --primary-light: #f59e0b; /* amber-500 */
@@ -23,9 +21,7 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* =========================================
-   3. RESET & BASE STYLES 
-   ========================================= */
+/* 3. RESET & BASE STYLES */
 * {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
@@ -47,9 +43,7 @@ body {
   width: 100vw;
 }
 
-/* =========================================
-   4. SIDEBAR STYLES 
-   ========================================= */
+/*  4. SIDEBAR STYLES */
 .sidebar {
   width: 260px;
   background: var(--sidebar-bg);
@@ -124,9 +118,7 @@ body {
   filter: drop-shadow(0 0 5px rgba(217, 119, 6, 0.5));
 }
 
-/* =========================================
-   5. MAIN CONTENT STYLES 
-   ========================================= */
+/* 5. MAIN CONTENT STYLES */
 .main-content {
   flex: 1;
   overflow-y: auto;
@@ -164,15 +156,70 @@ body {
   padding: 20px;
 }
 
-/* =========================================
-   6. DASHBOARD STATS STYLES 
-   ========================================= */
+/*  6. DASHBOARD STATS STYLES  */
 
 .dashboard-visuals {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 20px;
   margin-top: 20px;
+}
+
+.chart-container {
+  grid-column: 1 / -1;
+  padding: 30px !important;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container h3 {
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.chart-container > div {
+  flex: 1;
+  position: relative !important;
+  height: auto !important;
+  min-height: 350px !important;
+}
+
+.recent-activities {
+  grid-column: 1 / -1;
+  padding: 30px !important;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.recent-activities h3 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.log-item {
+  padding: 12px 15px;
+  background: #f9fafb;
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  transition: var(--transition);
+}
+
+.log-item:hover {
+  background: #fffbeb;
+  transform: translateX(5px);
 }
 .stats-grid {
   display: grid;
@@ -235,9 +282,7 @@ body {
   margin-top: 5px;
 }
 
-/* =========================================
-   7. TABLES VIP STYLES 
-   ========================================= */
+/* 7. TABLES VIP STYLES  */
 .table-wrapper {
   padding: 30px;
   margin-top: 25px;
@@ -310,9 +355,7 @@ body {
   align-items: center;
 }
 
-/* =========================================
-   8. MODAL LUXURY STYLES 
-   ========================================= */
+/* 8. MODAL LUXURY STYLES */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -355,17 +398,17 @@ body {
   }
 }
 
-/* --- CHỈNH SỬA PHẦN CHI TIẾT SẢN PHẨM--- */
+/* CHỈNH SỬA PHẦN CHI TIẾT SẢN PHẨM */
 
 .modal-detail-custom {
-  max-width: 400px !important; /* Thon gọn vòng eo Modal */
+  max-width: 400px !important;
   margin: 10px auto;
   border-radius: 24px;
   border: 1px solid rgba(217, 119, 6, 0.1);
 }
 
 .modal-detail-custom .modal-head {
-  padding: 15px 30px !important; /* Thu hẹp chiều cao header */
+  padding: 15px 30px !important;
 }
 
 #detailContent {
@@ -421,7 +464,7 @@ body {
   font-size: 0.95rem;
 }
 
-/* --- HẾT PHẦN CHỈNH SỬA --- */
+/* HẾT PHẦN CHỈNH SỬA */
 
 .modal-head {
   padding: 18px 25px;
@@ -518,9 +561,7 @@ body {
   flex-shrink: 0;
 }
 
-/* =========================================
-   9. BUTTON STYLES 
-   ========================================= */
+/* 9. BUTTON STYLES */
 .btn-ghost {
   background: #f5f5f4;
   border: none;
@@ -562,13 +603,9 @@ body {
   transform: scale(1.2);
 }
 
-/* =========================================
-   10. CHART & LOG STYLES 
-   ========================================= */
+/* 10. CHART & LOG STYLES  */
 
-/* =========================================
-   11. ANIMATIONS 
-   ========================================= */
+/* 11. ANIMATIONS */
 .tab-pane {
   display: none;
 }
@@ -588,9 +625,7 @@ body {
   }
 }
 
-/* =========================================
-   12. PROMO & EXTRA EFFECTS 
-   ========================================= */
+/* 12. PROMO & EXTRA EFFECTS */
 #promo {
   position: relative;
 }
@@ -649,7 +684,6 @@ body {
   backdrop-filter: blur(10px);
 }
 
-/* ===================== */
 /* Đổi .pagination thành #pagination */
 #pagination {
   display: flex;
@@ -699,7 +733,7 @@ body {
 #pagination button i {
   font-size: 12px;
 }
-/* ======= update user */
+/* update user */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -801,7 +835,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
 }
-/* ====== xóa user  */
+/* xóa user  */
 .btn-delete {
   background: #e74c3c;
   color: white;
@@ -820,7 +854,7 @@ body {
 .btn-delete:active {
   transform: scale(0.95);
 }
-/* ======= logout ====== */
+/*  logout */
 .logout-btn {
   margin-left: 15px;
   padding: 8px 12px;
@@ -840,10 +874,7 @@ body {
   background: #c0392b;
   transform: scale(1.05);
 }
-/* =========================================
-   PERMISSION TAB SPECIFIC STYLES 
-   ========================================= */
-
+/* PERMISSION TAB SPECIFIC STYLES  */
 /* Cấu hình cột riêng cho bảng phân quyền */
 #permission .vip-table th:nth-child(1) {
   width: 80px;
@@ -931,7 +962,7 @@ body {
 }
 /* Custom Select cho Quyền hạn */
 #permissionTable select {
-  appearance: none; /* Xóa icon mũi tên mặc định của trình duyệt */
+  appearance: none;
   background-color: #fdfdfd;
   border: 1.5px solid #e7e5e4;
   padding: 6px 30px 6px 12px;
@@ -954,7 +985,7 @@ body {
   box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
 }
 
-/* Custom nút "Lưu" cho chuyên nghiệp */
+/*  Nút "Lưu"  */
 .btn-save-permission {
   background: var(--primary-gradient);
   color: white;
@@ -978,10 +1009,7 @@ body {
   transform: translateY(0);
 }
 
-/* =========================================
-   PAGINATION & SEARCH STYLES
-   ========================================= */
-
+/* PAGINATION & SEARCH STYLES */
 /* Search Input */
 #searchProduct {
   padding: 10px 15px;
@@ -1071,7 +1099,7 @@ body {
   justify-content: center;
 }
 
-/* Hiệu ứng Hover - Bay lên và đổ bóng màu cam */
+/* Hiệu ứng Hover */
 #productPagination button:hover:not(:disabled) {
   background-color: #d97706; /* Màu primary cam */
   color: white;
@@ -1103,7 +1131,6 @@ body {
   transform: translateY(0);
 }
 /* phân trang product  */
-/* ========================================== */
 /* Container chứa các nút phân trang của Kho sản phẩm */
 #productPagination {
   display: flex;
@@ -1112,10 +1139,10 @@ body {
   gap: 8px;
   margin-top: 30px;
   padding: 20px 0;
-  padding-left: 10px; /* Thêm một chút khoảng cách với lề trái nếu cần */
+  padding-left: 10px;
 }
 
-/* Style cho các nút bấm (Giữ nguyên như cũ) */
+/* Style cho các nút bấm  */
 #productPagination button {
   background-color: #fdfdfd;
   border: 1.5px solid #e7e5e4;
@@ -1157,4 +1184,136 @@ body {
   background-color: #f5f5f5;
   transform: none;
   box-shadow: none;
+}
+
+/* POLICY CARDS STYLES */
+.policies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.policy-card {
+  border-radius: 18px;
+  padding: 28px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: var(--transition);
+  border: 1px solid rgba(217, 119, 6, 0.1);
+}
+
+.policy-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(217, 119, 6, 0.15);
+  border-color: rgba(217, 119, 6, 0.3);
+}
+
+.policy-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(217, 119, 6, 0.1);
+}
+
+.policy-icon {
+  font-size: 2rem;
+  color: var(--primary);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(217, 119, 6, 0.08);
+  border-radius: 12px;
+}
+
+.policy-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.policy-content {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.policy-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.policy-content li {
+  padding-left: 0;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.policy-content li strong {
+  color: var(--primary);
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.96rem;
+}
+
+.policy-content li ul {
+  margin-top: 6px;
+  padding-left: 15px;
+  gap: 6px;
+}
+
+.policy-content li ul li {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding-left: 0;
+}
+
+.policy-content li ul li::before {
+  content: "• ";
+  color: var(--primary);
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .policies-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .policies-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .policy-card {
+    padding: 20px !important;
+  }
+
+  .policy-header h3 {
+    font-size: 1rem;
+  }
+
+  .policy-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+}
+.swal2-container {
+  z-index: 99999 !important;
 }

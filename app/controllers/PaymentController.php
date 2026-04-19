@@ -130,7 +130,7 @@ class PaymentController {
             $totalSpent = $stmtTotal->fetch()['total'] ?? 0;
 
             // 2. Lấy danh sách giao dịch - Dùng customerId
-            $sqlList = "SELECT p.*, o.totalPrice, o.orderDate 
+            $sqlList = "SELECT p.*, o.totalPrice, o.orderDate, o.status as orderStatus
                         FROM payment p
                         JOIN orders o ON p.orderId = o.orderId
                         JOIN customers c ON o.customerId = c.customerId

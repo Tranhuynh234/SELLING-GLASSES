@@ -31,12 +31,11 @@ body {
   }
 }
 
-/* Class để CSS trượt 2 panel */
 .panel-transition {
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Floating Labels - Chuẩn Luxury UI */
+/* Floating Labels  */
 .input-group {
   position: relative;
 }
@@ -55,7 +54,7 @@ body {
 
 .floating-input:focus {
   background-color: #ffffff;
-  border-color: #d97706; /* amber-600 */
+  border-color: #d97706;
   box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
 }
 

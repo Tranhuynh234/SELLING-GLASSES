@@ -37,7 +37,7 @@ body {
   height: 100vh;
 }
 
-/*-- ================= SIDEBAR  ================= --*/
+/* SIDEBAR  */
 .sidebar {
   width: 260px;
   height: 100vh;
@@ -239,7 +239,7 @@ body {
   text-transform: uppercase;
 }
 
-/*-- ================= MAIN CONTENT ================= --*/
+/* MAIN CONTENT */
 .content {
   flex: 1;
   display: flex;
@@ -257,7 +257,7 @@ body {
   border-bottom: 1px solid #f0f0f0;
 }
 
-/* --- NÚT LOGIN --- */
+/*  NÚT LOGIN */
 .login-btn {
   display: flex;
   align-items: center;
@@ -284,7 +284,7 @@ body {
   font-size: 16px;
 }
 
-/* --- NÚT CHAT --- */
+/*  NÚT CHAT  */
 .chat-nav-btn {
   background-color: var(--lens-gold);
   color: white;
@@ -329,7 +329,7 @@ body {
   align-items: center;
 }
 
-/*-- ================= DASHBOARD ================= --*/
+/* DASHBOARD */
 .dashboard-body {
   padding: 20px 30px;
   flex: 1;
@@ -531,7 +531,7 @@ tr:hover td {
   background-color: #fafafa;
 }
 
-/* --- NÚT HÀNH ĐỘNG --- */
+/*  NÚT HÀNH ĐỘNG */
 .btn-view {
   background: #fdf6ec;
   border: none;
@@ -549,7 +549,7 @@ tr:hover td {
   color: white;
 }
 
-/*-- ================= DANH SÁCH ĐƠN ================= --*/
+/* DANH SÁCH ĐƠN */
 /* Thanh tìm kiếm */
 .toolbar-container {
   display: flex;
@@ -646,7 +646,7 @@ tr:hover td {
   background-color: #fcfdfd;
 }
 
-/*-- ================= PRE-ORDER ================= --*/
+/*  PRE-ORDER */
 .action-btn-group {
   display: flex;
   justify-content: center;
@@ -692,7 +692,7 @@ tr:hover td {
   color: white;
 }
 
-/*-- ================= KHIẾU NẠI ================= --*/
+/* KHIẾU NẠI */
 #complaint-page .toolbar-container {
   display: flex;
   align-items: flex-end;
@@ -704,7 +704,7 @@ tr:hover td {
   margin-bottom: 0;
 }
 
-/*-- ================= CHI TIẾT ĐƠN HÀNG ================= --*/
+/*  CHI TIẾT ĐƠN HÀNG */
 
 #orderDetailModal .modal-content {
   background-color: #ffffff !important;
@@ -910,7 +910,7 @@ tr:hover td {
   border: none !important;
 }
 
-/*-- ================= CHAT LIÊN HỆ VỚI KHÁCH HÀNG ================= --*/
+/* CHAT LIÊN HỆ VỚI KHÁCH HÀNG  */
 /* TRẠNG THÁI ẨN */
 .chat-hidden {
   display: none !important;
@@ -1153,7 +1153,7 @@ tr:hover td {
   background: #fff;
   border: 1px solid var(--lens-border);
   padding: 5px 15px;
-  border-radius: 25px; /* Tạo hình viên thuốc hiện đại */
+  border-radius: 25px; 
 }
 
 .input-group-wrapper:focus-within {

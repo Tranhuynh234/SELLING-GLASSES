@@ -65,14 +65,14 @@ document.addEventListener("DOMContentLoaded", function () {
               // Lưu variant được chọn
               window.__selectedProductVariantId = v.variantId || v.id || null;
 
-              // CẬP NHẬT GIÁ VÀ KHO TẠI ĐÂY
+              // CẬP NHẬT GIÁ VÀ KHO 
               updatePriceAndStock(v.price, v.stock, window.__selectedProductVariantId);
             };
 
             container.appendChild(btn);
           });
 
-          // 4. QUAN TRỌNG: Cập nhật giá của variant đầu tiên ngay khi load trang
+          // 4. Cập nhật giá của variant đầu tiên ngay khi load trang
           const first = product.variants[0];
           window.__selectedProductVariantId = first.variantId || first.id || null;
           updatePriceAndStock(first.price, first.stock, window.__selectedProductVariantId);
@@ -130,6 +130,10 @@ document.addEventListener('click', function (e) {
             if (badge) {
               const totalQty = data.data.reduce((s, it) => s + Number(it.quantity||0), 0);
               badge.innerText = totalQty;
+            }
+            // Reload lại giỏ hàng nếu có
+            if (typeof loadCart === 'function') {
+              loadCart();
             }
           }
         } else {

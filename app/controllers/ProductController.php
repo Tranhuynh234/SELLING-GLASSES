@@ -118,10 +118,13 @@ class ProductController {
  
     // Hiển thị danh sách sản phẩm đầy đủ
     public function index() {
-        // 1. Lấy toàn bộ dữ liệu từ Service
-        $result = $this->productService->getAllProducts();
+        // 1. Kiểm tra có filter theo danh mục không
+        $categoryId = isset($_GET['category']) ? (int)$_GET['category'] : null;
+        
+        // 2. Lấy dữ liệu từ Service (có thể lọc theo danh mục)
+        $result = $this->productService->getAllProducts($categoryId);
 
-        // 2. Nhận diện loại yêu cầu (Request Detection)
+        // 3. Nhận diện loại yêu cầu (Request Detection)
         // Nếu có header Accept: application/json hoặc có tham số ?format=json trên URL
         $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
                       || (isset($_GET['format']) && $_GET['format'] === 'json');
@@ -137,7 +140,10 @@ class ProductController {
         } else {
             //  PHẦN HIỂN THỊ CHO KHÁCH HÀNG 
             // Service trả về mảng trực tiếp nên gán thẳng $result cho $products 
-            $products = $result; 
+            $products = $result;
+            $totalPages = 1;
+            $currentPage = 1;
+            $selectedCategory = $categoryId;
 
             $viewPath = __DIR__ . '/../views/products/all_products.php';
             if (file_exists($viewPath)) {
@@ -176,7 +182,7 @@ class ProductController {
         } else {
             // Trả về view chi tiết
             $product = $result['data'] ?? $result;
-            $viewPath = __DIR__ . '/../views/product-detail.php';
+            $viewPath = __DIR__ . '/../views/products/product-detail.php';
             if (file_exists($viewPath)) {
                 include $viewPath;
             } else {
@@ -186,7 +192,6 @@ class ProductController {
         }
     }
 
-    // Hàm bổ trợ để xử lý lỗi nhanh cho cả 2 loại yêu cầu
     private function handleError($message) {
         $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
         if ($isJson) {

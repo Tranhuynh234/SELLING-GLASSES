@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Lắng nghe sự kiện thay đổi loại tròng
+    // Lắng nghe vc thay đổi loại tròng
     lensSelect.addEventListener("change", updatePrice);
 
     // Kiểm tra trước khi gửi form (Validate)
