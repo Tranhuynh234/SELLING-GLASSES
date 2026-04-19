@@ -235,6 +235,7 @@ class PaymentService {
                     o.orderId,
                     o.orderDate,
                     o.totalPrice,
+                    o.status AS orderStatus,
                     u.name AS customerName,
                     u.email AS customerEmail,
                     u.phone AS customerPhone,
@@ -261,7 +262,15 @@ class PaymentService {
         ]);
 
         foreach ($rows as &$row) {
-            $row['uiStatus'] = $this->mapPaymentStatusLabel($row['paymentStatus']);
+            // If order status indicates confirmed or returned, prefer showing that on payment UI
+            $orderStatus = $row['orderStatus'] ?? '';
+            if ($orderStatus === 'Confirmed') {
+                $row['uiStatus'] = 'Đã xác thực';
+            } elseif ($orderStatus === 'Returned') {
+                $row['uiStatus'] = 'Đã hoàn tiền';
+            } else {
+                $row['uiStatus'] = $this->mapPaymentStatusLabel($row['paymentStatus']);
+            }
         }
 
         return $this->response(true, "Lấy danh sách thanh toán thành công", $rows);

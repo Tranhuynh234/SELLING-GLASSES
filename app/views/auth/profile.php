@@ -304,21 +304,30 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                     -<?= number_format($p['totalPrice'], 0, ',', '.') ?>đ
                                 </td>
                                 <td>
-                                    <?php 
-                                        $status = $p['paymentStatus'];
-                                        // Map màu sắc theo đúng Enum 
-                                        $statusClass = 'status-pending'; // Mặc định là Pending
-                                        if ($status === 'Paid') $statusClass = 'status-success';
-                                        if ($status === 'Failed') $statusClass = 'status-failed';
-                                        if ($status === 'Refunded') $statusClass = 'status-refund';
-                                        
-                                        $statusText = $status;
-                                        if ($status === 'Paid') $statusText = 'Thành công';
-                                        if ($status === 'Pending') $statusText = 'Đang xác thực';
-                                        if ($status === 'Failed') $statusText = 'Thất bại';
-                                        if ($status === 'Refunded') $statusText = 'Đã hoàn tiền';
-                                    ?>
-                                    <span class="badge-pay <?= $statusClass ?>"><?= $statusText ?></span>
+                                        <?php
+                                            // Prefer order status for display when appropriate
+                                            $orderStatus = $p['orderStatus'] ?? '';
+                                            $paymentStatus = $p['paymentStatus'] ?? '';
+
+                                            $statusClass = 'status-pending';
+                                            $statusText = '';
+
+                                            if ($orderStatus === 'Confirmed') {
+                                                $statusClass = 'status-confirmed';
+                                                $statusText = 'Đã xác thực';
+                                            } elseif ($orderStatus === 'Returned') {
+                                                $statusClass = 'status-refund';
+                                                $statusText = 'Đã hoàn tiền';
+                                            } else {
+                                                // Fallback to payment status
+                                                if ($paymentStatus === 'Paid') { $statusClass = 'status-success'; $statusText = 'Thành công'; }
+                                                elseif ($paymentStatus === 'Pending') { $statusClass = 'status-pending'; $statusText = 'Đang xác thực'; }
+                                                elseif ($paymentStatus === 'Failed') { $statusClass = 'status-failed'; $statusText = 'Thất bại'; }
+                                                elseif ($paymentStatus === 'Refunded') { $statusClass = 'status-refund'; $statusText = 'Đã hoàn tiền'; }
+                                                else { $statusText = $paymentStatus; }
+                                            }
+                                        ?>
+                                        <span class="badge-pay <?= $statusClass ?>"><?= $statusText ?></span>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

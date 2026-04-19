@@ -107,17 +107,34 @@ public function addProduct($data) {
     }
 
     // 4. Lấy dữ liệu kèm giá/kho và Tên danh mục để hiện lên bảng Manager
-    public function getAllProductsWithVariants() {
-        $sql = "SELECT p.*, c.name as categoryName,
-            GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
-            MIN(v.price) as minPrice,
-            SUM(v.stock) as totalStock
-            FROM product p 
-            LEFT JOIN product_variant v ON p.productId = v.productId 
-            LEFT JOIN category c ON p.categoryId = c.categoryId
-            GROUP BY p.productId
-            ORDER BY p.productId DESC"; 
-        return $this->queryAll($sql);
+    public function getAllProductsWithVariants($categoryId = null) {
+        if ($categoryId) {
+            $sql = "SELECT p.*, c.name as categoryName,
+                GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
+                MIN(v.price) as minPrice,
+                SUM(v.stock) as totalStock
+                FROM product p 
+                LEFT JOIN product_variant v ON p.productId = v.productId 
+                LEFT JOIN category c ON p.categoryId = c.categoryId
+                WHERE p.categoryId = :categoryId
+                GROUP BY p.productId
+                ORDER BY p.productId DESC"; 
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } else {
+            $sql = "SELECT p.*, c.name as categoryName,
+                GROUP_CONCAT(CONCAT(v.color, ' (', v.size, ') - ', v.price, 'đ') SEPARATOR ', ') as variantSummary,
+                MIN(v.price) as minPrice,
+                SUM(v.stock) as totalStock
+                FROM product p 
+                LEFT JOIN product_variant v ON p.productId = v.productId 
+                LEFT JOIN category c ON p.categoryId = c.categoryId
+                GROUP BY p.productId
+                ORDER BY p.productId DESC"; 
+            return $this->queryAll($sql);
+        }
     }
 
     public function deleteProduct($id) {
@@ -151,54 +168,5 @@ public function addProduct($data) {
         $sql = "SELECT COUNT(*) AS total FROM product";
         $result = $this->queryOne($sql);
         return $result['total'];
-    }
-
-    public function getProductsByCategory($categoryName) {
-        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
-                FROM product p
-                LEFT JOIN product_variant pv ON pv.productId = p.productId
-                LEFT JOIN category c ON c.categoryId = p.categoryId
-                WHERE c.name = :categoryName
-                ORDER BY p.productId DESC";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':categoryName', $categoryName, PDO::PARAM_STR);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getProductsByCategoryId($categoryId) {
-        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
-                FROM product p
-                LEFT JOIN product_variant pv ON pv.productId = p.productId
-                LEFT JOIN category c ON c.categoryId = p.categoryId
-                WHERE p.categoryId = :categoryId
-                ORDER BY p.productId DESC";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // TÌM KIẾM SẢN PHẨM
-    public function searchProducts($keyword) {
-        $keyword = '%' . $keyword . '%';
-        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
-                FROM product p
-                LEFT JOIN product_variant pv ON pv.productId = p.productId
-                LEFT JOIN category c ON c.categoryId = p.categoryId
-                WHERE p.name LIKE :keyword 
-                   OR p.description LIKE :keyword
-                   OR c.name LIKE :keyword
-                ORDER BY p.productId DESC";
-
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(':keyword', $keyword, PDO::PARAM_STR);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

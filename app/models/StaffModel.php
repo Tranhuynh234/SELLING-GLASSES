@@ -74,14 +74,5 @@ class StaffModel extends BaseModel {
 
         return ($row['total'] > 0);
     }
-
-    // ===== TÌM STAFF THEO CHỨC VỤ =====
-    public function findByPosition($position) {
-        $sql = "SELECT * FROM staff WHERE LOWER(position) = LOWER(:position) LIMIT 1";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([':position' => $position]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ? new Staff($row) : null;
-    }
 }
 ?>

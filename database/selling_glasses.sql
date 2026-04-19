@@ -701,6 +701,74 @@ ALTER TABLE `shipment`
 --
 ALTER TABLE `staff`
   ADD CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`userId`);
+
+--
+-- Table structure for table `combo`
+--
+CREATE TABLE `combo` (
+  `comboId` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `price` decimal(10,2) NOT NULL,
+  `imagePath` varchar(255),
+  `isActive` tinyint(1) DEFAULT 1,
+  `staffId` int(11) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `deletedAt` datetime
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Table structure for table `combo_item`
+--
+CREATE TABLE `combo_item` (
+  `comboItemId` int(11) NOT NULL,
+  `comboId` int(11) NOT NULL,
+  `productId` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  `createdAt` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indexes for table `combo`
+--
+ALTER TABLE `combo`
+  ADD PRIMARY KEY (`comboId`),
+  ADD KEY `staffId` (`staffId`);
+
+--
+-- Indexes for table `combo_item`
+--
+ALTER TABLE `combo_item`
+  ADD PRIMARY KEY (`comboItemId`),
+  ADD KEY `comboId` (`comboId`),
+  ADD KEY `productId` (`productId`);
+
+--
+-- AUTO_INCREMENT for table `combo`
+--
+ALTER TABLE `combo`
+  MODIFY `comboId` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `combo_item`
+--
+ALTER TABLE `combo_item`
+  MODIFY `comboItemId` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for table `combo`
+--
+ALTER TABLE `combo`
+  ADD CONSTRAINT `combo_ibfk_1` FOREIGN KEY (`staffId`) REFERENCES `staff` (`staffId`);
+
+--
+-- Constraints for table `combo_item`
+--
+ALTER TABLE `combo_item`
+  ADD CONSTRAINT `combo_item_ibfk_1` FOREIGN KEY (`comboId`) REFERENCES `combo` (`comboId`) ON DELETE CASCADE,
+  ADD CONSTRAINT `combo_item_ibfk_2` FOREIGN KEY (`productId`) REFERENCES `product` (`productId`);
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -40,9 +40,9 @@ class ProductServices {
     // ==========================================
     // 2. QUẢN LÝ SẢN PHẨM (PRODUCT)
     // ==========================================
-    public function getAllProducts() {
+    public function getAllProducts($categoryId = null) {
         // Đảm bảo khớp với Controller->index()
-        return $this->productModel->getAllProductsWithVariants() ?: [];
+        return $this->productModel->getAllProductsWithVariants($categoryId) ?: [];
     }
     
     public function getProductDetail($id) {
@@ -235,21 +235,5 @@ class ProductServices {
         } catch (Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
-    }
-
-    // ==========================================
-    // 4. LỌC SẢN PHẨM THEO DANH MỤC
-    // ==========================================
-    public function getProductsByCategory($categoryName) {
-        return $this->productModel->getProductsByCategory($categoryName) ?: [];
-    }
-
-    public function getProductsByCategoryId($categoryId) {
-        return $this->productModel->getProductsByCategoryId($categoryId) ?: [];
-    }
-
-    // TÌM KIẾM SẢN PHẨM
-    public function searchProducts($keyword) {
-        return $this->productModel->searchProducts($keyword) ?: [];
     }
 }

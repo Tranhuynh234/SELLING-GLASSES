@@ -159,15 +159,8 @@ switch ($url) {
         break;
 
     // --- PRODUCT ---
-    case 'product':
-        $productController->index();
-        break;
     case 'get-all-products':
-        if (isset($_GET['categoryId'])) {
-            $productController->getProductsByCategoryId($_GET['categoryId']);
-        } else {
-            $productController->getAllProducts();
-        }
+        $productController->index();
         break;
     case 'add-product':
         $productController->addProduct();
@@ -189,12 +182,6 @@ switch ($url) {
     case 'update-variant':
         $productController->updateVariant($variantId);
         break;
-    
-    // --- SEARCH ---
-    case 'search-products':
-        $productController->searchProducts();
-        break;
-        
     // ==== trân =========
     case "create-order":
         $orderController->create();
@@ -278,6 +265,32 @@ switch ($url) {
         $promotionController->requestReturn();
         break;
 
+    // --- Combo Module ---
+    case 'get-combos':
+        $comboController->getCombos();
+        exit();
+
+    case 'get-combo':
+        $comboController->getCombo();
+        exit();
+
+    case 'search-combos':
+        // Search combos by name (used by combo-manager.js)
+        $comboController->searchCombos();
+        exit();
+
+    case 'create-combo':
+        $comboController->createCombo();
+        exit();
+
+    case 'update-combo':
+        $comboController->updateCombo();
+        exit();
+
+    case 'delete-combo':
+        $comboController->deleteCombo();
+        exit();
+
     // --- Cart---//
     case 'get-cart':
         $cartController->getCart();
@@ -335,37 +348,6 @@ switch ($url) {
 
     case "get-review-by-order":
         $reviewController->getReviewByOrder();
-        exit();
-   
-    // --- COMBO Module ---
-    case 'get-combos':
-        $comboController->getCombos();
-        exit();
-
-    case 'get-combo':
-        $comboController->getCombo();
-        exit();
-
-    case 'create-combo':
-        $comboController->createCombo();
-        exit();
-
-    case 'update-combo':
-        $comboController->updateCombo();
-        exit();
-
-    case 'delete-combo':
-        AuthMiddleware::handle(['staff'], ['manager']);
-        $comboController->deleteCombo();
-        exit();
-
-    case 'restore-combo':
-        AuthMiddleware::handle(['staff'], ['manager']);
-        $comboController->restoreCombo();
-        exit();
-
-    case 'search-combos':
-        $comboController->searchCombos();
         exit();
    
     default:

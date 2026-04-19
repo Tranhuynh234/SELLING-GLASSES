@@ -310,11 +310,11 @@ function appendAIMessage(text, options = []) {
   let optionsHtml = "";
   if (options.length > 0) {
     optionsHtml = `<div class="flex gap-2 mt-3 flex-wrap">`;
-    options.forEach((opt) => {
+    options.forEach((opt, index) => {
+      const iconHtml = opt.icon ? `${opt.icon} ` : "";
       optionsHtml += `
-            <button onclick="handleQuickAction(this.innerText.trim(), '${opt.action}')"
-            class="flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm">
-                ${opt.label}
+            <button class="quick-action-btn flex items-center gap-2 text-[13px] border border-amber-600 text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full hover:bg-amber-600 hover:text-white transition shadow-sm" data-action="${opt.action}">
+                ${iconHtml}${opt.label}
             </button>`;
     });
     optionsHtml += `</div>`;
@@ -361,8 +361,8 @@ function handleQuickAction(label, actionCode) {
       appendAIMessage(
         "Dạ vâng! Để EYESGLASS gợi ý chuẩn xác nhất, bạn chọn giới tính giúp mình nhé:",
         [
-          { label: `${maleIcon} Mình là Nam`, action: "male" },
-          { label: `${femaleIcon} Mình là Nữ`, action: "female" },
+          { label: "Mình là Nam", icon: maleIcon, action: "male" },
+          { label: "Mình là Nữ", icon: femaleIcon, action: "female" },
         ],
       );
     } else if (actionCode === "male" || actionCode === "female") {
@@ -371,13 +371,15 @@ function handleQuickAction(label, actionCode) {
         `Tuyệt vời! Đối với ${gender}, bạn đang tìm kính để sử dụng cho mục đích nào chủ yếu?`,
         [
           {
-            label: '<i class="fa-solid fa-laptop"></i> Ngồi máy tính/Văn phòng',
-            action: "office",
+            label: "Ngồi máy tính/Văn phòng",
+            icon: '<i class="fa-solid fa-laptop"></i>',
+            action: "office"
           },
           {
-            label: '<i class="fa-solid fa-sun"></i> Đi chơi/Thời trang',
-            action: "fashion",
-          },
+            label: "Đi chơi/Thời trang",
+            icon: '<i class="fa-solid fa-sun"></i>',
+            action: "fashion"
+          }
         ],
       );
     } else if (actionCode === "office") {
@@ -478,20 +480,29 @@ function sendManualMessage() {
         `Mình đã nhận được câu hỏi: "<i>${text}</i>" <br>Trợ lý AI đang học hỏi thêm, bạn có muốn kết nối với Tư vấn viên người thật không ạ?`,
         [
           {
-            label:
-              '<i class="fa-solid fa-phone-volume text-amber-500"></i> Gặp tư vấn viên',
-            action: "human",
+            label: "Gặp tư vấn viên",
+            icon: '<i class="fa-solid fa-phone-volume text-amber-500"></i>',
+            action: "human"
           },
           {
-            label:
-              '<i class="fa-solid fa-glasses text-amber-500"></i> Tư vấn chọn kính',
-            action: "find_glasses",
-          },
+            label: "Tư vấn chọn kính",
+            icon: '<i class="fa-solid fa-glasses text-amber-500"></i>',
+            action: "find_glasses"
+          }
         ],
       );
     }
   }, 1200);
 }
+
+// Event delegation for quick action buttons
+chatBody.addEventListener("click", (e) => {
+  if (e.target.classList.contains("quick-action-btn")) {
+    const action = e.target.getAttribute("data-action");
+    const label = e.target.innerText.trim();
+    handleQuickAction(label, action);
+  }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   updateHomeChatBadge();
