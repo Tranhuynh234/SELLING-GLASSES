@@ -31,61 +31,61 @@
  <section id="danh-muc" class="py-20 px-6 max-w-7xl mx-auto text-center scroll-mt-[104px]">
      <h2 class="text-4xl font-bold mb-12">Khám Phá Danh Mục</h2>
      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-         <div class="group cursor-pointer">
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(1, 'Gọng Nam', this); return false;" class="group cursor-pointer category-card" data-category="1">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/gongnam.jpg" alt="Gọng Nam"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Gọng Nam</p>
-         </div>
-         <div class="group cursor-pointer">
+         </a>
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(2, 'Gọng Nữ', this); return false;" class="group cursor-pointer category-card" data-category="2">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/gongnu.jpg" alt="Gọng Nữ"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Gọng Nữ</p>
-         </div>
-         <div class="group cursor-pointer">
+         </a>
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(3, 'Gọng Trẻ Em', this); return false;" class="group cursor-pointer category-card" data-category="3">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/gongtrem.jpg" alt="Gọng Trẻ Em"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Gọng Trẻ Em</p>
-         </div>
-         <div class="group cursor-pointer">
+         </a>
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(4, 'Chống Ánh Sáng Xanh', this); return false;" class="group cursor-pointer category-card" data-category="4">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/anhsangxanh.jpg" alt="Tròng AS Xanh"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Chống Ánh Sáng Xanh</p>
-         </div>
-         <div class="group cursor-pointer">
+         </a>
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(5, 'Kính Đổi Màu', this); return false;" class="group cursor-pointer category-card" data-category="5">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/doimau.jpg" alt="Kính Đổi Màu"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Kính Đổi Màu</p>
-         </div>
-         <div class="group cursor-pointer">
+         </a>
+         <a href="javascript:void(0)" onclick="filterProductsByCategory(6, 'Kính Siêu Mỏng', this); return false;" class="group cursor-pointer category-card" data-category="6">
              <div
                  class="bg-white rounded-[32px] aspect-square border border-stone-100 shadow-sm flex items-center justify-center mb-4 group-hover:shadow-lg transition">
                  <img src="/SELLING-GLASSES/public/assets/images/products/sieumong.jpg" alt="Kính Siêu Mỏng"
                      class="w-full h-full object-cover rounded-[32px]">
              </div>
              <p class="font-bold text-stone-600">Kính Siêu Mỏng</p>
-         </div>
+         </a>
      </div>
  </section>
 
  <section class="py-20 px-6 max-w-7xl mx-auto">
      <div class="flex justify-between items-end mb-10">
          <h2 class="text-4xl font-bold">Sản Phẩm Bán Chạy</h2>
-         <a href="/SELLING-GLASSES/public/get-all-products"
+         <a href="/SELLING-GLASSES/public/index.php?url=product"
              class="text-amber-700 font-bold flex items-center gap-2 group">
              Xem tất cả
              <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
@@ -153,52 +153,9 @@
              Khám phá Combo
          </button>
      </div>
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-         <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
-             <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                 <img src="/SELLING-GLASSES/public/assets/images/products/combo_sinhvien.jpg" alt="Combo Sinh Viên"
-                     class="w-full h-full object-cover">
-             </div>
-             <h3 class="font-bold text-xl mb-1">Combo Sinh Viên</h3>
-             <p class="text-stone-400 text-sm mb-4">
-                 Gọng Basic + Tròng chống xước
-             </p>
-             <p class="text-amber-700 font-bold text-2xl mb-6">499.000đ</p>
-             <button class="w-full py-3 bg-stone-100 rounded-xl font-bold text-stone-600 hover:bg-stone-200 transition">
-                 Chọn combo này
-             </button>
-         </div>
-         <div class="bg-white rounded-[32px] p-8 border-2 border-amber-500 text-center shadow-xl relative scale-105">
-             <span
-                 class="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase">Hot
-                 nhất</span>
-             <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                 <img src="/SELLING-GLASSES/public/assets/images/products/combo_vanphong.jpg" alt="Combo Văn Phòng"
-                     class="w-full h-full object-cover">
-             </div>
-             <h3 class="font-bold text-xl mb-1">Combo Văn Phòng</h3>
-             <p class="text-stone-400 text-sm mb-4">
-                 Gọng Titan + Tròng chống AS Xanh
-             </p>
-             <p class="text-amber-700 font-bold text-2xl mb-6">899.000đ</p>
-             <button class="w-full py-3 bg-[#1C1917] rounded-xl font-bold text-white hover:bg-black transition">
-                 Chọn combo này
-             </button>
-         </div>
-         <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
-             <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center">
-                 <img src="/SELLING-GLASSES/public/assets/images/products/combo_sieunet.jpg" alt="Combo Siêu Nét"
-                     class="w-full h-full object-cover">
-             </div>
-             <h3 class="font-bold text-xl mb-1">Combo Siêu Nét</h3>
-             <p class="text-stone-400 text-sm mb-4">
-                 Gọng Thời Trang + Tròng Siêu Mỏng
-             </p>
-             <p class="text-amber-700 font-bold text-2xl mb-6">1.290.000đ</p>
-             <button class="w-full py-3 bg-stone-100 rounded-xl font-bold text-stone-600 hover:bg-stone-200 transition">
-                 Chọn combo này
-             </button>
-         </div>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="staticComboContainer">
+         <!-- Combos will be loaded here by JavaScript -->
+         <div class="text-center py-12 col-span-full text-stone-400">Đang tải combo...</div>
      </div>
  </section>
 
@@ -363,7 +320,7 @@
          </div>
      </div>
  </section>
-
+ 
  <section class="py-24 bg-[#F5F1E7]">
      <div class="max-w-7xl mx-auto px-6">
          <div class="flex justify-between items-end mb-12">
@@ -396,11 +353,25 @@
  <script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
  <script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
  <script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+ <script src="/SELLING-GLASSES/public/assets/js/combo-home.js"></script>
  <script src="/SELLING-GLASSES/public/assets/js/home.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
  <?php include_once __DIR__ . '/../partials/policies.php'; ?>
  <script src="/SELLING-GLASSES/public/assets/js/policy.js"></script>
+ <script src="/SELLING-GLASSES/public/assets/js/main.js"></script>
 
+ <!-- Initialize cart on page load -->
+ <script>
+     document.addEventListener('DOMContentLoaded', function() {
+         console.log('[home.php] DOMContentLoaded - calling loadCart and updateCartCount');
+         if (typeof loadCart === 'function') {
+             loadCart();
+         }
+         if (typeof updateCartCount === 'function') {
+             updateCartCount();
+         }
+     });
+ </script>
 
  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>

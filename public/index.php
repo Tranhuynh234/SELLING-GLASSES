@@ -14,6 +14,7 @@ require_once __DIR__ . "/../app/controllers/UserController.php";
 require_once "../app/controllers/PaymentController.php";
 require_once "../app/controllers/PrescriptionController.php";
 require_once "../app/controllers/ReviewController.php";
+require_once "../app/controllers/ComboController.php";
 
 $conn = Database::connect();
 
@@ -30,6 +31,7 @@ $userController = new UserController();
 $paymentController = new PaymentController();
 $prescriptionController = new PrescriptionController($conn);
 $reviewController = new ReviewController();
+$comboController = new ComboController();
 
 $url = $_GET['url'] ?? '';
 $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -157,8 +159,15 @@ switch ($url) {
         break;
 
     // --- PRODUCT ---
-    case 'get-all-products':
+    case 'product':
         $productController->index();
+        break;
+    case 'get-all-products':
+        if (isset($_GET['categoryId'])) {
+            $productController->getProductsByCategoryId($_GET['categoryId']);
+        } else {
+            $productController->getAllProducts();
+        }
         break;
     case 'add-product':
         $productController->addProduct();
@@ -180,6 +189,12 @@ switch ($url) {
     case 'update-variant':
         $productController->updateVariant($variantId);
         break;
+    
+    // --- SEARCH ---
+    case 'search-products':
+        $productController->searchProducts();
+        break;
+        
     // ==== trân =========
     case "create-order":
         $orderController->create();
@@ -320,6 +335,37 @@ switch ($url) {
 
     case "get-review-by-order":
         $reviewController->getReviewByOrder();
+        exit();
+   
+    // --- COMBO Module ---
+    case 'get-combos':
+        $comboController->getCombos();
+        exit();
+
+    case 'get-combo':
+        $comboController->getCombo();
+        exit();
+
+    case 'create-combo':
+        $comboController->createCombo();
+        exit();
+
+    case 'update-combo':
+        $comboController->updateCombo();
+        exit();
+
+    case 'delete-combo':
+        AuthMiddleware::handle(['staff'], ['manager']);
+        $comboController->deleteCombo();
+        exit();
+
+    case 'restore-combo':
+        AuthMiddleware::handle(['staff'], ['manager']);
+        $comboController->restoreCombo();
+        exit();
+
+    case 'search-combos':
+        $comboController->searchCombos();
         exit();
    
     default:

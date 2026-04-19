@@ -17,10 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const subtotal = checkoutSummary.summary.subtotal;
             const lensPrice = checkoutSummary.summary.lensPrice || 0;
-            const shippingFee = calculateShippingFee(subtotal);
+            const discount = checkoutSummary.summary.discount || 0;
+            const shippingFee = calculateShippingFee(subtotal, lensPrice, discount);
 
+            // Cập nhật tất cả các giá trị
             checkoutSummary.summary.shippingFee = shippingFee;
-            checkoutSummary.summary.total = subtotal + shippingFee + lensPrice;
+            checkoutSummary.summary.total = subtotal + shippingFee + lensPrice - discount;
+
+            console.log("🔄 CITY CHANGED, Updated summary:", checkoutSummary.summary);
 
             renderSummary(checkoutSummary.summary);
             renderBankInfo(
@@ -44,7 +48,6 @@ function getSelectedCartItems() {
 
 async function loadCheckoutSummary() {
     const selectedCartItems = getSelectedCartItems();
-    console.log("selectedCartItems:", selectedCartItems);
     if (!selectedCartItems.length) {
         renderEmptyState("Bạn chưa chọn sản phẩm nào để thanh toán!");
         return;
@@ -80,16 +83,17 @@ async function loadCheckoutSummary() {
         );
 
         const subtotal = filteredData.reduce((sum, i) => sum + i.price * i.quantity, 0);
-        const shippingFee = calculateShippingFee(subtotal);
+    const shippingFee = calculateShippingFee(subtotal, lensPrice, 0);
 
         checkoutSummary = {
             items: filteredData,
-            summary: {
+                summary: {
                 subtotal: subtotal,
                 discount: 0,
                 lensPrice: lensPrice,
                 shippingFee: shippingFee,
-                total: subtotal + shippingFee + lensPrice 
+                // total = subtotal + shipping + lensPrice - discount
+                total: subtotal + shippingFee + lensPrice - 0
             },
             bankInfo: {
                 bankName: "Vietcombank",
@@ -207,12 +211,73 @@ async function submitPendingPayment(event) {
         return;
     }
 
-    const formData = new FormData(form);
-    formData.append("selectedCartItems", selectedCartItems.join(","));
+    // Đảm bảo checkoutSummary.summary tồn tại
+    if (!checkoutSummary.summary) {
+        alert("Lỗi: Dữ liệu thanh toán chưa sẵn sàng. Vui lòng refresh trang.");
+        return;
+    }
 
-    const finalTotal = checkoutSummary.summary.total; 
-    formData.append("totalPrice", checkoutSummary.summary.total);
-    formData.append("shippingFee", checkoutSummary.summary.shippingFee);
+    // Khai báo biến trước khi sử dụng
+    let lensPrice = checkoutSummary.summary.lensPrice || 0;
+    let discount = checkoutSummary.summary.discount || 0;
+    let subtotal = checkoutSummary.summary.subtotal || 0;
+    
+    // Fallback: Nếu subtotal là 0, tính từ items
+    if (subtotal === 0 && checkoutSummary.items && checkoutSummary.items.length > 0) {
+        subtotal = checkoutSummary.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+    
+    // Lấy lensCost từ hidden field (source of truth)
+    const serverLensField = document.getElementById('server-lens-cost');
+    if (serverLensField && serverLensField.value) {
+        const serverValue = Number(serverLensField.value);
+        if (serverValue > 0) {
+            lensPrice = serverValue;
+        }
+    }
+    
+    // Tính lại tất cả giá trị ngay trước khi submit (AFTER variables are declared)
+    let actualShippingFee = calculateShippingFee(subtotal, lensPrice, discount);
+    const actualTotal = subtotal + actualShippingFee + lensPrice - discount;
+
+    // Collect all form inputs manually
+    const formElements = form.elements;
+    let queryParams = [];
+    
+    // Add form fields
+    for (let elem of formElements) {
+        if (elem.name && elem.value) {
+            queryParams.push(encodeURIComponent(elem.name) + "=" + encodeURIComponent(elem.value));
+        }
+    }
+    
+    // Lấy trực tiếp từ DOM - nguồn của sự thật
+    const subtotalText = document.getElementById('subtotal')?.innerText || '0đ';
+    const lensCostText = document.getElementById('lens-cost')?.innerText || '0đ';
+    const shippingFeeText = document.getElementById('shipping-fee')?.innerText || '0đ';
+    const discountText = document.getElementById('discount')?.innerText || '0đ';
+    const grandTotalText = document.getElementById('grand-total')?.innerText || '0đ';
+    
+    // Parse text to number (remove "đ" and commas)
+    const parseVND = (text) => {
+        return Number(text.replace(/[^\d]/g, '')) || 0;
+    };
+    
+    const subtotalFromDOM = parseVND(subtotalText);
+    const lensCostFromDOM = parseVND(lensCostText);
+    const shippingFeeFromDOM = parseVND(shippingFeeText);
+    const discountFromDOM = parseVND(discountText);
+    const grandTotalFromDOM = parseVND(grandTotalText);
+    
+    // Add checkout data - USE DOM VALUES
+    queryParams.push("selectedCartItems=" + encodeURIComponent(selectedCartItems.join(",")));
+    queryParams.push("totalPrice=" + encodeURIComponent(String(grandTotalFromDOM)));
+    queryParams.push("subtotal=" + encodeURIComponent(String(subtotalFromDOM)));
+    queryParams.push("lensCost=" + encodeURIComponent(String(lensCostFromDOM)));
+    queryParams.push("discount=" + encodeURIComponent(String(discountFromDOM)));
+    queryParams.push("shippingFee=" + encodeURIComponent(String(shippingFeeFromDOM)));
+
+    const bodyString = queryParams.join("&");
 
     button.disabled = true;
     button.textContent = "Đang gửi...";
@@ -220,7 +285,10 @@ async function submitPendingPayment(event) {
     try {
         const response = await fetch(`${CHECKOUT_BASE}/create-pending-payment`, {
             method: "POST",
-            body: formData,
+            body: bodyString,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
             credentials: "include"
         });
 
@@ -297,14 +365,25 @@ function escapeHtml(value) {
 function calculateShippingFee(subtotal) {
     const city = document.getElementById("city")?.value;
 
-    if (city === "Ho Chi Minh") {
+    // New signature: calculateShippingFee(subtotal, lensPrice = 0, discount = 0)
+    // Compute the order total used for shipping decision: subtotal + lensPrice - discount
+    // Note: discount is assumed to be a positive number (amount to subtract)
+    const lensPrice = arguments.length > 1 ? Number(arguments[1] || 0) : 0;
+    const discount = arguments.length > 2 ? Number(arguments[2] || 0) : 0;
+
+    const orderAmount = Number(subtotal || 0) + lensPrice - discount;
+
+    // Free shipping for Ho Chi Minh (by city selection)
+    if (city && city.toLowerCase().includes("ho chi minh")) {
         return 0;
     }
 
-    if (subtotal >= 500000) {
+    // Free shipping for orders >= 500,000 VND (across all regions)
+    if (orderAmount >= 500000) {
         return 0;
     }
 
+    // Otherwise apply flat 30,000 VND
     return 30000;
 }
 

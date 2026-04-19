@@ -7,12 +7,13 @@
     <title>Manager System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/mana.css" />
+    <link rel="stylesheet" href="/SELLING-GLASSES/public/assets/css/combo.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
     <input type="hidden" id="sessionStaffId" value="<?php echo $_SESSION['user']['staffId'] ?? ''; ?>">
-    <div id="modalUpdate" class="modal-overlay">
+    <div id="modalUpdate" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <div class="modal-header">
                 <h2>Cập nhật thông tin</h2>
@@ -93,7 +94,7 @@
             </div>
         </div>
     </div>
-    <div id="modal" class="modal-overlay">
+    <div id="modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <form id="productForm" onsubmit="event.preventDefault(); saveData();">
                 <div class="modal-glow"></div>
@@ -401,25 +402,7 @@
                 </section>
 
                 <section id="combo" class="tab-pane">
-                    <div class="pane-header">
-                        <h2>Quản lý Combo</h2>
-                        <button class="btn-confirm" onclick="openModal('combo')">
-                            <i class="fas fa-plus"></i> Thêm Combo
-                        </button>
-                    </div>
-                    <div class="table-wrapper glass">
-                        <table class="vip-table">
-                            <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Tên Combo</th>
-                                    <th>Giá tiền</th>
-                                    <th>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody id="comboTable"></tbody>
-                        </table>
-                    </div>
+                    <?php include __DIR__ . '/combo.php'; ?>
                 </section>
 
                 <section id="permission" class="tab-pane">
@@ -453,6 +436,7 @@
     </div>
     <script src="/SELLING-GLASSES/public/assets/js/mana.js"></script>
     <script src="/SELLING-GLASSES/public/assets/js/user.js"></script>
+    <script src="/SELLING-GLASSES/public/assets/js/combo-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 

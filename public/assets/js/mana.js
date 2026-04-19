@@ -18,6 +18,11 @@ function showTab(tabId) {
     loadPromotions();
   } else if (tabId === "product") {
     loadProducts(1); // Gọi trang 1 khi chuyển tab
+  } else if (tabId === "combo") {
+    // Initialize combo manager when combo tab is clicked
+    if (typeof initComboManager === 'function') {
+      initComboManager();
+    }
   }
 }
 

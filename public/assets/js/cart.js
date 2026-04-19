@@ -3,7 +3,9 @@ let cartItems = [];
 let selectedItems = new Set();
 
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("[cart.js] DOMContentLoaded fired");
     bindCartEvents();
+    console.log("[cart.js] Calling loadCart()...");
     loadCart();
 });
 
@@ -40,12 +42,17 @@ function bindCartEvents() {
 
 async function loadCart() {
     try {
+        console.log("[cart.js] loadCart() called, fetching /get-cart...");
         const response = await fetch(`${CART_BASE}/get-cart`, {
             credentials: "include"
         });
+        console.log("[cart.js] /get-cart response status:", response.status);
+        
         const data = await response.json();
+        console.log("[cart.js] /get-cart data:", data);
 
         if (data && data.error) {
+            console.log("[cart.js] Error in response:", data.error);
             cartItems = [];
             selectedItems.clear();
             renderCart(data.error === "Not logged in" ? "login" : "empty");
@@ -56,13 +63,15 @@ async function loadCart() {
         const saved = JSON.parse(sessionStorage.getItem("selectedCartItems")) || [];
 
         cartItems = Array.isArray(data) ? data : [];
+        console.log("[cart.js] cartItems set to:", cartItems);
 
         selectedItems = new Set(saved);
 
         renderCart();
+        console.log("[cart.js] Calling updateCartCount with cartItems");
         updateCartCount(cartItems);
     } catch (error) {
-        console.error("Lỗi loadCart:", error);
+        console.error("[cart.js] Error in loadCart:", error);
         cartItems = [];
         selectedItems.clear();
         renderCart("error");
@@ -115,6 +124,7 @@ async function removeSelectedItems() {
 }
 
 window.addToCart = async function (variantId) {
+    console.log("[cart.js] addToCart called with variantId:", variantId);
     const formData = new FormData();
     formData.append("variantId", variantId);
     formData.append("quantity", 1);
@@ -126,17 +136,22 @@ window.addToCart = async function (variantId) {
             credentials: "include"
         });
 
+        console.log("[cart.js] /add-to-cart response status:", response.status);
+
         // CHECK HTTP STATUS TRƯỚC
         if (!response.ok) {
             const text = await response.text();
-            console.error("Server error:", text);
+            console.error("[cart.js] Server error:", text);
             alert("Lỗi server khi thêm vào giỏ hàng!");
             return;
         }
 
         const data = await response.json();
+        console.log("[cart.js] /add-to-cart response data:", data);
 
         if (data.success) {
+            console.log("[cart.js] Add success, reloading cart...");
+            await loadCart();
             updateCartCount(data.data);
             alert("Đã thêm vào giỏ hàng thành công!");
         } else {
@@ -144,7 +159,7 @@ window.addToCart = async function (variantId) {
         }
 
     } catch (error) {
-        console.error("Lỗi khi thêm vào giỏ:", error);
+        console.error("[cart.js] Error in addToCart:", error);
         alert("Không thể thêm vào giỏ hàng!");
     }
 };

@@ -182,6 +182,10 @@ class PaymentService {
                 "customerId" => $customerId,
                 "orderDate" => date("Y-m-d H:i:s"),
                 "status" => "Pending",
+                "subtotal" => (float)($payload['subtotal'] ?? 0),
+                "lensCost" => (float)($payload['lensCost'] ?? 0),
+                "shippingFee" => (float)($payload['shippingFee'] ?? 0),
+                "discount" => (float)($payload['discount'] ?? 0),
                 "totalPrice" => (float)($payload['totalPrice'] ?? $summary['total']),
                 "staffId" => null
             ]);

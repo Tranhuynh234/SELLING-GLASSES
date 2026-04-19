@@ -131,6 +131,10 @@ document.addEventListener('click', function (e) {
               const totalQty = data.data.reduce((s, it) => s + Number(it.quantity||0), 0);
               badge.innerText = totalQty;
             }
+            // Reload lại giỏ hàng nếu có
+            if (typeof loadCart === 'function') {
+              loadCart();
+            }
           }
         } else {
           alert('Thêm vào giỏ thất bại: ' + (data.message || 'Lỗi'));

@@ -40,6 +40,16 @@ class StaffModel extends BaseModel {
         return $data ? new Staff($data) : null;
     }
 
+    // ===== TÌM THEO position (ví dụ: 'sales', 'operation') =====
+    public function findByPosition($position) {
+        if (!$position) return null;
+        $sql = "SELECT * FROM {$this->table} WHERE position = ? LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([strtolower($position)]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? new Staff($row) : null;
+    }
+
     // ===== XÓA THEO staffId =====
     public function deleteStaff($id) {
         return $this->delete($id, "staffId");

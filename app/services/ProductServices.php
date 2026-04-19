@@ -236,4 +236,20 @@ class ProductServices {
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
+
+    // ==========================================
+    // 4. LỌC SẢN PHẨM THEO DANH MỤC
+    // ==========================================
+    public function getProductsByCategory($categoryName) {
+        return $this->productModel->getProductsByCategory($categoryName) ?: [];
+    }
+
+    public function getProductsByCategoryId($categoryId) {
+        return $this->productModel->getProductsByCategoryId($categoryId) ?: [];
+    }
+
+    // TÌM KIẾM SẢN PHẨM
+    public function searchProducts($keyword) {
+        return $this->productModel->searchProducts($keyword) ?: [];
+    }
 }

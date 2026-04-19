@@ -152,4 +152,53 @@ public function addProduct($data) {
         $result = $this->queryOne($sql);
         return $result['total'];
     }
+
+    public function getProductsByCategory($categoryName) {
+        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
+                FROM product p
+                LEFT JOIN product_variant pv ON pv.productId = p.productId
+                LEFT JOIN category c ON c.categoryId = p.categoryId
+                WHERE c.name = :categoryName
+                ORDER BY p.productId DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':categoryName', $categoryName, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getProductsByCategoryId($categoryId) {
+        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
+                FROM product p
+                LEFT JOIN product_variant pv ON pv.productId = p.productId
+                LEFT JOIN category c ON c.categoryId = p.categoryId
+                WHERE p.categoryId = :categoryId
+                ORDER BY p.productId DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':categoryId', $categoryId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // TÌM KIẾM SẢN PHẨM
+    public function searchProducts($keyword) {
+        $keyword = '%' . $keyword . '%';
+        $sql = "SELECT p.*, pv.variantId, pv.price, pv.stock, pv.color, pv.size, c.name as categoryName
+                FROM product p
+                LEFT JOIN product_variant pv ON pv.productId = p.productId
+                LEFT JOIN category c ON c.categoryId = p.categoryId
+                WHERE p.name LIKE :keyword 
+                   OR p.description LIKE :keyword
+                   OR c.name LIKE :keyword
+                ORDER BY p.productId DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':keyword', $keyword, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

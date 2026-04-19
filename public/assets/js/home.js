@@ -49,66 +49,71 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.highlightCards = highlightCards;
 
+    // ========== CATEGORY FILTERING ==========
+    window.filterProductsByCategory = function(categoryId, categoryName, element) {
+        console.log('Filtering by category ID:', categoryId, 'Name:', categoryName);
+        
+        // Add visual feedback
+        if (element) {
+            element.style.opacity = '0.7';
+            element.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Redirect to filtered products page using categoryId
+        window.location.href = '/SELLING-GLASSES/public/get-all-products?categoryId=' + categoryId;
+    };
+
     // XỬ LÝ THANH TÌM KIẾM TRÊN HEADER
     const searchToggleBtn = document.getElementById('search-toggle-btn');
     const searchBar = document.getElementById('search-bar');
     const searchInput = document.getElementById('search-input');
     const searchIcon = document.getElementById('search-icon');
 
-    searchToggleBtn.addEventListener('click', () => {
-        const isOpen = searchBar.classList.contains('w-48') || searchBar.classList.contains('w-64');
+    if (searchToggleBtn && searchBar && searchInput && searchIcon) {
+        searchToggleBtn.addEventListener('click', () => {
+            const isOpen = searchBar.classList.contains('w-48') || searchBar.classList.contains('w-64');
 
-        if (!isOpen) {
-            // Mở thanh tìm kiếm
-            searchBar.classList.remove('w-0', 'opacity-0');
-            searchBar.classList.add('w-48','md:w-64','opacity-100');
-            searchIcon.classList.replace('fa-search', 'fa-times'); // Đổi icon kính lúp thành dấu X
-            searchInput.focus();
-        } else {
-            // Đóng thanh tìm kiếm
-            closeSearch();
-        }
-    });
-
-    function closeSearch() {
-        searchBar.classList.add('w-0', 'opacity-0');
-        searchBar.classList.remove('w-48', 'md:w-64', 'opacity-100', 'border', 'border-stone-200');
-        searchIcon.classList.replace('fa-times', 'fa-search');
-        searchInput.value = '';
-    }
-
-    // Đóng khi click ra ngoài
-    document.addEventListener('click', (e) => {
-        if (!searchBar.contains(e.target) && !searchToggleBtn.contains(e.target)) {
-            closeSearch();
-        }
-    });
-
-    // Xử lý khi nhấn Enter để tìm kiếm
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const query = searchInput.value.trim().toLowerCase();
-            if (query) {
-                // Tìm tất cả các tiêu đề sản phẩm trên trang
-                const productNames = document.querySelectorAll('h3');
-                let found = false;
-
-                productNames.forEach(name => {
-                    if (name.innerText.toLowerCase().includes(query)) {
-                        // Cuộn đến sản phẩm đó
-                        name.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        // Hiệu ứng nháy vàng để nhận biết
-                        name.parentElement.classList.add('ring-2', 'ring-amber-500', 'duration-500');
-                        setTimeout(() => name.parentElement.classList.remove('ring-2', 'ring-amber-500'), 3000);
-                        found = true;
-                    }
-                });
-
-                if (!found) {
-                    alert('Dạ EYESGLASS không tìm thấy sản phẩm: ' + query);
-                }
+            if (!isOpen) {
+                // Mở thanh tìm kiếm
+                searchBar.classList.remove('w-0', 'opacity-0');
+                searchBar.classList.add('w-48','md:w-64','opacity-100');
+                searchIcon.classList.replace('fa-search', 'fa-times'); // Đổi icon kính lúp thành dấu X
+                searchInput.focus();
+            } else {
+                // Đóng thanh tìm kiếm
                 closeSearch();
             }
+        });
+
+        function closeSearch() {
+            searchBar.classList.add('w-0', 'opacity-0');
+            searchBar.classList.remove('w-48', 'md:w-64', 'opacity-100', 'border', 'border-stone-200');
+            searchIcon.classList.replace('fa-times', 'fa-search');
+            searchInput.value = '';
         }
-    });
+
+        // Đóng khi click ra ngoài
+        document.addEventListener('click', (e) => {
+            if (!searchBar.contains(e.target) && !searchToggleBtn.contains(e.target)) {
+                closeSearch();
+            }
+        });
+
+        // Xử lý khi nhấn Enter để tìm kiếm
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Điều hướng đến trang tìm kiếm
+                    window.location.href = `/SELLING-GLASSES/public/search-products?q=${encodeURIComponent(query)}`;
+                } else {
+                    alert('Vui lòng nhập từ khóa tìm kiếm');
+                }
+            }
+        });
+    }
 });

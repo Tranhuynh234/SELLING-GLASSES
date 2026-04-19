@@ -26,8 +26,11 @@ public static function handle($roles = [], $positions = []) {
     }
 
     // check position
-    if (!empty($positions) && !in_array($user['position'], $positions)) {
-        self::jsonResponse(403, "Không có quyền - position");
+    if (!empty($positions)) {
+        $userPosition = $user['position'] ?? null;
+        if (!in_array($userPosition, $positions)) {
+            self::jsonResponse(403, "Không có quyền - position (yêu cầu: " . implode(", ", $positions) . ", user: " . $userPosition . ")");
+        }
     }
 
     return $user;

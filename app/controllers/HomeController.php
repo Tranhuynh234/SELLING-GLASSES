@@ -22,6 +22,9 @@ class HomeController {
         // Lấy danh sách đánh giá từ khách hàng
         $reviews = $this->homeService->getLatestReviews(5);
 
+        // Lấy danh sách combo từ database
+        $combos = $this->homeService->getCombos(3);
+
         // Nhúng file giao diện trang chủ
         require_once __DIR__ . "/../views/home/home.php";
     }

@@ -122,6 +122,10 @@ CREATE TABLE `orders` (
   `customerId` int(11) NOT NULL,
   `orderDate` datetime NOT NULL,
   `status` enum('Pending','Confirmed','Processing','Shipped','Delivered','Cancelled','Returned') NOT NULL,
+  `subtotal` decimal(10,2) DEFAULT 0,
+  `lensCost` decimal(10,2) DEFAULT 0,
+  `shippingFee` decimal(10,2) DEFAULT 0,
+  `discount` decimal(10,2) DEFAULT 0,
   `totalPrice` decimal(10,2) NOT NULL,
   `staffId` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

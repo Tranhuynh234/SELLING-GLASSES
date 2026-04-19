@@ -82,6 +82,7 @@ $customerId = $user['customerId'] ?? 0;
 
 // --- 2. LẤY DANH SÁCH ĐƠN HÀNG  ---
 $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
+                o.subtotal, o.lensCost, o.shippingFee, o.discount,
                 p.first_product_name, 
                 p.product_image,
                 p.has_prescription 
@@ -126,7 +127,10 @@ $orderInfo = null;
 $items = [];
 
 if ($orderId) {
-    $stmtDetail = $db->prepare("SELECT * FROM orders WHERE orderId = :id AND customerId = :cid");
+    $stmtDetail = $db->prepare("SELECT o.*, 
+                                      o.subtotal, o.lensCost, o.shippingFee, o.discount
+                               FROM orders o
+                               WHERE o.orderId = :id AND o.customerId = :cid");
     $stmtDetail->execute([':id' => $orderId, ':cid' => $customerId]);
     $orderInfo = $stmtDetail->fetch(PDO::FETCH_ASSOC);
 
@@ -403,13 +407,29 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                             <?php endforeach; ?>
 
                             <div class="price-info" style="text-align: right; margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px;">
-                                <p>Tiền hàng: <strong><?= number_format($subtotal) ?>đ</strong></p>
-                                
+                                <!-- Nếu database không lưu subtotal, tính lại từ items -->
                                 <?php 
-                                    // Tính phí ship dựa trên cột totalPrice trong database
-                                    $shippingFee = $orderInfo['totalPrice'] - $subtotal; 
+                                    $displaySubtotal = !empty($orderInfo['subtotal']) && $orderInfo['subtotal'] > 0 
+                                        ? $orderInfo['subtotal'] 
+                                        : $subtotal;
+                                    $displayLensCost = $orderInfo['lensCost'] ?? 0;
+                                    $displayShippingFee = $orderInfo['shippingFee'] ?? 0;
+                                    $displayDiscount = $orderInfo['discount'] ?? 0;
                                 ?>
-                                <p>Phí vận chuyển: <strong><?= number_format($shippingFee) ?>đ</strong></p>
+                                
+                                <p>Tiền hàng: <strong><?= number_format($displaySubtotal) ?>đ</strong></p>
+                                
+                                <?php if ($displayLensCost > 0): ?>
+                                    <p>Chi phí tròng kính: <strong><?= number_format($displayLensCost) ?>đ</strong></p>
+                                <?php endif; ?>
+                                
+                                <?php if ($displayShippingFee > 0): ?>
+                                    <p>Phí vận chuyển: <strong><?= number_format($displayShippingFee) ?>đ</strong></p>
+                                <?php endif; ?>
+                                
+                                <?php if ($displayDiscount > 0): ?>
+                                    <p>Giảm giá: <strong style="color: #16a34a;">-<?= number_format($displayDiscount) ?>đ</strong></p>
+                                <?php endif; ?>
                                 
                                 <h3 style="color: #dc2626; margin-top: 10px;">
                                     Tổng thanh toán: <?= number_format($orderInfo['totalPrice']) ?>đ

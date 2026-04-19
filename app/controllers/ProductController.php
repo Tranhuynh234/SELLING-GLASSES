@@ -149,6 +149,97 @@ class ProductController {
         }
     }
 
+    // Lấy sản phẩm theo danh mục (Category Filter)
+    public function getProductsByCategory() {
+        $categoryName = isset($_GET['category']) ? trim($_GET['category']) : '';
+        
+        if (empty($categoryName)) {
+            $this->handleError("Danh mục không hợp lệ");
+        }
+
+        // Lấy sản phẩm theo danh mục từ Service
+        $result = $this->productService->getProductsByCategory($categoryName);
+
+        // Kiểm tra loại yêu cầu
+        $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+                      || (isset($_GET['format']) && $_GET['format'] === 'json');
+
+        if ($isJsonRequest) {
+            header('Content-Type: application/json; charset=utf-8');
+            $response = [
+                'success' => true,
+                'data' => $result,
+                'category' => $categoryName
+            ];
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit();
+        } else {
+            // Hiển thị view với sản phẩm lọc
+            $products = $result;
+            $categoryTitle = $categoryName;
+            $viewPath = __DIR__ . '/../views/products/all_products.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+            }
+            exit();
+        }
+    }
+
+    // Lấy sản phẩm theo ID danh mục (Category Filter by ID)
+    public function getProductsByCategoryId() {
+        $categoryId = isset($_GET['categoryId']) ? (int)$_GET['categoryId'] : 0;
+        
+        if ($categoryId <= 0) {
+            $this->handleError("Danh mục không hợp lệ");
+        }
+
+        // Lấy sản phẩm theo categoryId từ Service
+        $result = $this->productService->getProductsByCategoryId($categoryId);
+
+        // Kiểm tra loại yêu cầu
+        $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+                      || (isset($_GET['format']) && $_GET['format'] === 'json');
+
+        if ($isJsonRequest) {
+            header('Content-Type: application/json; charset=utf-8');
+            $response = [
+                'success' => true,
+                'data' => $result,
+                'categoryId' => $categoryId
+            ];
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit();
+        } else {
+            // Hiển thị view với sản phẩm lọc
+            $products = $result;
+            
+            // Lấy tên danh mục để hiển thị tiêu đề
+            $categoryName = '';
+            $categoryMap = [
+                1 => 'Gọng Nam',
+                2 => 'Gọng Nữ',
+                3 => 'Gọng Trẻ Em',
+                4 => 'Chống Ánh Sáng Xanh',
+                5 => 'Kính Đổi Màu',
+                6 => 'Kính Siêu Mỏng'
+            ];
+            
+            if (isset($categoryMap[$categoryId])) {
+                $categoryName = $categoryMap[$categoryId];
+            }
+            
+            $viewPath = __DIR__ . '/../views/products/all_products.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+            }
+            exit();
+        }
+    }
+
     // Hiển thị chi tiết (Dùng cho nút Xem chi tiết)
     public function detail($id) {
         // 1. Kiểm tra ID hợp lệ (Dùng chung cho cả 2 bên)
@@ -186,6 +277,45 @@ class ProductController {
         }
     }
 
+    // TÌM KIẾM SẢN PHẨM
+    public function searchProducts() {
+        $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
+        
+        if (empty($keyword)) {
+            $this->handleError("Từ khóa tìm kiếm không hợp lệ");
+        }
+
+        // Lấy kết quả từ Service
+        $result = $this->productService->searchProducts($keyword);
+
+        // Kiểm tra loại yêu cầu
+        $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) 
+                      || (isset($_GET['format']) && $_GET['format'] === 'json');
+
+        if ($isJsonRequest) {
+            header('Content-Type: application/json; charset=utf-8');
+            $response = [
+                'success' => true,
+                'data' => $result,
+                'keyword' => $keyword,
+                'count' => count($result)
+            ];
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit();
+        } else {
+            // Hiển thị view với kết quả tìm kiếm
+            $products = $result;
+            $categoryName = 'Kết quả tìm kiếm: "' . htmlspecialchars($keyword) . '"';
+            $viewPath = __DIR__ . '/../views/products/all_products.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+            }
+            exit();
+        }
+    }
+
     // Hàm bổ trợ để xử lý lỗi nhanh cho cả 2 loại yêu cầu
     private function handleError($message) {
         $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
@@ -196,5 +326,41 @@ class ProductController {
             die($message);
         }
         exit();
+    }
+
+    /**
+     * Lấy tất cả sản phẩm (API - dùng cho Combo Manager)
+     */
+    public function getAllProducts() {
+        // Force JSON response
+        header('Content-Type: application/json; charset=utf-8');
+        header('Accept: application/json');
+
+        try {
+            $products = $this->productService->getAllProducts();
+            
+            // Transform to simpler format for combo selection
+            $data = array_map(function($product) {
+                return [
+                    'productId' => (int)$product['productId'],
+                    'name' => $product['name'] ?? '',
+                    'price' => (int)($product['minPrice'] ?? 0),
+                    'description' => $product['description'] ?? ''
+                ];
+            }, $products);
+            
+            echo json_encode([
+                'success' => true,
+                'data' => $data
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        } catch (\Exception $e) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], JSON_UNESCAPED_UNICODE);
+            exit();
+        }
     }
 }

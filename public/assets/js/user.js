@@ -12,7 +12,9 @@ const USER_API = "/SELLING-GLASSES/public/get-users";
 // =============================
 async function loadUsers() {
   try {
-    const res = await fetch(USER_API);
+    const res = await fetch(USER_API, {
+      credentials: 'include'
+    });
     const result = await res.json();
 
     if (!result.success) {
@@ -187,6 +189,7 @@ async function saveUser() {
   try {
     const response = await fetch("/SELLING-GLASSES/public/create-user", {
       method: "POST",
+      credentials: 'include',
       body: formData, // Gửi dưới dạng Form
     });
 
@@ -235,6 +238,9 @@ async function executeSearch(keyword) {
   try {
     const response = await fetch(
       `/SELLING-GLASSES/public/search-users?keyword=${encodeURIComponent(keyword)}`,
+      {
+        credentials: 'include'
+      }
     );
     const result = await response.json();
 
@@ -317,6 +323,7 @@ async function deleteUser(userId) {
   try {
     const response = await fetch(`/SELLING-GLASSES/public/delete-user`, {
       method: "POST",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -373,7 +380,9 @@ const permissionPageSize = 5;
 let allPermissions = [];
 async function loadPermissions() {
   try {
-    const res = await fetch("/SELLING-GLASSES/public/get-users");
+    const res = await fetch("/SELLING-GLASSES/public/get-users", {
+      credentials: 'include'
+    });
     const result = await res.json();
 
     if (!result.success) {
@@ -485,6 +494,7 @@ async function updatePermission(userId) {
     const res = await fetch("/SELLING-GLASSES/public/staff-save", {
       // Thay đổi route ở đây
       method: "POST",
+      credentials: 'include',
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -553,6 +563,7 @@ if (formUpdate) {
     try {
       const response = await fetch("/SELLING-GLASSES/public/update-user", {
         method: "POST",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
