@@ -322,6 +322,7 @@ switch ($url) {
         exit();
 
     case 'add-to-cart':
+        AuthMiddleware::handle();
         $cartController->add();
         exit();
 
