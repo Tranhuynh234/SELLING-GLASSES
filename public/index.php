@@ -326,6 +326,11 @@ switch ($url) {
         $cartController->add();
         exit();
 
+    case 'add-combo-to-cart':
+        AuthMiddleware::handle();
+        $cartController->addCombo();
+        exit();
+
     case 'update-cart':
         $cartController->update();
         exit();
