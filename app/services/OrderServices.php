@@ -46,13 +46,17 @@ class OrderService {
 
             $cart = $_SESSION['cart'] ?? [];
             foreach ($cart as $item) {
+                $variantId = $item['variantId'] ?? $item['productId'] ?? null;
+                $comboId = $item['comboId'] ?? null;
+
                 $stmt = $db->prepare(
-                    "INSERT INTO order_item (orderId, variantId, quantity, price) VALUES (?, ?, ?, ?)"
+                    "INSERT INTO order_item (orderId, variantId, comboId, quantity, price) VALUES (?, ?, ?, ?, ?)"
                 );
 
                 $stmt->execute([
                     $orderId,
-                    $item['variantId'] ?? $item['productId'] ?? null,
+                    $variantId,
+                    $comboId,
                     $item['quantity'],
                     $item['price']
                 ]);
