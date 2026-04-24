@@ -205,16 +205,35 @@ function renderCart(state = "ready") {
 
 function renderRow(item) {
   const cartItemId = String(item.cartItemId);
+  const isCombo = item.itemType === 'combo';
   const imageUrl = resolveImageUrl(item.imagePath);
   const lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
   const detailParts = [];
 
-  if (item.color) {
-    detailParts.push(`<strong>Màu sắc:</strong> ${escapeHtml(item.color)}`);
+  if (!isCombo) {
+    if (item.color) {
+      detailParts.push(`<strong>Màu sắc:</strong> ${escapeHtml(item.color)}`);
+    }
+    if (item.size) {
+      detailParts.push(`<strong>Size:</strong> ${escapeHtml(item.size)}`);
+    }
   }
-  if (item.size) {
-    detailParts.push(`<strong>Size:</strong> ${escapeHtml(item.size)}`);
-  }
+
+  const badgeHtml = isCombo
+    ? `<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;margin-bottom:4px;">COMBO</span><br>`
+    : '';
+
+  const codeHtml = isCombo
+    ? `<p class="cart-product-code">Mã combo: ${escapeHtml(item.comboId || "")}</p>`
+    : `<p class="cart-product-code">Mã biến thể: ${escapeHtml(item.variantId || "")}</p>`;
+
+  const detailHtml = isCombo
+    ? (item.comboDescription ? `<p class="cart-product-detail">${escapeHtml(item.comboDescription)}</p>` : '')
+    : `<p class="cart-product-detail">${detailParts.join(" • ") || "Phiên bản tiêu chuẩn"}</p>${item.description ? `<p class="cart-product-detail">${escapeHtml(item.description)}</p>` : ""}`;
+
+  const stockHtml = isCombo
+    ? `<div class="cart-stock" style="color:#b45309;font-weight:600;">Combo</div>`
+    : `<div class="cart-stock">${Math.max(Number(item.stock || 0) - Number(item.quantity || 0), 0)} sản phẩm</div>`;
 
   return `
         <article class="cart-row" data-cart-item-id="${cartItemId}">
@@ -226,10 +245,10 @@ function renderRow(item) {
             <div class="cart-product">
                 <img class="cart-product-image" src="${imageUrl}" alt="${escapeHtml(item.productName || "Sản phẩm")}" onerror="this.src='/SELLING-GLASSES/public/assets/images/thumbnail1.jpg'">
                 <div class="cart-product-copy">
+                    ${badgeHtml}
                     <h3>${escapeHtml(item.productName || "Sản phẩm đang cập nhật")}</h3>
-                    <p class="cart-product-code">Mã biến thể: ${escapeHtml(item.variantId || "")}</p>
-                    <p class="cart-product-detail">${detailParts.join(" • ") || "Phiên bản tiêu chuẩn"}</p>
-                    ${item.description ? `<p class="cart-product-detail">${escapeHtml(item.description)}</p>` : ""}
+                    ${codeHtml}
+                    ${detailHtml}
                 </div>
             </div>
 
@@ -238,10 +257,10 @@ function renderRow(item) {
             <div class="qty-control">
                 <button type="button" class="qty-btn" data-action="decrease" data-cart-item-id="${cartItemId}" ${Number(item.quantity) <= 1 ? "disabled" : ""}>-</button>
                 <span class="qty-value">${Number(item.quantity || 0)}</span>
-                <button type="button" class="qty-btn" data-action="increase" data-cart-item-id="${cartItemId}" ${Number(item.quantity) >= Number(item.stock) ? "disabled" : ""}>+</button>
+                <button type="button" class="qty-btn" data-action="increase" data-cart-item-id="${cartItemId}" ${!isCombo && Number(item.quantity) >= Number(item.stock) ? "disabled" : ""}>+</button>
             </div>
 
-            <div class="cart-stock">${Math.max(Number(item.stock || 0) - Number(item.quantity || 0), 0)} sản phẩm</div>
+            ${stockHtml}
 
             <div class="cart-line-total">${formatCurrency(lineTotal)}</div>
 
