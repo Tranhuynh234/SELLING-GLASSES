@@ -196,7 +196,7 @@ class OrderService {
         return $this->orderModel->getSupportUnreadCountForUser($userId);
     }
 
-    // KHÁCH HÀNG gửi tin nhắn cho nhân viên
+    // KHÁCH HÀNG GỬI TIN NHẮN HỖ TRỢ
     public function sendCustomerMessageForUser($userId, $message) {
         if (!$userId || empty($message)) {
             return false;
