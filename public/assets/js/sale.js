@@ -367,13 +367,18 @@ document.addEventListener("DOMContentLoaded", () => {
         syncOrderUI(detail.status, detail.is_contacted);
         modalBody.innerHTML = renderRows(
           result.data,
-          (item) => `
+          (item) => {
+            const isCombo = item.itemType === 'combo' || item.comboId;
+            const badgeHtml = isCombo ? '<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:4px;">COMBO</span>' : '';
+            const detailHtml = isCombo ? '' : `<div class="text-muted" style="font-size: 0.85rem;">Màu: ${item.color || '-'} | Size: ${item.size || '-'}</div>`;
+            return `
             <tr style="vertical-align: middle;">
               <td class="text-center" style="width: 80px;"><img src="/SELLING-GLASSES/public/assets/images/products/${item.product_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"></td>
-              <td><div class="fw-bold" style="color: #333;">${item.product_name}</div><div class="text-muted" style="font-size: 0.85rem;">Màu: ${item.color} | Size: ${item.size}</div></td>
+              <td><div class="fw-bold" style="color: #333;">${badgeHtml}${item.product_name}</div>${detailHtml}</td>
               <td class="text-center">${item.quantity}</td>
               <td class="text-center fw-bold" style="color: #2d3436;">${formatPrice(item.price)}</td>
-            </tr>`,
+            </tr>`;
+          },
         );
         renderComplaintRequestPanel(requestContext);
       } else {
