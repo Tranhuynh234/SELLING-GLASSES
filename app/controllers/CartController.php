@@ -105,6 +105,42 @@ class CartController {
         exit();
     }
 
+    /** Thêm combo vào giỏ */
+    public function addCombo() {
+        header('Content-Type: application/json');
+        $customerId = $this->getCustomerId();
+
+        if (!$customerId) {
+            echo json_encode(["error" => "Not logged in"]);
+            exit();
+        }
+
+        $comboId = $_POST['comboId'] ?? null;
+        $quantity = $_POST['quantity'] ?? 1;
+
+        if (!$comboId) {
+            echo json_encode(["success" => false, "message" => "Missing comboId"]);
+            exit();
+        }
+
+        $items = $this->cartService->addComboToCart($customerId, $comboId, $quantity);
+
+        if ($items === false) {
+            http_response_code(500);
+            echo json_encode([
+                "success" => false,
+                "message" => "Combo không tồn tại hoặc đã ngưng hoạt động"
+            ]);
+            exit();
+        }
+
+        echo json_encode([
+            "success" => true,
+            "data" => $items
+        ]);
+        exit();
+    }
+
     public function update() {
         header('Content-Type: application/json');
 
