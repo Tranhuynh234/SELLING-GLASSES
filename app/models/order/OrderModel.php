@@ -75,15 +75,27 @@ class OrderModel extends BaseModel {
                 u.name AS cust_name,
                 u.phone AS cust_phone,
                 c.address AS cust_address,
-                oi.quantity, oi.price,
+                oi.quantity, oi.price, oi.comboId,
                 pv.color, pv.size,
-                p.name AS product_name, p.imagePath AS product_image
+                CASE
+                    WHEN oi.comboId IS NOT NULL THEN cb.name
+                    ELSE p.name
+                END AS product_name,
+                CASE
+                    WHEN oi.comboId IS NOT NULL THEN cb.imagePath
+                    ELSE p.imagePath
+                END AS product_image,
+                CASE
+                    WHEN oi.comboId IS NOT NULL THEN 'combo'
+                    ELSE 'product'
+                END AS itemType
             FROM orders o
             JOIN customers c ON o.customerId = c.customerId
             JOIN users u ON c.userId = u.userId
             LEFT JOIN order_item oi ON o.orderId = oi.orderId
             LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
             LEFT JOIN product p ON pv.productId = p.productId
+            LEFT JOIN combo cb ON oi.comboId = cb.comboId
             WHERE o.orderId = :orderId";
 
             $stmt = $this->conn->prepare($sql);

@@ -322,7 +322,13 @@ switch ($url) {
         exit();
 
     case 'add-to-cart':
+        AuthMiddleware::handle();
         $cartController->add();
+        exit();
+
+    case 'add-combo-to-cart':
+        AuthMiddleware::handle();
+        $cartController->addCombo();
         exit();
 
     case 'update-cart':

@@ -3,215 +3,239 @@ let cartItems = [];
 let selectedItems = new Set();
 
 document.addEventListener("DOMContentLoaded", () => {
-    bindCartEvents();
-    loadCart();
+  bindCartEvents();
+  loadCart();
 });
 
 function bindCartEvents() {
-    const selectAll = document.getElementById("select-all");
-    const removeSelectedButton = document.getElementById("remove-selected");
-    const checkoutButton = document.getElementById("go-to-checkout");
+  const selectAll = document.getElementById("select-all");
+  const removeSelectedButton = document.getElementById("remove-selected");
+  const checkoutButton = document.getElementById("go-to-checkout");
 
-    if (selectAll) {
-        selectAll.addEventListener("change", () => {
-            if (selectAll.checked) {
-                selectedItems = new Set(cartItems.map((item) => String(item.cartItemId)));
-            } else {
-                selectedItems.clear();
-            }
+  if (selectAll) {
+    selectAll.addEventListener("change", () => {
+      if (selectAll.checked) {
+        selectedItems = new Set(
+          cartItems.map((item) => String(item.cartItemId)),
+        );
+      } else {
+        selectedItems.clear();
+      }
 
-            sessionStorage.setItem(
-                "selectedCartItems",
-                JSON.stringify(Array.from(selectedItems))
-            );
+      sessionStorage.setItem(
+        "selectedCartItems",
+        JSON.stringify(Array.from(selectedItems)),
+      );
 
-            renderCart();
-        });
-    }
+      renderCart();
+    });
+  }
 
-    if (removeSelectedButton) {
-        removeSelectedButton.addEventListener("click", removeSelectedItems);
-    }
+  if (removeSelectedButton) {
+    removeSelectedButton.addEventListener("click", removeSelectedItems);
+  }
 
-    if (checkoutButton) {
-        checkoutButton.addEventListener("click", goToCheckout);
-    }
+  if (checkoutButton) {
+    checkoutButton.addEventListener("click", goToCheckout);
+  }
 }
 
 async function loadCart() {
-    try {
-        const response = await fetch(`${CART_BASE}/get-cart`, {
-            credentials: "include"
-        });
-        const data = await response.json();
+  try {
+    const response = await fetch(`${CART_BASE}/get-cart`, {
+      credentials: "include",
+    });
+    const data = await response.json();
 
-        if (data && data.error) {
-            cartItems = [];
-            selectedItems.clear();
-            renderCart(data.error === "Not logged in" ? "login" : "empty");
-            updateCartCount([]);
-            return;
-        }
-
-        const saved = JSON.parse(sessionStorage.getItem("selectedCartItems")) || [];
-
-        cartItems = Array.isArray(data) ? data : [];
-
-        selectedItems = new Set(saved);
-
-        renderCart();
-        updateCartCount(cartItems);
-    } catch (error) {
-        console.error("Lỗi loadCart:", error);
-        cartItems = [];
-        selectedItems.clear();
-        renderCart("error");
-        updateCartCount([]);
+    if (data && data.error) {
+      cartItems = [];
+      selectedItems.clear();
+      renderCart(data.error === "Not logged in" ? "login" : "empty");
+      updateCartCount([]);
+      return;
     }
+
+    const saved = JSON.parse(sessionStorage.getItem("selectedCartItems")) || [];
+
+    cartItems = Array.isArray(data) ? data : [];
+
+    selectedItems = new Set(saved);
+
+    renderCart();
+    updateCartCount(cartItems);
+  } catch (error) {
+    console.error("Lỗi loadCart:", error);
+    cartItems = [];
+    selectedItems.clear();
+    renderCart("error");
+    updateCartCount([]);
+  }
 }
 
 async function changeQuantity(cartItemId, nextQuantity) {
-    if (nextQuantity <= 0) {
-        return;
-    }
+  if (nextQuantity <= 0) {
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("cartItemId", cartItemId);
-    formData.append("quantity", nextQuantity);
+  const formData = new FormData();
+  formData.append("cartItemId", cartItemId);
+  formData.append("quantity", nextQuantity);
 
-    await fetch(`${CART_BASE}/update-cart`, {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-    });
+  await fetch(`${CART_BASE}/update-cart`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
 
-    await loadCart();
+  await loadCart();
 }
 
 async function removeItem(cartItemId) {
-    const formData = new FormData();
-    formData.append("cartItemId", cartItemId);
+  const formData = new FormData();
+  formData.append("cartItemId", cartItemId);
 
-    await fetch(`${CART_BASE}/remove-cart-item`, {
-        method: "POST",
-        body: formData,
-        credentials: "include"
-    });
+  await fetch(`${CART_BASE}/remove-cart-item`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
 
-    selectedItems.delete(String(cartItemId));
-    await loadCart();
+  selectedItems.delete(String(cartItemId));
+  await loadCart();
 }
 
 async function removeSelectedItems() {
-    if (!selectedItems.size) {
-        alert("Hãy chọn ít nhất một sản phẩm để xóa.");
-        return;
-    }
+  if (!selectedItems.size) {
+    alert("Hãy chọn ít nhất một sản phẩm để xóa.");
+    return;
+  }
 
-    const ids = Array.from(selectedItems);
-    for (const cartItemId of ids) {
-        await removeItem(cartItemId);
-    }
+  const ids = Array.from(selectedItems);
+  for (const cartItemId of ids) {
+    await removeItem(cartItemId);
+  }
 }
 
 window.addToCart = async function (variantId) {
-    const formData = new FormData();
-    formData.append("variantId", variantId);
-    formData.append("quantity", 1);
+  const formData = new FormData();
+  formData.append("variantId", variantId);
+  formData.append("quantity", 1);
 
-    try {
-        const response = await fetch(`${CART_BASE}/add-to-cart`, {
-            method: "POST",
-            body: formData,
-            credentials: "include"
-        });
+  try {
+    const response = await fetch(`${CART_BASE}/add-to-cart`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
 
-        // CHECK HTTP STATUS TRƯỚC
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("Server error:", text);
-            alert("Lỗi server khi thêm vào giỏ hàng!");
-            return;
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-            await loadCart();
-            updateCartCount(data.data);
-            alert("Đã thêm vào giỏ hàng thành công!");
-        } else {
-            alert("Lỗi: " + (data.message || "Unknown error"));
-        }
-
-    } catch (error) {
-        console.error("Lỗi khi thêm vào giỏ:", error);
-        alert("Không thể thêm vào giỏ hàng!");
+    // CHECK HTTP STATUS TRƯỚC
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Server error:", text);
+      alert("Chưa Đăng Nhập");
+      return;
     }
+
+    const data = await response.json();
+
+    if (data.success) {
+      await loadCart();
+      updateCartCount(data.data);
+      alert("Đã thêm vào giỏ hàng thành công!");
+    } else {
+      alert("Lỗi: " + (data.message || "Unknown error"));
+    }
+  } catch (error) {
+    console.error("Lỗi khi thêm vào giỏ:", error);
+    alert("Không thể thêm vào giỏ hàng!");
+  }
 };
 
 function renderCart(state = "ready") {
-    const itemsContainer = document.getElementById("cart-items");
-    const selectAll = document.getElementById("select-all");
-    const removeSelectedButton = document.getElementById("remove-selected");
+  const itemsContainer = document.getElementById("cart-items");
+  const selectAll = document.getElementById("select-all");
+  const removeSelectedButton = document.getElementById("remove-selected");
 
-    if (!itemsContainer) {
-        return;
-    }
+  if (!itemsContainer) {
+    return;
+  }
 
-    if (state !== "ready") {
-        itemsContainer.innerHTML = renderState(state);
-        syncSummary([]);
-        if (selectAll) {
-            selectAll.checked = false;
-            selectAll.disabled = true;
-        }
-        if (removeSelectedButton) {
-            removeSelectedButton.disabled = true;
-        }
-        return;
-    }
-
-    if (!cartItems.length) {
-        itemsContainer.innerHTML = renderState("empty");
-        syncSummary([]);
-        if (selectAll) {
-            selectAll.checked = false;
-            selectAll.disabled = true;
-        }
-        if (removeSelectedButton) {
-            removeSelectedButton.disabled = true;
-        }
-        return;
-    }
-
+  if (state !== "ready") {
+    itemsContainer.innerHTML = renderState(state);
+    syncSummary([]);
     if (selectAll) {
-        selectAll.disabled = false;
-        selectAll.checked = cartItems.every((item) => selectedItems.has(String(item.cartItemId)));
+      selectAll.checked = false;
+      selectAll.disabled = true;
     }
     if (removeSelectedButton) {
-        removeSelectedButton.disabled = !selectedItems.size;
+      removeSelectedButton.disabled = true;
     }
+    return;
+  }
 
-    itemsContainer.innerHTML = cartItems.map(renderRow).join("");
-    bindRowEvents();
-    syncSummary(cartItems.filter((item) => selectedItems.has(String(item.cartItemId))));
+  if (!cartItems.length) {
+    itemsContainer.innerHTML = renderState("empty");
+    syncSummary([]);
+    if (selectAll) {
+      selectAll.checked = false;
+      selectAll.disabled = true;
+    }
+    if (removeSelectedButton) {
+      removeSelectedButton.disabled = true;
+    }
+    return;
+  }
+
+  if (selectAll) {
+    selectAll.disabled = false;
+    selectAll.checked = cartItems.every((item) =>
+      selectedItems.has(String(item.cartItemId)),
+    );
+  }
+  if (removeSelectedButton) {
+    removeSelectedButton.disabled = !selectedItems.size;
+  }
+
+  itemsContainer.innerHTML = cartItems.map(renderRow).join("");
+  bindRowEvents();
+  syncSummary(
+    cartItems.filter((item) => selectedItems.has(String(item.cartItemId))),
+  );
 }
 
 function renderRow(item) {
-    const cartItemId = String(item.cartItemId);
-    const imageUrl = resolveImageUrl(item.imagePath);
-    const lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
-    const detailParts = [];
+  const cartItemId = String(item.cartItemId);
+  const isCombo = item.itemType === 'combo';
+  const imageUrl = resolveImageUrl(item.imagePath);
+  const lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
+  const detailParts = [];
 
+  if (!isCombo) {
     if (item.color) {
-        detailParts.push(`<strong>Màu sắc:</strong> ${escapeHtml(item.color)}`);
+      detailParts.push(`<strong>Màu sắc:</strong> ${escapeHtml(item.color)}`);
     }
     if (item.size) {
-        detailParts.push(`<strong>Size:</strong> ${escapeHtml(item.size)}`);
+      detailParts.push(`<strong>Size:</strong> ${escapeHtml(item.size)}`);
     }
+  }
 
-    return `
+  const badgeHtml = isCombo
+    ? `<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;margin-bottom:4px;">COMBO</span><br>`
+    : '';
+
+  const codeHtml = isCombo
+    ? `<p class="cart-product-code">Mã combo: ${escapeHtml(item.comboId || "")}</p>`
+    : `<p class="cart-product-code">Mã biến thể: ${escapeHtml(item.variantId || "")}</p>`;
+
+  const detailHtml = isCombo
+    ? (item.comboDescription ? `<p class="cart-product-detail">${escapeHtml(item.comboDescription)}</p>` : '')
+    : `<p class="cart-product-detail">${detailParts.join(" • ") || "Phiên bản tiêu chuẩn"}</p>${item.description ? `<p class="cart-product-detail">${escapeHtml(item.description)}</p>` : ""}`;
+
+  const stockHtml = isCombo
+    ? `<div class="cart-stock" style="color:#b45309;font-weight:600;">Combo</div>`
+    : `<div class="cart-stock">${Math.max(Number(item.stock || 0) - Number(item.quantity || 0), 0)} sản phẩm</div>`;
+
+  return `
         <article class="cart-row" data-cart-item-id="${cartItemId}">
             <label class="check-wrap">
                 <input type="checkbox" class="row-check" data-cart-item-id="${cartItemId}" ${selectedItems.has(cartItemId) ? "checked" : ""}>
@@ -221,10 +245,10 @@ function renderRow(item) {
             <div class="cart-product">
                 <img class="cart-product-image" src="${imageUrl}" alt="${escapeHtml(item.productName || "Sản phẩm")}" onerror="this.src='/SELLING-GLASSES/public/assets/images/thumbnail1.jpg'">
                 <div class="cart-product-copy">
+                    ${badgeHtml}
                     <h3>${escapeHtml(item.productName || "Sản phẩm đang cập nhật")}</h3>
-                    <p class="cart-product-code">Mã biến thể: ${escapeHtml(item.variantId || "")}</p>
-                    <p class="cart-product-detail">${detailParts.join(" • ") || "Phiên bản tiêu chuẩn"}</p>
-                    ${item.description ? `<p class="cart-product-detail">${escapeHtml(item.description)}</p>` : ""}
+                    ${codeHtml}
+                    ${detailHtml}
                 </div>
             </div>
 
@@ -233,10 +257,10 @@ function renderRow(item) {
             <div class="qty-control">
                 <button type="button" class="qty-btn" data-action="decrease" data-cart-item-id="${cartItemId}" ${Number(item.quantity) <= 1 ? "disabled" : ""}>-</button>
                 <span class="qty-value">${Number(item.quantity || 0)}</span>
-                <button type="button" class="qty-btn" data-action="increase" data-cart-item-id="${cartItemId}" ${Number(item.quantity) >= Number(item.stock) ? "disabled" : ""}>+</button>
+                <button type="button" class="qty-btn" data-action="increase" data-cart-item-id="${cartItemId}" ${!isCombo && Number(item.quantity) >= Number(item.stock) ? "disabled" : ""}>+</button>
             </div>
 
-            <div class="cart-stock">${Math.max(Number(item.stock || 0) - Number(item.quantity || 0), 0)} sản phẩm</div>
+            ${stockHtml}
 
             <div class="cart-line-total">${formatCurrency(lineTotal)}</div>
 
@@ -250,96 +274,105 @@ function renderRow(item) {
 }
 
 function bindRowEvents() {
-    document.querySelectorAll(".row-check").forEach((input) => {
-        input.addEventListener("change", () => {
-            const cartItemId = String(input.dataset.cartItemId);
+  document.querySelectorAll(".row-check").forEach((input) => {
+    input.addEventListener("change", () => {
+      const cartItemId = String(input.dataset.cartItemId);
 
-            if (input.checked) {
-                selectedItems.add(cartItemId);
-            } else {
-                selectedItems.delete(cartItemId);
-            }
+      if (input.checked) {
+        selectedItems.add(cartItemId);
+      } else {
+        selectedItems.delete(cartItemId);
+      }
 
-            sessionStorage.setItem(
-                "selectedCartItems",
-                JSON.stringify(Array.from(selectedItems))
-            );
+      sessionStorage.setItem(
+        "selectedCartItems",
+        JSON.stringify(Array.from(selectedItems)),
+      );
 
-            renderCart();
-        });
+      renderCart();
     });
+  });
 
-    document.querySelectorAll(".qty-btn").forEach((button) => {
-        button.addEventListener("click", async () => {
-            const cartItemId = String(button.dataset.cartItemId);
-            const item = cartItems.find((cartRow) => String(cartRow.cartItemId) === cartItemId);
+  document.querySelectorAll(".qty-btn").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const cartItemId = String(button.dataset.cartItemId);
+      const item = cartItems.find(
+        (cartRow) => String(cartRow.cartItemId) === cartItemId,
+      );
 
-            if (!item) {
-                return;
-            }
+      if (!item) {
+        return;
+      }
 
-            const currentQuantity = Number(item.quantity || 0);
-            const nextQuantity = button.dataset.action === "increase"
-                ? currentQuantity + 1
-                : currentQuantity - 1;
+      const currentQuantity = Number(item.quantity || 0);
+      const nextQuantity =
+        button.dataset.action === "increase"
+          ? currentQuantity + 1
+          : currentQuantity - 1;
 
-            await changeQuantity(cartItemId, nextQuantity);
-        });
+      await changeQuantity(cartItemId, nextQuantity);
     });
+  });
 
-    document.querySelectorAll(".remove-item").forEach((button) => {
-        button.addEventListener("click", async () => {
-            await removeItem(button.dataset.cartItemId);
-        });
+  document.querySelectorAll(".remove-item").forEach((button) => {
+    button.addEventListener("click", async () => {
+      await removeItem(button.dataset.cartItemId);
     });
+  });
 }
 
 function syncSummary(selectedCartItems) {
-    const subtotal = selectedCartItems.reduce((sum, item) => {
-        return sum + Number(item.price || 0) * Number(item.quantity || 0);
-    }, 0);
-    const selectedCount = selectedCartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-    const shipping = subtotal > 0 ? 30000 : 0;
-    const total = subtotal + shipping;
+  const subtotal = selectedCartItems.reduce((sum, item) => {
+    return sum + Number(item.price || 0) * Number(item.quantity || 0);
+  }, 0);
+  const selectedCount = selectedCartItems.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0,
+  );
+  const shipping = subtotal > 0 ? 30000 : 0;
+  const total = subtotal + shipping;
 
-    setText("selected-count", `${selectedCount}`);
-    setText("subtotal", formatCurrency(subtotal));
-    setText("shipping", formatCurrency(shipping));
-    setText("total", formatCurrency(total));
+  setText("selected-count", `${selectedCount}`);
+  setText("subtotal", formatCurrency(subtotal));
+  setText("shipping", formatCurrency(shipping));
+  setText("total", formatCurrency(total));
 }
 
 function goToCheckout() {
-    if (!selectedItems.size) {
-        alert("Hãy chọn ít nhất một sản phẩm trước khi thanh toán.");
-        return;
-    }
+  if (!selectedItems.size) {
+    alert("Hãy chọn ít nhất một sản phẩm trước khi thanh toán.");
+    return;
+  }
 
-    sessionStorage.setItem("selectedCartItems", JSON.stringify(Array.from(selectedItems)));
-    window.location.href = `${CART_BASE}/checkout`;
+  sessionStorage.setItem(
+    "selectedCartItems",
+    JSON.stringify(Array.from(selectedItems)),
+  );
+  window.location.href = `${CART_BASE}/checkout`;
 }
 
 function renderState(type) {
-    if (type === "login") {
-        return `
+  if (type === "login") {
+    return `
             <div class="cart-state">
                 <h3>Bạn cần đăng nhập để xem giỏ hàng</h3>
                 <p>Giỏ hàng đang gắn với tài khoản khách hàng trong hệ thống này. Hãy đăng nhập trước rồi quay lại để tiếp tục mua sắm.</p>
                 <a class="btn btn-primary" href="${CART_BASE}/auth">Đăng nhập ngay</a>
             </div>
         `;
-    }
+  }
 
-    if (type === "error") {
-        return `
+  if (type === "error") {
+    return `
             <div class="cart-state">
                 <h3>Chưa tải được giỏ hàng</h3>
                 <p>Đã có lỗi khi lấy dữ liệu sản phẩm. Bạn thử tải lại trang hoặc kiểm tra kết nối cơ sở dữ liệu của dự án.</p>
                 <a class="btn btn-primary" href="${CART_BASE}/cart">Tải lại</a>
             </div>
         `;
-    }
+  }
 
-    return `
+  return `
         <div class="cart-state">
             <h3>Giỏ hàng của bạn đang trống</h3>
             <p>Hãy chọn thêm một vài mẫu kính để phần tóm tắt đơn hàng và thao tác thanh toán hiển thị đầy đủ.</p>
@@ -349,86 +382,89 @@ function renderState(type) {
 }
 
 function resolveImageUrl(imagePath) {
-    if (!imagePath) {
-        return `${CART_BASE}/assets/images/thumbnail1.jpg`;
-    }
+  if (!imagePath) {
+    return `${CART_BASE}/assets/images/thumbnail1.jpg`;
+  }
 
-    if (imagePath.startsWith("http://") || imagePath.startsWith("https://") || imagePath.startsWith("/")) {
-        return imagePath;
-    }
+  if (
+    imagePath.startsWith("http://") ||
+    imagePath.startsWith("https://") ||
+    imagePath.startsWith("/")
+  ) {
+    return imagePath;
+  }
 
-    return `${CART_BASE}/assets/images/products/${imagePath}`;
+  return `${CART_BASE}/assets/images/products/${imagePath}`;
 }
 
 function setText(id, value) {
-    const node = document.getElementById(id);
-    if (node) {
-        node.textContent = value;
-    }
+  const node = document.getElementById(id);
+  if (node) {
+    node.textContent = value;
+  }
 }
 
 function formatCurrency(value) {
-    return `${Number(value || 0).toLocaleString("vi-VN")}đ`;
+  return `${Number(value || 0).toLocaleString("vi-VN")}đ`;
 }
 
 function escapeHtml(value) {
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function updateCartCount(data) {
-    const badge = document.getElementById("cart-count");
-    if (!badge) return;
+  const badge = document.getElementById("cart-count");
+  if (!badge) return;
 
-    if (!Array.isArray(data)) {
-        badge.innerText = 0;
-        return;
-    }
+  if (!Array.isArray(data)) {
+    badge.innerText = 0;
+    return;
+  }
 
-    const totalQty = data.reduce((total, item) => {
-        return total + Number(item.quantity || 0);
-    }, 0);
+  const totalQty = data.reduce((total, item) => {
+    return total + Number(item.quantity || 0);
+  }, 0);
 
-    badge.innerText = totalQty;
+  badge.innerText = totalQty;
 }
 
 // Add combo to cart
 window.addComboToCart = async function (comboId) {
-    const formData = new FormData();
-    formData.append("comboId", comboId);
-    formData.append("quantity", 1);
+  const formData = new FormData();
+  formData.append("comboId", comboId);
+  formData.append("quantity", 1);
 
-    try {
-        const response = await fetch(`${CART_BASE}/add-combo-to-cart`, {
-            method: "POST",
-            body: formData,
-            credentials: "include"
-        });
+  try {
+    const response = await fetch(`${CART_BASE}/add-combo-to-cart`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
 
-        // CHECK HTTP STATUS TRƯỚC
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("Server error:", text);
-            alert("Lỗi server khi thêm combo vào giỏ hàng!");
-            return;
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-            await loadCart();
-            updateCartCount(data.data);
-            alert("Đã thêm combo vào giỏ hàng thành công!");
-        } else {
-            alert("Lỗi: " + (data.message || "Unknown error"));
-        }
-
-    } catch (error) {
-        console.error("Lỗi khi thêm combo vào giỏ:", error);
-        alert("Không thể thêm combo vào giỏ hàng!");
+    // CHECK HTTP STATUS TRƯỚC
+    if (!response.ok) {
+      const text = await response.text();
+      console.error("Server error:", text);
+      alert("Lỗi server khi thêm combo vào giỏ hàng!");
+      return;
     }
+
+    const data = await response.json();
+
+    if (data.success) {
+      await loadCart();
+      updateCartCount(data.data);
+      alert("Đã thêm combo vào giỏ hàng thành công!");
+    } else {
+      alert("Lỗi: " + (data.message || "Unknown error"));
+    }
+  } catch (error) {
+    console.error("Lỗi khi thêm combo vào giỏ:", error);
+    alert("Không thể thêm combo vào giỏ hàng!");
+  }
 };

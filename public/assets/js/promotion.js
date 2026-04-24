@@ -133,12 +133,149 @@ function renderPromoPagination(total) {
   container.innerHTML = html;
 }
 
-function viewPromotion(id) {
-  fetch(
-    `/SELLING-GLASSES/public/index.php?url=promotion-detail&promotionId=${id}`,
-  )
+// ==========================
+// Apply Promotion Modal + API
+// ==========================
+let currentApplyPromotionId = null;
+let selectedApplyProducts = new Set();
+let allApplyProducts = [];
+
+function openApplyModal(promotionId, promoName) {
+  currentApplyPromotionId = promotionId;
+  selectedApplyProducts.clear();
+
+  // Build modal content
+  const html = `
+    <div style="text-align: left;">
+      <div style="margin-bottom:12px; font-weight:700; font-size:16px;">🔎 Tìm sản phẩm:</div>
+      <input id="promoApplySearch" placeholder="Nhập tên sản phẩm..." style="width:100%; padding:8px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+      <div id="promoApplyList" style="max-height:320px; overflow:auto; border:1px solid #f0f0f0; border-radius:6px; padding:8px;">
+        <div style="text-align:center; color:#888;">Đang tải danh sách...</div>
+      </div>
+    </div>
+  `;
+
+  Swal.fire({
+    title: `Áp dụng: ${promoName}`,
+    html,
+    showCancelButton: true,
+    showConfirmButton: true,
+    confirmButtonText: "✓ Áp dụng",
+    cancelButtonText: "Hủy",
+    width: 600,
+    didOpen: () => {
+      // Load products
+      loadProductsForApply();
+
+      const input = document.getElementById("promoApplySearch");
+      input.addEventListener("input", (e) =>
+        filterApplyList(e.target.value.trim()),
+      );
+    },
+  }).then((res) => {
+    if (res.isConfirmed) {
+      const productIds = Array.from(selectedApplyProducts);
+      if (productIds.length === 0) {
+        Swal.fire("Lỗi", "Vui lòng chọn ít nhất một sản phẩm", "error");
+        return;
+      }
+
+      applyPromotionToProducts(currentApplyPromotionId, productIds);
+    }
+  });
+}
+
+function loadProductsForApply() {
+  const listEl = document.getElementById("promoApplyList");
+  if (!listEl) return;
+
+  fetch("/SELLING-GLASSES/public/index.php?url=get-all-products&format=json")
     .then((r) => r.json())
     .then((res) => {
-      alert(JSON.stringify(res.data, null, 2));
+      if (!res.success || !Array.isArray(res.data)) {
+        listEl.innerHTML =
+          '<div style="color:red; text-align:center;">Không thể tải danh sách sản phẩm</div>';
+        return;
+      }
+
+      allApplyProducts = res.data;
+      renderApplyList(allApplyProducts);
+    })
+    .catch((err) => {
+      console.error("Load products error", err);
+      listEl.innerHTML =
+        '<div style="color:red; text-align:center;">Lỗi khi tải sản phẩm</div>';
     });
+}
+
+function renderApplyList(products) {
+  const listEl = document.getElementById("promoApplyList");
+  if (!listEl) return;
+
+  if (!products.length) {
+    listEl.innerHTML =
+      '<div style="text-align:center; color:#666;">Không có sản phẩm</div>';
+    return;
+  }
+
+  const html = products
+    .map((p) => {
+      const price =
+        p.price !== undefined ? Number(p.price).toLocaleString() + "đ" : "0đ";
+      return `
+      <label style="display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid #f5f5f5;">
+        <input type="checkbox" data-pid="${p.productId}" onchange="toggleApplyProduct(this)">
+        <div style="flex:1;">
+          <div style="font-weight:600">${escapeHtml(p.name)}</div>
+          <div style="color:#888; font-size:12px">Giá hiện tại: ${price}</div>
+        </div>
+      </label>
+    `;
+    })
+    .join("\n");
+
+  listEl.innerHTML = html;
+}
+
+function toggleApplyProduct(checkbox) {
+  const pid = Number(checkbox.dataset.pid);
+  if (checkbox.checked) selectedApplyProducts.add(pid);
+  else selectedApplyProducts.delete(pid);
+}
+
+function filterApplyList(keyword) {
+  const filtered = allApplyProducts.filter((p) =>
+    p.name.toLowerCase().includes(keyword.toLowerCase()),
+  );
+  renderApplyList(filtered);
+}
+
+function applyPromotionToProducts(promotionId, productIds) {
+  fetch("/SELLING-GLASSES/public/index.php?url=promotion-apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ promotionId, productIds }),
+  })
+    .then((r) => r.json())
+    .then((res) => {
+      if (res.success) {
+        Swal.fire("Thành công", "Áp dụng khuyến mãi thành công", "success");
+        loadPromotions();
+      } else {
+        Swal.fire("Lỗi", res.message || "Áp dụng thất bại", "error");
+      }
+    })
+    .catch((err) => {
+      console.error("Apply error", err);
+      Swal.fire("Lỗi", "Không thể kết nối server", "error");
+    });
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

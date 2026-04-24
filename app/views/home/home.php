@@ -178,7 +178,7 @@
                          <button onclick="openComboModal(<?php echo htmlspecialchars(json_encode(['id' => $combo->comboId, 'name' => $combo->name, 'description' => $combo->description, 'price' => $combo->price, 'imagePath' => $combo->imagePath, 'items' => $combo->items ?? []])); ?>)" class="flex-1 py-3 border border-stone-800 rounded-xl font-bold text-stone-800 hover:bg-stone-50 transition">
                              Chi tiết
                          </button>
-                         <button class="flex-1 py-3 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
+                         <button onclick="event.stopPropagation(); window.addComboToCart(<?php echo $combo->comboId; ?>)" class="flex-1 py-3 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
                              Thêm vào giỏ
                          </button>
                      </div>
@@ -413,7 +413,7 @@
                          <p id="modalComboDescription" class="text-stone-600 text-base mb-6 leading-relaxed"></p>
                          <p id="modalComboPrice" class="text-amber-700 font-bold text-3xl mb-8"></p>
                      </div>
-                     <button onclick="addComboToCart()" class="w-full py-4 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
+                     <button onclick="addModalComboToCart()" class="w-full py-4 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
                          Thêm vào giỏ
                      </button>
                  </div>
@@ -474,10 +474,31 @@
          currentCombo = null;
      }
 
-     function addComboToCart() {
-         if (currentCombo) {
-             // You can add logic to add combo to cart here
-             alert('Đã thêm combo "' + currentCombo.name + '" vào giỏ hàng!');
+     function addModalComboToCart() {
+         if (currentCombo && currentCombo.id) {
+             // Gọi trực tiếp window.addComboToCart từ cart.js
+             if (typeof window.addComboToCart === 'function') {
+                 window.addComboToCart(currentCombo.id);
+             } else {
+                 // Fallback nếu cart.js chưa load
+                 const formData = new FormData();
+                 formData.append('comboId', currentCombo.id);
+                 formData.append('quantity', 1);
+                 fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
+                     method: 'POST',
+                     body: formData,
+                     credentials: 'include'
+                 })
+                 .then(r => r.json())
+                 .then(data => {
+                     if (data.success) {
+                         alert('Đã thêm combo "' + currentCombo.name + '" vào giỏ hàng!');
+                     } else {
+                         alert('Lỗi: ' + (data.message || 'Không thể thêm combo'));
+                     }
+                 })
+                 .catch(() => alert('Lỗi kết nối server'));
+             }
              closeComboModal();
          }
      }

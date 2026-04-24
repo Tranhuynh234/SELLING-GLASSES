@@ -222,12 +222,12 @@ const opsApp = {
   },
 
   // 7. VẬN CHUYỂN
-renderShipping(el) {
-  // Lấy cả đơn hàng status 'Pending' và 'Processing'
-  const pending = this.state.orders.filter(
-    (o) => o.status === "Pending" || o.status === "Processing"
-  );
-  el.innerHTML = `
+  renderShipping(el) {
+    // Lấy cả đơn hàng status 'Pending' và 'Processing'
+    const pending = this.state.orders.filter(
+      (o) => o.status === "Pending" || o.status === "Processing",
+    );
+    el.innerHTML = `
     <h2 class="fade-in" style="margin-bottom:20px;">Tạo vận đơn nhanh</h2>
     <div class="card fade-in" style="max-width:600px; margin:0 auto; padding:30px;">
       ${
@@ -251,48 +251,48 @@ renderShipping(el) {
           : `<div style="text-align:center; padding:30px;"><h3>Không còn đơn chờ xử lý</h3></div>`
       }
     </div>`;
-},
+  },
 
   // 8. LOGIC XỬ LÝ (SHIP & CẬP NHẬT TRẠNG THÁI)
-   async handleShip() {
-  const id = document.getElementById("ship-order-id")?.value;
-  const partner = document.getElementById("ship-partner")?.value;
-  if (!id) return alert("Vui lòng chọn đơn hàng.");
+  async handleShip() {
+    const id = document.getElementById("ship-order-id")?.value;
+    const partner = document.getElementById("ship-partner")?.value;
+    if (!id) return alert("Vui lòng chọn đơn hàng.");
 
-  const track =
-    partner + "-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-  const formData = new FormData();
-  formData.append("orderId", id);
-  formData.append("status", "Shipped");
-  formData.append("trackingCode", track);
-  formData.append("carrier", partner);
+    const track =
+      partner + "-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    const formData = new FormData();
+    formData.append("orderId", id);
+    formData.append("status", "Shipped");
+    formData.append("trackingCode", track);
+    formData.append("carrier", partner);
 
-  try {
-    const response = await fetch(`${this.apiUrl}?url=update-order-status`, {
-      method: "POST",
-      body: formData,
-    });
-    const res = await response.json();
-    if (res.success) {
-      this.setModal(
-        "Xuất mã vận đơn thành công",
-        `<div style="text-align:center">
+    try {
+      const response = await fetch(`${this.apiUrl}?url=update-order-status`, {
+        method: "POST",
+        body: formData,
+      });
+      const res = await response.json();
+      if (res.success) {
+        this.setModal(
+          "Xuất mã vận đơn thành công",
+          `<div style="text-align:center">
           <div style="font-size:18px; margin-bottom:10px;">Mã vận đơn:</div>
           <div style="font-size:28px; font-weight:bold; color:#e67e22; margin-bottom:16px;">${track}</div>
           <div>Đơn hàng #${id} đã được chuyển sang trạng thái <b>Đang giao</b>.</div>
         </div>`,
-        async () => {
-          this.closeModal();
-          await this.init();
-        }
-      );
-    } else {
-      alert(res.message || "Tạo vận đơn thất bại.");
+          async () => {
+            this.closeModal();
+            await this.init();
+          },
+        );
+      } else {
+        alert(res.message || "Tạo vận đơn thất bại.");
+      }
+    } catch (e) {
+      alert("Lỗi kết nối server.");
     }
-  } catch (e) {
-    alert("Lỗi kết nối server.");
-  }
-},
+  },
 
   async handleUpdateOrder(orderId, newStatus) {
     const formData = new FormData();
@@ -334,7 +334,6 @@ renderShipping(el) {
     });
   },
 
- 
   // 9. CÁC HÀM TIỆN ÍCH (SEARCH, MODAL, CHART)
   handleGlobalSearch(val) {
     this.state.searchQuery = val.toLowerCase();
@@ -342,7 +341,24 @@ renderShipping(el) {
 
   handleLogout() {
     if (confirm("Bạn muốn đăng xuất?"))
-      window.location.href = "index.php?url=logout";
+      fetch("/SELLING-GLASSES/public/logout", {
+        method: "POST", // Gọi POST vì AuthController có thể yêu cầu, hoặc an toàn hơn
+        credentials: "include",
+      })
+        .then((res) => res.json()) // Trong AuthController bạn trả về JSON
+        .then((result) => {
+          // Xóa dữ liệu local
+          localStorage.removeItem("user");
+          // Chuyển hướng theo Backend báo về (hoặc tự về home)
+          window.location.href =
+            result.redirect || "/SELLING-GLASSES/public/home";
+        })
+        .catch((err) => {
+          console.error("Lỗi đăng xuất:", err);
+          // Nếu lỗi mạng vẫn ép xóa local và về home
+          localStorage.removeItem("user");
+          window.location.href = "/SELLING-GLASSES/public/home";
+        });
   },
 
   initChart() {

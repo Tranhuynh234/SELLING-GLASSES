@@ -139,18 +139,27 @@ function renderItems(items) {
     countLabel.textContent = `(${totalQuantity})`;
 
     container.innerHTML = items.map((item) => {
+        const isCombo = item.itemType === 'combo';
         const lineTotal = Number(item.price || 0) * Number(item.quantity || 0);
         const imageUrl = item.imagePath 
             ? `/SELLING-GLASSES/public/assets/images/products/${item.imagePath}`
             : "/SELLING-GLASSES/public/assets/images/thumbnail1.jpg";
 
+        const badgeHtml = isCombo
+            ? `<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;margin-bottom:4px;">COMBO</span> `
+            : '';
+
+        const detailHtml = isCombo
+            ? `<p>Số lượng: ${Number(item.quantity || 0)}</p>`
+            : `<p>Màu: ${escapeHtml(item.color || "-")} • Size: ${escapeHtml(item.size || "-")}</p>
+                    <p>Số lượng: ${Number(item.quantity || 0)}</p>`;
+
         return `
             <article class="checkout-item">
                 <img src="${imageUrl}" alt="${escapeHtml(item.productName || "Sản phẩm")}" onerror="this.src='/SELLING-GLASSES/public/assets/images/thumbnail1.jpg'">
                 <div>
-                    <h4>${escapeHtml(item.productName || "Sản phẩm")}</h4>
-                    <p>Màu: ${escapeHtml(item.color || "-")} • Size: ${escapeHtml(item.size || "-")}</p>
-                    <p>Số lượng: ${Number(item.quantity || 0)}</p>
+                    <h4>${badgeHtml}${escapeHtml(item.productName || "Sản phẩm")}</h4>
+                    ${detailHtml}
                 </div>
                 <div class="item-price">${formatCurrency(lineTotal)}</div>
             </article>
