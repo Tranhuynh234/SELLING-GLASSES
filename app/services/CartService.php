@@ -133,4 +133,67 @@ class CartService {
             return false;
         }
     }
+
+    // ADD COMBO TO CART
+    public function addComboToCart($customerId, $comboId, $quantity) {
+        try {
+            $cId = (int)$comboId;
+            $qty = (int)$quantity;
+
+            // Kiểm tra combo tồn tại và đang active
+            $stmt = $this->conn->prepare("
+                SELECT comboId, price 
+                FROM combo 
+                WHERE comboId = ? AND isActive = 1 AND deletedAt IS NULL
+            ");
+            $stmt->execute([$cId]);
+
+            if (!$stmt->fetch()) {
+                error_log("Combo not found or inactive: " . $cId);
+                return false;
+            }
+
+            if (!$customerId || $cId <= 0 || $qty <= 0) {
+                return [];
+            }
+
+            $cartId = $this->findOrCreateCartId($customerId);
+
+            if (!$cartId) {
+                throw new Exception("Cannot create cart");
+            }
+
+            // Kiểm tra combo đã có trong giỏ hàng chưa
+            $stmt = $this->conn->prepare("
+                SELECT cartItemId, quantity 
+                FROM cart_item 
+                WHERE cartId = ? AND comboId = ? AND variantId IS NULL
+            ");
+            $stmt->execute([$cartId, $cId]);
+            $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($item) {
+                $newQty = $item['quantity'] + $qty;
+
+                $update = $this->conn->prepare("
+                    UPDATE cart_item 
+                    SET quantity = ? 
+                    WHERE cartItemId = ?
+                ");
+                $update->execute([$newQty, $item['cartItemId']]);
+            } else {
+                $insert = $this->conn->prepare("
+                    INSERT INTO cart_item (cartId, variantId, comboId, quantity)
+                    VALUES (?, NULL, ?, ?)
+                ");
+                $insert->execute([$cartId, $cId, $qty]);
+            }
+
+            return $this->getCart($customerId);
+
+        } catch (Exception $e) {
+            error_log("addComboToCart error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
