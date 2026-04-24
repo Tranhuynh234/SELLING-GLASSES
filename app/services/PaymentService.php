@@ -195,12 +195,24 @@ class PaymentService {
             }
 
             foreach ($items as $item) {
-                $this->orderItemModel->create([
+                $isCombo = ($item['itemType'] ?? '') === 'combo';
+                $orderItemData = [
                     "orderId" => $orderId,
-                    "variantId" => (int) $item['variantId'],
                     "quantity" => (int) $item['quantity'],
                     "price" => (float) $item['price']
-                ]);
+                ];
+
+                if ($isCombo) {
+                    // Combo item: lưu comboId, variantId = NULL
+                    $orderItemData["variantId"] = null;
+                    $orderItemData["comboId"] = (int) $item['comboId'];
+                } else {
+                    // Product item: lưu variantId, comboId = NULL
+                    $orderItemData["variantId"] = (int) $item['variantId'];
+                    $orderItemData["comboId"] = null;
+                }
+
+                $this->orderItemModel->create($orderItemData);
             }
 
             $this->paymentModel->createPayment([
@@ -248,10 +260,19 @@ class PaymentService {
                 LEFT JOIN (
                     SELECT
                         oi.orderId,
-                        GROUP_CONCAT(CONCAT(pr.name, ' x', oi.quantity) SEPARATOR ' | ') AS items
+                        GROUP_CONCAT(
+                            CONCAT(
+                                CASE
+                                    WHEN oi.comboId IS NOT NULL THEN CONCAT('[COMBO] ', cb.name)
+                                    ELSE pr.name
+                                END,
+                                ' x', oi.quantity
+                            ) SEPARATOR ' | '
+                        ) AS items
                     FROM order_item oi
-                    JOIN product_variant pv ON oi.variantId = pv.variantId
-                    JOIN product pr ON pv.productId = pr.productId
+                    LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
+                    LEFT JOIN product pr ON pv.productId = pr.productId
+                    LEFT JOIN combo cb ON oi.comboId = cb.comboId
                     GROUP BY oi.orderId
                 ) item_summary ON item_summary.orderId = o.orderId
                 WHERE p.paymentStatus = :paymentStatus
