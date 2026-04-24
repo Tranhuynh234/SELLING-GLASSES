@@ -418,7 +418,8 @@ INSERT INTO `orders` (`orderId`, `customerId`, `orderDate`, `status`, `totalPric
 CREATE TABLE `order_item` (
   `orderItemId` int(11) NOT NULL,
   `orderId` int(11) NOT NULL,
-  `variantId` int(11) NOT NULL,
+  `variantId` int(11) DEFAULT NULL,
+  `comboId` int(11) DEFAULT NULL,
   `quantity` smallint(6) NOT NULL,
   `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -820,7 +821,8 @@ ALTER TABLE `orders`
 ALTER TABLE `order_item`
   ADD PRIMARY KEY (`orderItemId`),
   ADD KEY `orderId` (`orderId`),
-  ADD KEY `variantId` (`variantId`);
+  ADD KEY `variantId` (`variantId`),
+  ADD KEY `idx_order_item_comboId` (`comboId`);
 
 --
 -- Chỉ mục cho bảng `payment`
@@ -1077,7 +1079,8 @@ ALTER TABLE `orders`
 --
 ALTER TABLE `order_item`
   ADD CONSTRAINT `order_item_ibfk_1` FOREIGN KEY (`orderId`) REFERENCES `orders` (`orderId`),
-  ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`variantId`) REFERENCES `product_variant` (`variantId`);
+  ADD CONSTRAINT `order_item_ibfk_2` FOREIGN KEY (`variantId`) REFERENCES `product_variant` (`variantId`) ON DELETE SET NULL,
+  ADD CONSTRAINT `order_item_ibfk_3` FOREIGN KEY (`comboId`) REFERENCES `combo` (`comboId`) ON DELETE SET NULL;
 
 --
 -- Các ràng buộc cho bảng `payment`
