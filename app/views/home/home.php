@@ -434,6 +434,8 @@
 
      function openComboModal(comboData) {
          currentCombo = comboData;
+         console.log('=== DEBUG COMBO DATA ===');
+         console.log('Items:', JSON.stringify(comboData.items, null, 2));
          
          // Populate modal with combo data
          document.getElementById('modalComboImage').src = '/SELLING-GLASSES/public/assets/images/products/' + comboData.imagePath;
@@ -450,7 +452,13 @@
              comboData.items.forEach(item => {
                  const itemEl = document.createElement('div');
                  itemEl.className = 'flex items-center gap-3 p-3 bg-stone-50 rounded-lg';
+                 const imgSrc = item.imagePath 
+                     ? '/SELLING-GLASSES/public/assets/images/products/' + item.imagePath 
+                     : '/SELLING-GLASSES/public/assets/images/thumbnail1.jpg';
                  itemEl.innerHTML = `
+                     <img src="${imgSrc}" alt="${item.productName || 'Sản phẩm'}" 
+                          class="w-12 h-12 rounded-lg object-cover border border-stone-200"
+                          onerror="this.src='/SELLING-GLASSES/public/assets/images/thumbnail1.jpg'">
                      <div class="flex-1">
                          <p class="font-bold text-stone-800">${item.productName || 'Sản phẩm ' + item.productId}</p>
                          <p class="text-xs text-stone-500">Số lượng: ${item.quantity || 1}</p>
