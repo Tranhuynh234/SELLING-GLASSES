@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDashboard = $id("menu-dashboard");
   const btnOrders = $id("menu-orders");
   const btnPreorder = $id("menu-preorder");
+  const btnPrescription = $id("menu-prescription");
   const btnComplaints = $id("menu-complaints");
   const allSections = $qa(".dashboard-body");
   const allMenuItems = $qa(".menu-item");
@@ -96,6 +97,63 @@ document.addEventListener("DOMContentLoaded", () => {
     new Intl.NumberFormat("vi-VN").format(value) + "đ";
   const renderRows = (data, rowFn) => data.map(rowFn).join("");
 
+  /* HÀM HELPER XÁC ĐỊNH LOẠI ĐƠN HÀNG */
+  const getOrderTypeInfo = (order) => {
+    const type = order.order_type || order.orderType || "";
+
+    if (
+      type === "pre_order" ||
+      order.isPreorder == 1 ||
+      order.is_preorder == 1
+    ) {
+      return { orderType: "Hàng Pre-order", orderTypeClass: "preorder" };
+    }
+    if (
+      type === "prescription" ||
+      order.isPrescription == 1 ||
+      order.is_prescription == 1
+    ) {
+      return { orderType: "Hàng Prescription", orderTypeClass: "prescription" };
+    }
+    return { orderType: "Hàng có sẵn", orderTypeClass: "default" };
+  };
+
+  /*  TÌM KIẾM TRONG BẢNG  */
+  const setupSearchTable = (inputId, tableBodyId) => {
+    const searchInput = $id(inputId);
+    const tableBody = $id(tableBodyId);
+    if (!searchInput || !tableBody) return;
+    let statusLabel = $id(inputId + "-status");
+    if (!statusLabel) {
+      statusLabel = document.createElement("small");
+      statusLabel.id = inputId + "-status";
+      statusLabel.style.cssText =
+        "margin-left: 10px; color: #666; font-style: italic;";
+      searchInput.parentNode.appendChild(statusLabel);
+    }
+    searchInput.oninput = function () {
+      const filter = this.value.toLowerCase().trim();
+      const rows = tableBody.getElementsByTagName("tr");
+      let count = 0;
+      tableBody.querySelector(".no-result-row")?.remove();
+      for (const row of rows) {
+        if (row.classList.contains("no-result-row")) continue;
+        const visible = row.textContent.toLowerCase().includes(filter);
+        row.style.display = visible ? "" : "none";
+        count += visible ? 1 : 0;
+      }
+      statusLabel.innerText = filter ? `Tìm thấy ${count} kết quả` : "";
+      statusLabel.style.color = count > 0 ? "#2ecc71" : "#e74c3c";
+      if (!count && filter) {
+        const colCount = tableBody.querySelector("tr")?.children.length || 5;
+        const noResultRow = document.createElement("tr");
+        noResultRow.className = "no-result-row";
+        noResultRow.innerHTML = `<td colspan="${colCount}" style="text-align:center; color:#999;">Không tìm thấy kết quả phù hợp</td>`;
+        tableBody.appendChild(noResultRow);
+      }
+    };
+  };
+
   /* API: ORDERS / COMPLAINTS */
   const fetchOrders = async (status = "All") => {
     const body = $id("orders-table-body");
@@ -116,11 +174,15 @@ document.addEventListener("DOMContentLoaded", () => {
             order.customerName ||
             order.customer_name ||
             "Khách vãng lai";
+
+          const { orderType, orderTypeClass } = getOrderTypeInfo(order);
+
           return `
             <tr>
               <td>#${order.orderId}</td>
               <td>${customer}</td>
               <td>${order.orderDate}</td>
+              <td><span class="order-type-badge type-${orderTypeClass}">${orderType}</span></td>
               <td><span class="status-badge status-${statusInfo.cls}">${statusInfo.vn}</span></td>
               <td><button class="btn-view" onclick="viewOrderDetail('${order.orderId}')"><i class="fas fa-eye"></i> Xem</button></td>
             </tr>`;
@@ -151,11 +213,15 @@ document.addEventListener("DOMContentLoaded", () => {
           vn: order.status,
           cls: "pending",
         };
+
+        const { orderType, orderTypeClass } = getOrderTypeInfo(order);
+
         return `
           <tr>
             <td>#${order.orderId}</td>
             <td>${customer}</td>
             <td>${order.orderDate}</td>
+            <td><span class="order-type-badge type-${orderTypeClass}">${orderType}</span></td>
             <td><span class="status-badge status-${statusInfo.cls}">${statusInfo.vn}</span></td>
             <td><button class="btn-view" onclick="viewOrderDetail('${order.orderId}')"><i class="fas fa-eye"></i> Xem</button></td>
           </tr>`;
@@ -300,6 +366,10 @@ document.addEventListener("DOMContentLoaded", () => {
     switchPage("preorder-page", btnPreorder);
     fetchPreorders("All");
   });
+  btnPrescription?.addEventListener("click", () => {
+    switchPage("prescription-page", btnPrescription);
+    // Chưa có API riêng cho Prescription
+  });
   btnComplaints?.addEventListener("click", () => {
     switchPage("complaint-page", btnComplaints);
     fetchComplaints("all");
@@ -309,6 +379,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilterEvents("preorder-page", (status) =>
     console.log("Lọc Preorder:", status),
   );
+
+  setupFilterEvents("prescription-page", (status) =>
+    console.log("Lọc Prescription:", status),
+  );
+
+  setupSearchTable("search-prescription", "prescription-list");
   setupFilterEvents("complaint-page", fetchComplaints);
 
   btnToggle?.addEventListener("click", () =>
@@ -365,21 +441,22 @@ document.addEventListener("DOMContentLoaded", () => {
         custPhone && (custPhone.innerText = detail.cust_phone || "N/A");
         custAddress && (custAddress.innerText = detail.cust_address || "N/A");
         syncOrderUI(detail.status, detail.is_contacted);
-        modalBody.innerHTML = renderRows(
-          result.data,
-          (item) => {
-            const isCombo = item.itemType === 'combo' || item.comboId;
-            const badgeHtml = isCombo ? '<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:4px;">COMBO</span>' : '';
-            const detailHtml = isCombo ? '' : `<div class="text-muted" style="font-size: 0.85rem;">Màu: ${item.color || '-'} | Size: ${item.size || '-'}</div>`;
-            return `
+        modalBody.innerHTML = renderRows(result.data, (item) => {
+          const isCombo = item.itemType === "combo" || item.comboId;
+          const badgeHtml = isCombo
+            ? '<span style="display:inline-block;background:#b45309;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-right:4px;">COMBO</span>'
+            : "";
+          const detailHtml = isCombo
+            ? ""
+            : `<div class="text-muted" style="font-size: 0.85rem;">Màu: ${item.color || "-"} | Size: ${item.size || "-"}</div>`;
+          return `
             <tr style="vertical-align: middle;">
               <td class="text-center" style="width: 80px;"><img src="/SELLING-GLASSES/public/assets/images/products/${item.product_image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"></td>
               <td><div class="fw-bold" style="color: #333;">${badgeHtml}${item.product_name}</div>${detailHtml}</td>
               <td class="text-center">${item.quantity}</td>
               <td class="text-center fw-bold" style="color: #2d3436;">${formatPrice(item.price)}</td>
             </tr>`;
-          },
-        );
+        });
         renderComplaintRequestPanel(requestContext);
       } else {
         modalBody &&
@@ -771,44 +848,6 @@ document.addEventListener("DOMContentLoaded", () => {
       window.closeChat();
     }
   });
-
-  /*  TÌM KIẾM TRONG BẢNG  */
-  const setupSearchTable = (inputId, tableBodyId) => {
-    const searchInput = $id(inputId);
-    const tableBody = $id(tableBodyId);
-    if (!searchInput || !tableBody) return;
-    let statusLabel = $id(inputId + "-status");
-    if (!statusLabel) {
-      statusLabel = document.createElement("small");
-      statusLabel.id = inputId + "-status";
-      statusLabel.style.cssText =
-        "margin-left: 10px; color: #666; font-style: italic;";
-      searchInput.parentNode.appendChild(statusLabel);
-    }
-    searchInput.oninput = function () {
-      const filter = this.value.toLowerCase().trim();
-      const rows = tableBody.getElementsByTagName("tr");
-      let count = 0;
-      tableBody.querySelector(".no-result-row")?.remove();
-      for (const row of rows) {
-        if (row.classList.contains("no-result-row")) continue;
-        const visible = row.textContent.toLowerCase().includes(filter);
-        row.style.display = visible ? "" : "none";
-        count += visible ? 1 : 0;
-      }
-      statusLabel.innerText = filter ? `Tìm thấy ${count} kết quả` : "";
-      statusLabel.style.color = count > 0 ? "#2ecc71" : "#e74c3c";
-      if (!count && filter) {
-        const colCount = tableBody
-          .closest("table")
-          .querySelectorAll("thead th").length;
-        tableBody.insertAdjacentHTML(
-          "beforeend",
-          `<tr class=\"no-result-row\"><td colspan=\"${colCount}\" style=\"text-align:center; padding: 40px; background: #fffaf0;\"><div style=\"font-size: 16px; color: #555;\"><i class=\"fas fa-search-minus\" style=\"font-size: 24px; color: #ccc; margin-bottom: 10px; display: block;\"></i>Rất tiếc, không tìm thấy <strong>\"${this.value}\"</strong> trong danh sách.<br><small style=\"color: #999;\">Vui lòng kiểm tra lại mã đơn hoặc tên khách hàng.</small></div></td></tr>`,
-        );
-      }
-    };
-  };
 
   /* KHỞI TẠO  */
   switchPage("dashboard-page", btnDashboard);

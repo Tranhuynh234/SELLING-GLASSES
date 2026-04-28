@@ -82,7 +82,7 @@ $customerId = $user['customerId'] ?? 0;
 
 // 2. LẤY DANH SÁCH ĐƠN HÀNG 
 $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
-                o.subtotal, o.lensCost, o.shippingFee, o.discount,
+                o.subtotal, o.lensCost, o.shippingFee, o.discount, o.order_type,
                 p.first_product_name, 
                 p.product_image,
                 p.has_prescription 
@@ -128,10 +128,12 @@ $items = [];
 
 if ($orderId) {
     $stmtDetail = $db->prepare("SELECT o.*, 
-                                      o.subtotal, o.lensCost, o.shippingFee, o.discount
+                                      o.subtotal, o.lensCost, o.shippingFee, o.discount,
+                                      c.name as customer_name, c.phone as customer_phone, c.address as customer_address
                                FROM orders o
-                               WHERE o.orderId = :id AND o.customerId = :cid");
-    $stmtDetail->execute([':id' => $orderId, ':cid' => $customerId]);
+                               JOIN customers c ON o.customerId = c.customerId
+                               WHERE o.orderId = :id AND o.userId = :uid"); // Changed o.customerId to o.userId and added c.name, c.phone, c.address
+    $stmtDetail->execute([':id' => $orderId, ':uid' => $_SESSION['user']['userId']]); // Changed :cid to :uid
     $orderInfo = $stmtDetail->fetch(PDO::FETCH_ASSOC);
 
     if ($orderInfo) {
@@ -398,17 +400,28 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 <div class="item-card-detail">
                                     <img src="/SELLING-GLASSES/public/assets/images/products/<?= $item['product_image'] ?>" class="product-img">
                                     
-                                    <div class="product-info">
+                                                                        <div class="product-info">
                                         <h4><?= $item['product_name'] ?></h4>
-                                        <p class="product-type">Loại: Đơn cắt tròng / Có sẵn</p>
+                                        <?php
+                                            $itemTypeLabel = 'Hàng có sẵn';
+                                            $itemTypeColor = '#10b981';
+                                            if (($orderInfo['order_type'] ?? '') === 'pre_order') {
+                                                $itemTypeLabel = 'Hàng Pre-order';
+                                                $itemTypeColor = '#f59e0b';
+                                            } elseif (($orderInfo['order_type'] ?? '') === 'prescription' || !empty($item['leftEye'])) {
+                                                $itemTypeLabel = 'Hàng Prescription';
+                                                $itemTypeColor = '#3b82f6';
+                                            }
+                                        ?>
+                                        <p class="product-type" style="color: <?= $itemTypeColor ?>;">Loại: <?= $itemTypeLabel ?></p>
                                         <p class="product-qty">Số lượng: x<?= $item['quantity'] ?></p>
                                     </div>
 
                                     <div class="shipping-info">
                                         <p class="info-title"><i class="fas fa-truck"></i> Thông tin nhận hàng</p>
-                                        <p><strong>Người nhận:</strong> <?= htmlspecialchars($user['name']) ?></p>
-                                        <p><strong>SĐT:</strong> <?= htmlspecialchars($user['phone']) ?></p>
-                                        <p><strong>Đ/C:</strong> <?= htmlspecialchars($user['address']) ?></p>
+                                        <p><strong>Người nhận:</strong> <?= htmlspecialchars($orderInfo['customer_name'] ?? '') ?></p>
+                                        <p><strong>SĐT:</strong> <?= htmlspecialchars($orderInfo['customer_phone'] ?? '') ?></p>
+                                        <p><strong>Đ/C:</strong> <?= htmlspecialchars($orderInfo['customer_address'] ?? '') ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -472,8 +485,21 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 <div class="product-info">
                                     <span style="font-size: 13px; color: var(--primary); font-weight: bold;">#<?= $order['orderId'] ?></span>
                                     <span style="font-size: 12px; color: #999; margin-left: 10px;"><?= date("d/m/Y H:i", strtotime($order['orderDate'])) ?></span>
-                                    <h4 style="margin: 5px 0;"><?= !empty($order['first_product_name']) ? $order['first_product_name'] : 'Sản phẩm trong đơn hàng' ?></h4>
-                                    <p style="font-size: 12px; color: #ea580c; margin: 0;">Loại: Đơn cắt tròng / Có sẵn</p>
+                                                                        <h4 style="margin: 5px 0;"><?= !empty($order['first_product_name']) ? $order['first_product_name'] : 'Sản phẩm trong đơn hàng' ?></h4>
+                                    <?php
+                                        $orderTypeLabel = 'Hàng có sẵn';
+                                        $orderTypeClass = '';
+                                        if (($order['order_type'] ?? '') === 'pre_order') {
+                                            $orderTypeLabel = 'Hàng Pre-order';
+                                            $orderTypeClass = 'color: #f59e0b;'; // Màu cam/vàng cho pre-order
+                                        } elseif (($order['order_type'] ?? '') === 'prescription' || ($order['has_prescription'] ?? 0) == 1) {
+                                            $orderTypeLabel = 'Hàng Prescription';
+                                            $orderTypeClass = 'color: #3b82f6;'; // Màu xanh cho đơn kính
+                                        } else {
+                                            $orderTypeClass = 'color: #10b981;'; // Màu xanh lá cho hàng có sẵn
+                                        }
+                                    ?>
+                                    <p style="font-size: 12px; <?= $orderTypeClass ?> margin: 0;">Loại: <?= $orderTypeLabel ?></p>
                                 </div>
                             </div>
 

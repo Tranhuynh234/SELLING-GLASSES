@@ -100,7 +100,6 @@ class OrderController {
     }
 
     // HỆ THỐNG CHAT & TƯ VẤN KHÁCH HÀNG
-     // GỬI TIN NHẮN LIÊN HỆ VỚI KHÁCH HÀNG
     public function contactCustomer() {
         ob_clean();
         header("Content-Type: application/json");

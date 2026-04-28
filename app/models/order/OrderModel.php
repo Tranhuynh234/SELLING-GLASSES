@@ -22,7 +22,7 @@ class OrderModel extends BaseModel {
     // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI
     public function findByStatus($status) {
         try {
-            $sql = "SELECT o.*, u.name AS cust_name 
+            $sql = "SELECT o.*, o.order_type, u.name AS cust_name 
                 FROM {$this->table} o
                 JOIN customers c ON o.customerId = c.customerId
                 JOIN users u ON c.userId = u.userId";
@@ -113,7 +113,7 @@ class OrderModel extends BaseModel {
 
     // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI CHO OPS
     public function getOrdersForOps($status = null) {
-        $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
+        $sql = "SELECT o.*, o.order_type, u.name AS customerName, u.name AS cust_name 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customerId = c.customerId
                 LEFT JOIN users u ON c.userId = u.userId
@@ -129,8 +129,9 @@ class OrderModel extends BaseModel {
         return $this->queryAll($sql, $params);
     }
 
+    // LẤY DANH SÁCH ĐƠN HÀNG THEO TRẠNG THÁI CHO SALE
     public function getOrdersForSales($status = null) {
-        $sql = "SELECT o.*, u.name AS customerName, u.name AS cust_name 
+        $sql = "SELECT o.*, o.order_type, u.name AS customerName, u.name AS cust_name 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customerId = c.customerId
                 LEFT JOIN users u ON c.userId = u.userId";

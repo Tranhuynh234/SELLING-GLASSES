@@ -54,6 +54,10 @@
                         <div class="menu-item" id="menu-preorder">
                             <i class="fas fa-hourglass-half"></i> <span>Pre-order</span>
                         </div>
+                        <!-- Prescription -->
+                        <div class="menu-item" id="menu-prescription">
+                            <i class="fas fa-file-medical"></i> <span>Prescription</span>
+                        </div>
                         <!-- Khiếu nại -->
                         <div class="menu-item" id="menu-complaints">
                             <i class="fas fa-exclamation-triangle"></i>
@@ -171,6 +175,7 @@
                                     <th>Mã đơn</th>
                                     <th>Tên khách</th>
                                     <th>Ngày nhận</th>
+                                    <th>Loại đơn</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -233,6 +238,7 @@
                                     <th>Mã đơn</th>
                                     <th>Tên khách</th>
                                     <th>Ngày nhận</th>
+                                    <th>Loại đơn</th>
                                     <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -289,6 +295,48 @@
                                 </tr>
                             </thead>
                             <tbody id="preorder-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!--  PRESCRIPTION -->
+            <section id="prescription-page" class="dashboard-body hidden">
+                <h1 class="page-title">DANH SÁCH ĐƠN KÍNH ĐƠN</h1>
+
+                <div class="toolbar-container">
+                    <div class="search-group">
+                        <label>Tìm theo mã đơn/khách</label>
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-prescription" placeholder="Nhập mã hoặc tên khách..." />
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Trạng thái</label>
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-status="all">Tất cả</button>
+                            <button class="filter-tab" data-status="pending">Chờ xử lý</button>
+                            <button class="filter-tab" data-status="processing">Đang xử lý</button>
+                            <button class="filter-tab" data-status="completed">Hoàn tất</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-wrapper">
+                        <table class="main-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="prescription-list"></tbody>
                         </table>
                     </div>
                 </div>

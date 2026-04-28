@@ -531,6 +531,27 @@ tr:hover td {
   background-color: #fafafa;
 }
 
+/* Order Type Badge */
+/* .order-type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.order-type-badge.type-default {
+  background: #ffebee;
+  color: #d04c4c;
+}
+.order-type-badge.type-preorder {
+  background: #fdf6ec;
+  color: var(--lens-gold);
+}
+.order-type-badge.type-prescription {
+  background: #cfe7d1;
+  color: #48904e;
+} */
+
 /*  NÚT HÀNH ĐỘNG */
 .btn-view {
   background: #fdf6ec;
@@ -1153,7 +1174,7 @@ tr:hover td {
   background: #fff;
   border: 1px solid var(--lens-border);
   padding: 5px 15px;
-  border-radius: 25px; 
+  border-radius: 25px;
 }
 
 .input-group-wrapper:focus-within {

@@ -34,6 +34,22 @@ class OrderService {
         $data['status'] = 'Pending';
         $data['totalPrice'] = $data['totalPrice'] ?? 0;
 
+        // --- PHẦN SỬA ĐỔI: PHÂN LOẠI ĐƠN HÀNG ---
+        // 1. Kiểm tra nếu có dữ liệu độ kính trong session
+        if (!empty($_SESSION['prescription_data'])) {
+            $data['order_type'] = 'prescription';
+        } 
+        // 2. Kiểm tra nếu phía Frontend gửi lên flag xác nhận là hàng đặt trước
+        // (Lưu ý: Bạn cần đảm bảo bên sale.js khi gửi request có kèm biến isPreorder)
+        elseif (isset($data['isPreorder']) && ($data['isPreorder'] == 'true' || $data['isPreorder'] == 1)) {
+            $data['order_type'] = 'pre_order';
+        } 
+        // 3. Mặc định là hàng có sẵn
+        else {
+            $data['order_type'] = 'ready_stock';
+        }
+        // ---------------------------------------
+
         $db = Database::connect();
 
         try {
@@ -75,8 +91,13 @@ class OrderService {
                     $pres->rightPD = $p['rightPD'];
                     $pres->imagePath = $p['imagePath'];
                     $pres->save($db);
-                    unset($_SESSION['prescription_data']);
+                    // unset($_SESSION['prescription_data']);
                 }
+            }
+
+            // Xóa session độ kính sau khi hoàn tất lưu toàn bộ items
+            if (isset($_SESSION['prescription_data'])) {
+                unset($_SESSION['prescription_data']);
             }
 
             $db->commit();
