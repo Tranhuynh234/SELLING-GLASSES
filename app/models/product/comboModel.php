@@ -286,7 +286,8 @@ class ComboModel extends BaseModel
     public function getComboItems($comboId)
     {
         $query = "SELECT ci.comboItemId, ci.productId, ci.quantity, ci.sortOrder, 
-                         p.name, p.description, p.imagePath
+                         p.name AS productName, p.description AS productDescription, p.imagePath,
+                         (SELECT pv.price FROM product_variant pv WHERE pv.productId = p.productId LIMIT 1) AS price
                   FROM {$this->comboItemTable} ci
                   JOIN product p ON ci.productId = p.productId
                   WHERE ci.comboId = :comboId
