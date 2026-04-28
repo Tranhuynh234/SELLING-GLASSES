@@ -88,11 +88,14 @@ $queryOrders = "SELECT o.orderId, o.status, o.totalPrice, o.orderDate,
                 p.has_prescription 
                 FROM orders o
                 LEFT JOIN (
-                    SELECT oi.orderId, pr.name as first_product_name, pr.imagePath as product_image,
-                    MAX(CASE WHEN pres.prescriptionId IS NOT NULL THEN 1 ELSE 0 END) as has_prescription 
+                    SELECT oi.orderId, 
+                        COALESCE(MIN(pr.name), MIN(cb.name)) as first_product_name, 
+                        COALESCE(MIN(pr.imagePath), MIN(cb.imagePath)) as product_image,
+                        MAX(CASE WHEN pres.prescriptionId IS NOT NULL THEN 1 ELSE 0 END) as has_prescription 
                     FROM order_item oi
                     LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
                     LEFT JOIN product pr ON pv.productId = pr.productId
+                    LEFT JOIN combo cb ON oi.comboId = cb.comboId
                     LEFT JOIN prescription pres ON oi.orderItemId = pres.orderItemId 
                     GROUP BY oi.orderId
                 ) p ON o.orderId = p.orderId
@@ -128,23 +131,22 @@ $items = [];
 
 if ($orderId) {
     $stmtDetail = $db->prepare("SELECT o.*, 
-                                      o.subtotal, o.lensCost, o.shippingFee, o.discount,
-                                      c.name as customer_name, c.phone as customer_phone, c.address as customer_address
+                                      o.subtotal, o.lensCost, o.shippingFee, o.discount
                                FROM orders o
-                               JOIN customers c ON o.customerId = c.customerId
-                               WHERE o.orderId = :id AND o.userId = :uid"); // Changed o.customerId to o.userId and added c.name, c.phone, c.address
-    $stmtDetail->execute([':id' => $orderId, ':uid' => $_SESSION['user']['userId']]); // Changed :cid to :uid
+                               WHERE o.orderId = :id AND o.customerId = :cid");
+    $stmtDetail->execute([':id' => $orderId, ':cid' => $customerId]);
     $orderInfo = $stmtDetail->fetch(PDO::FETCH_ASSOC);
 
     if ($orderInfo) {
         $queryItems = "SELECT oi.*, 
-                             p.name as product_name, 
-                             p.imagePath as product_image, 
+                            COALESCE(p.name, cb.name) as product_name, 
+                            COALESCE(p.imagePath, cb.imagePath) as product_image,
                              pr.leftEye, pr.rightEye, pr.leftPD, pr.rightPD,
                              pr.imagePath as prescription_image
                       FROM order_item oi
-                      JOIN product_variant pv ON oi.variantId = pv.variantId
-                      JOIN product p ON pv.productId = p.productId
+                      LEFT JOIN product_variant pv ON oi.variantId = pv.variantId
+                      LEFT JOIN product p ON pv.productId = p.productId
+                      LEFT JOIN combo cb ON oi.comboId = cb.comboId
                       LEFT JOIN prescription pr ON oi.orderItemId = pr.orderItemId
                       WHERE oi.orderId = :orderId";
         
@@ -400,7 +402,7 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                                 <div class="item-card-detail">
                                     <img src="/SELLING-GLASSES/public/assets/images/products/<?= $item['product_image'] ?>" class="product-img">
                                     
-                                                                        <div class="product-info">
+                                    <div class="product-info">
                                         <h4><?= $item['product_name'] ?></h4>
                                         <?php
                                             $itemTypeLabel = 'Hàng có sẵn';
@@ -419,9 +421,9 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
 
                                     <div class="shipping-info">
                                         <p class="info-title"><i class="fas fa-truck"></i> Thông tin nhận hàng</p>
-                                        <p><strong>Người nhận:</strong> <?= htmlspecialchars($orderInfo['customer_name'] ?? '') ?></p>
-                                        <p><strong>SĐT:</strong> <?= htmlspecialchars($orderInfo['customer_phone'] ?? '') ?></p>
-                                        <p><strong>Đ/C:</strong> <?= htmlspecialchars($orderInfo['customer_address'] ?? '') ?></p>
+                                        <p><strong>Người nhận:</strong> <?= htmlspecialchars($user['name']) ?></p>
+                                        <p><strong>SĐT:</strong> <?= htmlspecialchars($user['phone']) ?></p>
+                                        <p><strong>Đ/C:</strong> <?= htmlspecialchars($user['address']) ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -474,7 +476,10 @@ $pdVal = $userPres ? ($userPres['leftPD'] + $userPres['rightPD']) : '';
                             <div class="order-card-left" style="display: flex; align-items: center; gap: 15px;">
                                 <div class="product-icon">
                                     <?php if (!empty($order['product_image'])): ?>
-                                        <img src="/SELLING-GLASSES/public/assets/images/products/<?= $order['product_image'] ?>" 
+                                        <?php 
+                                            $displayImg = "/SELLING-GLASSES/public/assets/images/products/" . $order['product_image'];
+                                        ?>
+                                        <img src="<?= $displayImg ?>"
                                             style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;"
                                             onerror="this.src='/SELLING-GLASSES/public/assets/images/products/default.jpg'">
                                     <?php else: ?>
