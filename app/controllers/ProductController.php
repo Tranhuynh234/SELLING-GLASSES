@@ -191,7 +191,6 @@ class ProductController {
             exit();
         }
     }
-
     private function handleError($message) {
         $isJson = (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
         if ($isJson) {
@@ -200,6 +199,19 @@ class ProductController {
         } else {
             die($message);
         }
+        exit();
+    }  
+    public function search() {
+        $keyword = $_GET['query'] ?? '';
+        
+        // Gọi qua Service thay vì gọi thẳng Model
+        $data = $this->productService->getSearchSuggestions($keyword);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => true,
+            'data' => $data
+        ]);
         exit();
     }
 }

@@ -48,6 +48,205 @@
             </form>
         </div>
     </div>
+    <!-- hủy áp dụng promotion  -->
+    <div id="cancelPromotionModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modern-ui">
+            <div class="modal-header">
+                <h3><span class="header-icon" style="background: #e8f5e9; color: #27ae60;"><i
+                            class="fas fa-magic"></i></span> Chọn sản phẩm hủy áp dụng</h3>
+                <button class="close-x" onclick="closeCancelModal()">&times;</button>
+            </div>
+            <input type="text" id="search_cancel" class="form-control mb-3 product-search-input"
+                placeholder="Tìm sản phẩm đang áp dụng..."
+                oninput="handleSearch(this.value, 'product_list_cancel_container')">
+            <div class="modal-body">
+                <div id="product_list_cancel_container"
+                    style="max-height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 5px;">
+                    <!-- Sản phẩm load vào đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modern-cancel" onclick="closeCancelModal()">Hủy</button>
+                <!-- Nên dùng hàm đóng riêng -->
+                <button class="btn-modern-confirm" onclick="submitCancelPromotion()" style="background: #e74c3c;">
+                    <!-- Đổi màu đỏ cho đúng tính chất hủy -->
+                    Xác nhận hủy áp dụng
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- áp dụng promotion  -->
+    <div id="applyPromotionModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modern-ui">
+            <div class="modal-header">
+                <h3><span class="header-icon" style="background: #e8f5e9; color: #27ae60;"><i
+                            class="fas fa-magic"></i></span> Chọn sản phẩm áp dụng</h3>
+                <button class="close-x" onclick="closeApplyModal()">&times;</button>
+            </div>
+            <input type="text" id="search_apply" class="form-control mb-3 product-search-input"
+                placeholder="Tìm tên hoặc mã sản phẩm..." oninput="handleSearch(this.value, 'product_list_container')">
+            <div class="modal-body">
+                <div id="product_list_container"
+                    style="max-height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 5px;">
+                    <!-- Sản phẩm load vào đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modern-cancel" onclick="closeApplyModal()">Hủy</button>
+                <button class="btn-modern-confirm" onclick="submitApplyPromotion()" style="background: #27ae60;">Xác
+                    nhận áp dụng</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Thêm Khuyến Mãi (Đã sửa để giống Modal Chỉnh sửa) -->
+    <div id="addPromotionModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modern-ui">
+            <div class="modal-header">
+                <h3><span class="header-icon"><i class="fas fa-plus-circle"></i></span> Thêm chương trình mới</h3>
+                <button class="close-x" onclick="closeAddModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formAddPromotion">
+                    <div class="input-group full-width">
+                        <label>Tên chương trình</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-tag icon-input"></i>
+                            <input type="text" id="add_name" placeholder="Tên khuyến mãi">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mức giảm</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-percent icon-input"></i>
+                                <input type="number" id="add_discount">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Loại giảm giá</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-list-ul icon-input"></i>
+                                <select id="add_discountType">
+                                    <option value="percent">Phần trăm</option>
+                                    <option value="fixed">Số tiền</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Ngày bắt đầu</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-calendar-alt icon-input"></i>
+                                <input type="date" id="add_startDate">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Ngày kết thúc</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-calendar-check icon-input"></i>
+                                <input type="date" id="add_endDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>Trạng thái</label>
+                        <div class="input-wrapper status-wrapper">
+                            <i class="fas fa-toggle-on icon-input"></i>
+                            <select id="add_status">
+                                <option value="1">Đang chạy</option>
+                                <option value="0">Tạm dừng</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modern-cancel" onclick="closeAddModal()"><i class="fas fa-times"></i> Hủy bỏ</button>
+                <button class="btn-modern-confirm" onclick="addPromotion()"><i class="fas fa-check"></i> Xác nhận
+                    lưu</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Chỉnh sửa Promotion -->
+    <div id="modalEditPromotion" class="modal-overlay">
+        <div class="modal-content modern-ui">
+            <div class="modal-header">
+                <h3><span class="header-icon"><i class="fas fa-plus-circle"></i></span> Chỉnh sửa chương trình</h3>
+                <button class="close-x" onclick="closeModalPromotion()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditPromotion">
+                    <input type="hidden" id="edit_promotionId">
+
+                    <div class="input-group full-width">
+                        <label>Tên chương trình</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-tag icon-input"></i>
+                            <input type="text" id="edit_name_promotion" placeholder="Tên khuyến mãi">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Mức giảm</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-percent icon-input"></i>
+                                <input type="number" id="edit_discount">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Loại giảm giá</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-list-ul icon-input"></i>
+                                <select id="edit_discountType">
+                                    <option value="percent">Phần trăm</option>
+                                    <option value="fixed">Số tiền</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Ngày bắt đầu</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-calendar-alt icon-input"></i>
+                                <input type="date" id="edit_startDate">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Ngày kết thúc</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-calendar-check icon-input"></i>
+                                <input type="date" id="edit_endDate">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>Trạng thái</label>
+                        <div class="input-wrapper status-wrapper">
+                            <i class="fas fa-toggle-on icon-input"></i>
+                            <select id="edit_status">
+                                <option value="1">Đang chạy</option>
+                                <option value="0">Tạm dừng</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modern-cancel" onclick="closeModalPromotion()"><i class="fas fa-times"></i> Hủy
+                    bỏ</button>
+                <button class="btn-modern-confirm" onclick="saveUpdate()"><i class="fas fa-check"></i> Xác nhận
+                    lưu</button>
+            </div>
+        </div>
+    </div>
     <div id="userModal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <div class="modal-glow"></div>
@@ -170,7 +369,7 @@
                     <button type="button" class="btn-ghost" onclick="closeModal()">
                         <i class="fas fa-times"></i> Hủy bỏ
                     </button>
-                    <button type="submit" class="btn-confirm">
+                    <button type="button" class="btn-modern-confirm" onclick="saveUpdate()">
                         <i class="fas fa-check"></i> Xác nhận lưu
                     </button>
                 </div>
@@ -398,10 +597,16 @@
                 <section id="promo" class="tab-pane">
                     <div class="pane-header">
                         <h2>Chương trình khuyến mãi</h2>
-                        <div style="display: flex; gap: 10px">
-                            <input type="text" id="searchPromo" placeholder=" Tìm kiếm..." />
-                            <button class="btn-confirm" onclick="openModal('promo')">
-                                <i class="fas fa-percent"></i> Tạo mã
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <!-- Container cho ô tìm kiếm -->
+                            <div class="search-wrapper">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchPromo" placeholder="Tìm tên hoặc email..." />
+                            </div>
+
+                            <!-- Nút tạo mã giữ nguyên class của bạn -->
+                            <button class="btn-confirm" onclick="openAddPromotionModal()">
+                                <i class="fas fa-percent"></i> Tạo mã khuyến mãi
                             </button>
                         </div>
                     </div>
@@ -416,10 +621,14 @@
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
-                            <tbody id="promoTable"></tbody>
+                            <tbody id="promotion-list-body"></tbody>
                         </table>
                     </div>
-                    <div id="promoPagination" class="pagination-container"></div>
+                    <div class="pagination-wrapper">
+                        <div id="promo-pagination-container">
+
+                        </div>
+                    </div>
                 </section>
 
                 <section id="policy" class="tab-pane">

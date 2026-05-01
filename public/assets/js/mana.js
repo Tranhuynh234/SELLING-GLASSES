@@ -450,8 +450,6 @@ function loadCategories() {
           const option = `<option value="${cat.categoryId}">${cat.name}</option>`;
           selectCat.insertAdjacentHTML("beforeend", option);
         });
-
-        console.log("Đã tải danh mục thành công!");
       } else {
         console.error("Dữ liệu trả về không phải là mảng:", res);
       }

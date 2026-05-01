@@ -160,6 +160,9 @@ switch ($url) {
         break;
 
     // --- PRODUCT ---
+    case 'search-products':
+        $productController->search();
+        break;
     case 'get-all-products':
         $productController->index();
         break;
@@ -263,33 +266,28 @@ switch ($url) {
  // =====================
 // PROMOTION MODULE
 // =====================
-    case "promotion-apply":
-        $promotionController->applyPromotion();
-        exit();
-    case "promotion-create":
-        $promotionController->createPromotion();
-        exit();
-
-    case "promotion-update":
-        $promotionController->updatePromotion();
-        exit();
 
     case "promotion-delete":
-        $promotionController->deletePromotion();
+        $promotionController->delete();
         exit();
-
-    case "promotion-detail":
-        $promotionController->getPromotionDetail();
+    case "promotion-index":
+        $promotionController->getAll();
         exit();
-
-    case "promotion-search":
-        $promotionController->searchPromotions();
+    case "promotion-edit":
+        $promotionController->edit(); 
         exit();
-
-    case "promotion-active-product":
-        $promotionController->getActivePromotionByProduct();
+    case "promotion-update":
+        $promotionController->update(); 
         exit();
-
+    case "promotion-create":
+        $promotionController->create();
+        exit();
+    case "apply-promotion":
+            $promotionController->applyPromotion();
+            exit();
+    case "cancel-promotion":
+        $promotionController->cancelPromotion();
+        exit();
     // --- Combo Module ---
     case 'get-combos':
         $comboController->getCombos();

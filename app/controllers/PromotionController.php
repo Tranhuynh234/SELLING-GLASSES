@@ -1,166 +1,159 @@
 <?php
-
-require_once dirname(__DIR__) . "/services/PromotionServices.php";
+require_once __DIR__ . "/../services/PromotionServices.php";
 
 class PromotionController {
-
-    private $promotionService;
+    private $service;
 
     public function __construct() {
-        $this->promotionService = new PromotionService();
+        $this->service = new PromotionService();
     }
 
-    // =========================
-    // HELPER: GET JSON INPUT
-    // =========================
-    private function getJsonInput() {
-        return json_decode(file_get_contents("php://input"), true);
-    }
+    public function getAll() {
+        header('Content-Type: application/json; charset=utf-8');
 
-    // =========================
-    // CREATE PROMOTION
-    // =========================
-    public function createPromotion() {
-        header("Content-Type: application/json; charset=utf-8");
+        // Lấy từ khóa 'name' từ query string (do JS gửi lên)
+        $name = isset($_GET['name']) ? $_GET['name'] : '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 5;
 
-        $data = $this->getJsonInput() ?? $_POST;
+        // Service sẽ trả về dữ liệu đã lọc theo tên và phân trang
+        $data = $this->service->getPromotions($page, $limit, $name);
+        $totalPages = $this->service->getTotalPages($limit, $name);
 
-        echo json_encode(
-            $this->promotionService->createPromotion($data)
-        );
-    }
+        $result = array_map(function($p) {
+            return [
+                'promotionId' => $p->getPromotionId(),
+                'name' => $p->getName(),
+                'discount' => $p->getDiscount(),
+                'discountType' => $p->getDiscountType(),
+                'startDate' => $p->getStartDate(),
+                'endDate' => $p->getEndDate(),
+                'status' => $p->getStatus(),
+                'staffId' => $p->getStaffId(),
+            ];
+        }, $data);
 
-    // =========================
-    // UPDATE PROMOTION
-    // =========================
-    public function updatePromotion() {
-        header("Content-Type: application/json; charset=utf-8");
-
-        $data = $this->getJsonInput() ?? $_POST;
-
-        $id = $data['promotionId'] ?? null;
-
-        if (!$id) {
-            echo json_encode([
-                "success" => false,
-                "message" => "Thiếu promotionId"
-            ]);
-            return;
-        }
-
-        unset($data['promotionId']);
-
-        echo json_encode(
-            $this->promotionService->updatePromotion($id, $data)
-        );
-    }
-
-    // =========================
-    // DELETE PROMOTION
-    // =========================
-    public function deletePromotion() {
-        header("Content-Type: application/json; charset=utf-8");
-
-        $data = $this->getJsonInput() ?? $_POST;
-
-        $id = $data['promotionId'] ?? null;
-
-        if (!$id) {
-            echo json_encode([
-                "success" => false,
-                "message" => "Thiếu promotionId"
-            ]);
-            return;
-        }
-
-        echo json_encode(
-            $this->promotionService->deletePromotion($id)
-        );
-    }
-
-    // =========================
-    // GET DETAIL PROMOTION
-    // =========================
-    public function getPromotionDetail() {
-        header("Content-Type: application/json; charset=utf-8");
-
-        $id = $_GET['promotionId'] ?? null;
-
-        if (!$id) {
-            echo json_encode([
-                "success" => false,
-                "message" => "Thiếu promotionId"
-            ]);
-            return;
-        }
-
-        echo json_encode(
-            $this->promotionService->getPromotionDetail($id)
-        );
-    }
-
-    // =========================
-    // SEARCH PROMOTION
-    // =========================
-    public function searchPromotions() {
-        header("Content-Type: application/json; charset=utf-8");
-
-        $filters = [
-            "keyword" => $_GET['keyword'] ?? '',
-            "status"  => $_GET['status'] ?? null
-        ];
-
-        $page  = $_GET['page'] ?? 1;
-        $limit = $_GET['limit'] ?? 10;
-
-        echo json_encode(
-            $this->promotionService->searchPromotions($filters, $page, $limit)
-        );
-    }
-
-    // =========================
-    // ACTIVE PROMOTION BY PRODUCT
-    // =========================
-    public function getActivePromotionByProduct() {
-        header("Content-Type: application/json; charset=utf-8");
-
-        $productId = $_GET['productId'] ?? null;
-
-        if (!$productId) {
-            echo json_encode([
-                "success" => false,
-                "message" => "Thiếu productId"
-            ]);
-            return;
-        }
-
-        echo json_encode(
-            $this->promotionService->getActivePromotionByProduct($productId)
-        );
-    }
-public function applyPromotion() {
-    header("Content-Type: application/json");
-
-    $input = json_decode(file_get_contents("php://input"), true);
-
-    $promotionId = $input['promotionId'] ?? null;
-    $productIds = $input['productIds'] ?? [];
-
-    if (!$promotionId || empty($productIds)) {
         echo json_encode([
-            "success" => false,
-            "message" => "Thiếu dữ liệu"
+            'success' => true,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'data' => $result
         ]);
-        return;
+    }
+    public function delete() {
+    header('Content-Type: application/json; charset=utf-8');
+    
+    // Lấy ID từ URL (ví dụ: ?id=5)
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+    if ($id > 0) {
+        $result = $this->service->deletePromotion($id);
+        if ($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Lỗi khi xóa dữ liệu']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+    }
+}
+public function edit() {
+    header('Content-Type: application/json');
+    $id = $_GET['id'] ?? 0;
+    
+    // Gọi Service để lấy dữ liệu cũ
+    $data = $this->service->getPromotionById($id);
+    
+    if ($data) {
+        echo json_encode(['success' => true, 'data' => $data]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Không tìm thấy dữ liệu']);
+    }
+}
+
+public function update() {
+    header('Content-Type: application/json');
+    
+    // Nhận dữ liệu JSON từ request body
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
+    
+    $id = $data['promotionId'] ?? 0;
+    
+    if ($id > 0) {
+        // Tách ID ra khỏi mảng dữ liệu để hàm update của BaseModel hoạt động đúng
+        $promoId = $data['promotionId'];
+        unset($data['promotionId']); 
+        
+        // Gọi Service thực hiện cập nhật
+        $result = $this->service->updatePromotion($promoId, $data);
+        
+        echo json_encode(['success' => $result]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+    }
+}
+public function create() {
+    // 1. Khởi tạo session
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    
+    // Đảm bảo trả về header JSON để trình duyệt hiểu đúng
+    header('Content-Type: application/json');
+
+    // 2. Lấy dữ liệu từ Frontend
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!$data) {
+        echo json_encode(["success" => false, "message" => "Dữ liệu không hợp lệ"]);
+        exit();
     }
 
-    $result = $this->promotionService->applyPromotion($promotionId, $productIds);
+    // 3. Gán staffId AN TOÀN (Sửa lỗi tại đây)
+    // Kiểm tra nếu có session thì lấy, không có thì gán mặc định để tránh ném lỗi Warning ra màn hình
+    if (isset($_SESSION['staff']['staffId'])) {
+        $data['staffId'] = $_SESSION['user']['staffId'];;
+    } else {
+        // Bạn có thể gán ID mặc định của Admin hoặc Staff test ở đây (ví dụ: 1)
+        $data['staffId'] = 1; 
+    }
 
-    echo json_encode([
-        "success" => true,
-        "message" => "Áp dụng thành công",
-        "data" => $result
-    ]);
+    try {
+        $result = $this->service->createPromotion($data);
+
+        if ($result) {
+            echo json_encode([
+                "success" => true, 
+                "message" => "Tạo khuyến mãi thành công",
+                "staffId" => $data['staffId']
+            ]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Không thể lưu dữ liệu"]);
+        }
+    } catch (Exception $e) {
+        // Trả về lỗi dưới dạng JSON thay vì để PHP tự in lỗi ra
+        echo json_encode(["success" => false, "message" => $e->getMessage()]);
+    }
+    exit();
+}
+public function applyPromotion() {
+    $promotionId = $_POST['promotionId'] ?? null;
+    $productIds = $_POST['productIds'] ?? []; // Mảng ID sản phẩm từ checkbox
+
+    $service = new PromotionService();
+    $result = $service->applyToProducts($promotionId, $productIds);
+
+    // Trả về kết quả JSON cho giao diện
+    echo json_encode($result);
+}
+public function cancelPromotion() {
+    // Nhận dữ liệu từ FormData gửi lên
+    $productIds = $_POST['productIds'] ?? [];
+
+    $service = new PromotionService();
+    $result = $service->cancelForProducts($productIds);
+
+    header('Content-Type: application/json');
+    echo json_encode($result);
+    exit();
 }
 }
-?>

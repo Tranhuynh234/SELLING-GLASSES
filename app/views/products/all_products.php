@@ -55,7 +55,7 @@
                 <p class="text-stone-500">Khám phá hàng trăm mẫu gọng kính và tròng kính hiện đại nhất 2026.</p>
             </div>
             <span class="text-sm font-medium text-stone-400 uppercase tracking-widest">
-                <?php echo count($products); ?> Sản phẩm
+
             </span>
         </div>
 
@@ -86,7 +86,8 @@
                         <span class="text-amber-700 font-black text-lg">
                             <?php echo number_format($item['minPrice'], 0, ',', '.'); ?>đ
                         </span>
-                        <button class="add-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
+                        <button
+                            class="add-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
                             data-product-id="<?php echo $item['productId']; ?>"
                             data-variant-id="<?php echo $item['variantId'] ?? 0; ?>">
                             <i class="fa-solid fa-plus"></i>
@@ -108,18 +109,6 @@
 
         </div>
 
-        <?php if (isset($totalPages) && $totalPages > 1): ?>
-        <div class="flex justify-center items-center mt-20 gap-3">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-            <a href="/SELLING-GLASSES/public/get-all-products?page=<?php echo $i; ?>"
-                class="w-12 h-12 flex items-center justify-center rounded-2xl font-bold transition-all
-                <?php echo ($i == $currentPage) ? 'bg-stone-900 text-white shadow-xl scale-110' : 'bg-white border border-stone-200 text-stone-600 hover:border-stone-900'; ?>">
-                <?php echo $i; ?>
-            </a>
-            <?php endfor; ?>
-        </div>
-        <?php endif; ?>
-
     </div>
 </main>
 
@@ -134,28 +123,28 @@
 <script src="/SELLING-GLASSES/public/assets/js/product-detail.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý click vào nút dấu cộng để thêm vào giỏ hàng
-        const addToCartButtons = document.querySelectorAll('.add-to-cart-quick');
-        
-        addToCartButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.getAttribute('data-product-id');
-                const variantId = this.getAttribute('data-variant-id');
-                
-                if (!variantId || variantId === '0') {
-                    alert('Vui lòng chọn màu sắc & kích thước trước khi thêm vào giỏ hàng');
-                    return;
-                }
-                
-                // Gọi hàm addToCart từ cart.js
-                if (typeof addToCart === 'function') {
-                    addToCart(variantId, 1);
-                } else {
-                    alert('Hệ thống giỏ hàng chưa sẵn sàng. Vui lòng thử lại!');
-                }
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý click vào nút dấu cộng để thêm vào giỏ hàng
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-quick');
+
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            const variantId = this.getAttribute('data-variant-id');
+
+            if (!variantId || variantId === '0') {
+                alert('Vui lòng chọn màu sắc & kích thước trước khi thêm vào giỏ hàng');
+                return;
+            }
+
+            // Gọi hàm addToCart từ cart.js
+            if (typeof addToCart === 'function') {
+                addToCart(variantId, 1);
+            } else {
+                alert('Hệ thống giỏ hàng chưa sẵn sàng. Vui lòng thử lại!');
+            }
         });
     });
+});
 </script>

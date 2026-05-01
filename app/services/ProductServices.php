@@ -230,4 +230,12 @@ class ProductServices {
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
+public function getSearchSuggestions($keyword) {
+    if (empty($keyword)) return [];
+
+    // Thêm dấu %
+    $searchKeyword = "%" . $keyword . "%"; 
+
+    return $this->productModel->searchProducts($searchKeyword);
+}
 }
