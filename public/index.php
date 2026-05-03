@@ -134,15 +134,9 @@ switch ($url) {
         // Xử lý lưu dữ liệu đơn kính (POST)
         $prescriptionController->store();
         exit();
-
-    case "get-prescription-session":
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        
-        // Nếu tồn tại thì trả về giá, không thì trả về 0
-        $price = isset($_SESSION['prescription_total']) ? $_SESSION['prescription_total'] : 0;
-        
-        echo json_encode(['price' => $price]);
-        exit();
+   case "get-prescription-session":
+    $prescriptionController->getPrescriptionSession();
+    exit();
 
     // --- PHẦN QUẢN LÝ CỦA YẾN ---
     // --- CATEGORY ---
@@ -208,9 +202,14 @@ switch ($url) {
     case "update-order-status":
         $orderController->updateStatus();
         exit();
-
+    case "get-prescription-orders":
+        $orderController->getPrescriptionOrders();
+        exit();
     case "cancel-order":
         $orderController->cancelOrder();
+        exit();
+    case "update-prescription-status":
+        $orderController->updatePrescriptionStatus();
         exit();
 
     case "get-order-detail":
@@ -400,7 +399,6 @@ switch ($url) {
     case "get-review-by-order":
         $reviewController->getReviewByOrder();
         exit();
-   
     default:
         http_response_code(404);
         echo "404 Not Found";
