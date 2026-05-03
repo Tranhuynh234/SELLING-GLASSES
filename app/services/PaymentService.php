@@ -8,6 +8,7 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/order/OrderModel.php";
 require_once __DIR__ . "/../models/order/OrderItemModel.php";
 require_once __DIR__ . "/../models/order/PaymentModel.php";
+require_once __DIR__ . "/../models/Prescription.php";
 
 class PaymentService {
     private $conn;
@@ -166,16 +167,30 @@ class PaymentService {
         try {
             $this->conn->beginTransaction();
 
-            $this->userModel->update($userId, [
-                "name" => $recipientName,
-                "phone" => $recipientPhone
-            ], "userId");
+            // --- PHÂN LOẠI ĐƠN HÀNG DỰA TRÊN STOCK VÀ LENS COST ---
+            $hasOutOfStock = false;
+            $hasPrescription = ($payload['lensCost'] ?? 0) > 0;
 
-            $customer = $this->customerModel->findByUserId($userId);
-            if ($customer) {
-                $this->customerModel->updateCustomer($customer->getCustomerId(), [
-                    "address" => $shippingAddress
-                ]);
+            // Kiểm tra stock của từng item
+            foreach ($items as $item) {
+                if (isset($item['variantId']) && $item['variantId']) {
+                    // Kiểm tra stock của product variant
+                    $stmt = $this->conn->prepare("SELECT stock FROM product_variant WHERE variantId = ?");
+                    $stmt->execute([$item['variantId']]);
+                    $variant = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$variant || $variant['stock'] <= 0) {
+                        $hasOutOfStock = true;
+                        break;
+                    }
+                }
+                // Combo không kiểm tra stock
+            }
+
+            $orderType = 'ready_stock';
+            if ($hasOutOfStock) {
+                $orderType = 'pre_order';
+            } elseif ($hasPrescription) {
+                $orderType = 'prescription';
             }
 
             $orderId = $this->orderModel->create([
@@ -187,7 +202,8 @@ class PaymentService {
                 "shippingFee" => (float)($payload['shippingFee'] ?? 0),
                 "discount" => (float)($payload['discount'] ?? 0),
                 "totalPrice" => (float)($payload['totalPrice'] ?? $summary['total']),
-                "staffId" => null
+                "staffId" => null,
+                "order_type" => $orderType
             ]);
 
             if (!$orderId) {
@@ -213,6 +229,30 @@ class PaymentService {
                 }
 
                 $this->orderItemModel->create($orderItemData);
+            }
+
+            // LƯU PRESCRIPTION NẾU CÓ
+            if (!empty($_SESSION['prescription_data'])) {
+                $p = $_SESSION['prescription_data'];
+
+                $pres = new Prescription();
+                // Set orderId để liên kết prescription với order cụ thể
+                $pres->orderId = $orderId;
+                $pres->userId = $userId;
+                $pres->orderItemId = null;
+                $pres->leftEye = $p['leftEye'];
+                $pres->rightEye = $p['rightEye'];
+                $pres->leftPD = $p['leftPD'];
+                $pres->rightPD = $p['rightPD'];
+                $pres->imagePath = $p['imagePath'];
+                $pres->status = 'Pending';
+
+                $pres->save($this->conn);
+            }
+
+            // Xóa session prescription sau khi tạo order thành công
+            if (isset($_SESSION['prescription_data'])) {
+                unset($_SESSION['prescription_data']);
             }
 
             $this->paymentModel->createPayment([

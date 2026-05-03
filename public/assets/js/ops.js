@@ -190,10 +190,20 @@ const opsApp = {
                           this.state.orders.length
                             ? this.state.orders
                                 .map((o) => {
-                                  const isCustom = o.leftEye || o.rightEye;
-                                  const typeBadge = isCustom
-                                    ? '<span style="color:#3498db; font-weight:700;">Gia công</span>'
-                                    : '<span style="color:#9b59b6; font-weight:700;">Mua sẵn</span>';
+                                  const orderType = (
+                                    o.order_type ||
+                                    o.orderType ||
+                                    ""
+                                  ).toLowerCase();
+                                  let typeBadge =
+                                    '<span style="color:#9b59b6; font-weight:700;">Hàng có sẵn</span>';
+                                  if (orderType === "prescription") {
+                                    typeBadge =
+                                      '<span style="color:#3498db; font-weight:700;">Hàng Prescription</span>';
+                                  } else if (orderType === "pre_order") {
+                                    typeBadge =
+                                      '<span style="color:#e67e22; font-weight:700;">Hàng Pre-Order</span>';
+                                  }
 
                                   return `
                                 <tr>

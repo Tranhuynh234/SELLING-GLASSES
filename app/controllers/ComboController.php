@@ -40,6 +40,56 @@ class ComboController
         }
     }
 
+    /** Hiển thị trang danh sách combo (cho khách hàng) */
+    public function index()
+    {
+        try {
+            $combos = $this->comboModel->getAll(true, 100, 0);
+
+            $viewPath = __DIR__ . '/../views/combos/all_combos.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+            }
+            exit();
+        } catch (\Exception $e) {
+            echo "Lỗi: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /** Hiển thị trang chi tiết combo (cho khách hàng) */
+    public function detail()
+    {
+        try {
+            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
+
+            if (!$comboId) {
+                echo "Lỗi: Thiếu ID combo";
+                exit();
+            }
+
+            $combo = $this->comboModel->getById($comboId);
+
+            if (!$combo) {
+                echo "Lỗi: Combo không tồn tại";
+                exit();
+            }
+
+            $viewPath = __DIR__ . '/../views/combos/combo-detail.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện chi tiết combo.";
+            }
+            exit();
+        } catch (\Exception $e) {
+            echo "Lỗi: " . $e->getMessage();
+            exit();
+        }
+    }
+
     /** API: Lấy danh sách combo */
     public function getCombos()
     {

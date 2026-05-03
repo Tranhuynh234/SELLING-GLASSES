@@ -434,8 +434,6 @@
 
      function openComboModal(comboData) {
          currentCombo = comboData;
-         console.log('=== DEBUG COMBO DATA ===');
-         console.log('Items:', JSON.stringify(comboData.items, null, 2));
          
          // Populate modal with combo data
          document.getElementById('modalComboImage').src = '/SELLING-GLASSES/public/assets/images/products/' + comboData.imagePath;

@@ -201,6 +201,45 @@ class OrderController {
         exit();
     }
 
+    // LẤY DANH SÁCH ĐƠN HÀNG CÓ ĐƠN KÍNH
+    public function getPrescriptionOrders() {
+        ob_clean();
+        header('Content-Type: application/json');
+        $status = $_GET['status'] ?? 'all';
+        $result = $this->orderService->getPrescriptionOrders($status);
+        echo json_encode($result);
+        exit();
+    }
+
+    // LẤY CHI TIẾT PRESCRIPTION THEO ORDER ID
+    public function getPrescriptionDetail() {
+        ob_clean();
+        header('Content-Type: application/json');
+        $orderId = $_GET['orderId'] ?? null;
+        if (!$orderId) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu orderId']);
+            exit();
+        }
+        $result = $this->orderService->getPrescriptionDetail($orderId);
+        echo json_encode($result);
+        exit();
+    }
+
+    // CẬP NHẬT TRẠNG THÁI PRESCRIPTION
+    public function updatePrescriptionStatus() {
+        ob_clean();
+        header('Content-Type: application/json');
+        $prescriptionId = $_POST['prescriptionId'] ?? null;
+        $status = $_POST['status'] ?? null;
+        if (!$prescriptionId || !$status) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu dữ liệu']);
+            exit();
+        }
+        $result = $this->orderService->updatePrescriptionStatus($prescriptionId, $status);
+        echo json_encode($result);
+        exit();
+    }
+
     // HIỂN THỊ CHI TIẾT ĐƠN HÀNG TRÊN TRANG CÁ NHÂN
     public function showDetail($orderId) {
         if (session_status() === PHP_SESSION_NONE) session_start();

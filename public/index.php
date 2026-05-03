@@ -289,6 +289,14 @@ switch ($url) {
         $promotionController->cancelPromotion();
         exit();
     // --- Combo Module ---
+    case 'all-combos':
+        $comboController->index();
+        exit();
+
+    case 'combo-detail':
+        $comboController->detail();
+        exit();
+
     case 'get-combos':
         $comboController->getCombos();
         exit();

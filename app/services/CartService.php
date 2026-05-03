@@ -87,7 +87,6 @@ class CartService {
             $stmt->execute([$vId]);
 
             if (!$stmt->fetch()) {
-                error_log("Variant not found: " . $vId);
                 return false; // KHÔNG THROW
             }
 
@@ -129,7 +128,6 @@ class CartService {
             return $this->getCart($customerId);
 
         } catch (Exception $e) {
-            error_log("addToCart error: " . $e->getMessage());
             return false;
         }
     }
@@ -149,7 +147,6 @@ class CartService {
             $stmt->execute([$cId]);
 
             if (!$stmt->fetch()) {
-                error_log("Combo not found or inactive: " . $cId);
                 return false;
             }
 
@@ -192,7 +189,6 @@ class CartService {
             return $this->getCart($customerId);
 
         } catch (Exception $e) {
-            error_log("addComboToCart error: " . $e->getMessage());
             return false;
         }
     }

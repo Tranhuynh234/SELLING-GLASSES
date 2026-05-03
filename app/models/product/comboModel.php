@@ -69,12 +69,8 @@ class ComboModel extends BaseModel
 
             // 2. Xóa tất cả sản phẩm cũ và thêm sản phẩm mới
             if (!empty($products)) {
-                error_log("ComboModel::update - Updating items for comboId=$comboId");
-                
                 // Use updateItems which handles duplicate key better
                 $this->updateItems($comboId, $products);
-                
-                error_log("ComboModel::update - Items updated successfully");
             }
 
             $this->conn->commit();
@@ -217,10 +213,8 @@ class ComboModel extends BaseModel
                     ':quantity' => (int)($product['quantity'] ?? 1),
                     ':sortOrder' => $sortOrder++
                 ]);
-                error_log("updateItems - Insert product {$product['productId']}: " . ($result ? 'success' : 'failed'));
             }
 
-            error_log("updateItems - Complete success");
             return true;
         } catch (\Exception $e) {
             error_log("updateItems - Exception: " . $e->getMessage());

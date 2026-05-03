@@ -71,7 +71,7 @@ class OrderModel extends BaseModel {
     public function getOrderDetailWithCustomer($orderId) {
         try {
             $sql = "SELECT
-                o.orderId, o.orderDate, o.status, o.totalPrice, o.is_contacted,
+                o.orderId, o.orderDate, o.status, o.totalPrice, o.is_contacted, o.order_type,
                 u.name AS cust_name,
                 u.phone AS cust_phone,
                 c.address AS cust_address,
