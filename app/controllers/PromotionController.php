@@ -110,11 +110,10 @@ public function create() {
 
     // 3. Gán staffId AN TOÀN (Sửa lỗi tại đây)
     // Kiểm tra nếu có session thì lấy, không có thì gán mặc định để tránh ném lỗi Warning ra màn hình
-    if (isset($_SESSION['staff']['staffId'])) {
-        $data['staffId'] = $_SESSION['user']['staffId'];;
+    if (isset($_SESSION['user']['staffId'])) {
+        $data['staffId'] = $_SESSION['user']['staffId'];
     } else {
-        // Bạn có thể gán ID mặc định của Admin hoặc Staff test ở đây (ví dụ: 1)
-        $data['staffId'] = 1; 
+        $data['staffId'] = 1; // fallback
     }
 
     try {

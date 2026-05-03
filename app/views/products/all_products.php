@@ -54,9 +54,7 @@
                 </h1>
                 <p class="text-stone-500">Khám phá hàng trăm mẫu gọng kính và tròng kính hiện đại nhất 2026.</p>
             </div>
-            <span class="text-sm font-medium text-stone-400 uppercase tracking-widest">
 
-            </span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
@@ -108,7 +106,6 @@
             <?php endif; ?>
 
         </div>
-
     </div>
 </main>
 

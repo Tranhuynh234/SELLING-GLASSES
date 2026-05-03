@@ -158,7 +158,7 @@ async function editPromo(id) {
   }
 }
 
-async function saveUpdate() {
+async function saveUpdatePromotion() {
   const id = document.getElementById("edit_promotionId").value;
   const name = document.getElementById("edit_name_promotion").value;
   const discount = document.getElementById("edit_discount").value;
@@ -454,7 +454,7 @@ function closeCancelModal() {
 }
 // === tìm kiếm sản phẩm ====
 // Lưu trữ ID đã chọn cho 2 mục riêng biệt
-// let searchTimer;t
+//let searchTimer;
 let selectedToApply = [];
 let selectedToCancel = [];
 

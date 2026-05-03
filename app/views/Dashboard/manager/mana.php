@@ -242,7 +242,7 @@
             <div class="modal-footer">
                 <button class="btn-modern-cancel" onclick="closeModalPromotion()"><i class="fas fa-times"></i> Hủy
                     bỏ</button>
-                <button class="btn-modern-confirm" onclick="saveUpdate()"><i class="fas fa-check"></i> Xác nhận
+                <button class="btn-modern-confirm" onclick="saveUpdatePromotion()"><i class="fas fa-check"></i> Xác nhận
                     lưu</button>
             </div>
         </div>
@@ -369,7 +369,7 @@
                     <button type="button" class="btn-ghost" onclick="closeModal()">
                         <i class="fas fa-times"></i> Hủy bỏ
                     </button>
-                    <button type="button" class="btn-modern-confirm" onclick="saveUpdate()">
+                    <button type="button" class="btn-modern-confirm" onclick="saveData()">
                         <i class="fas fa-check"></i> Xác nhận lưu
                     </button>
                 </div>
