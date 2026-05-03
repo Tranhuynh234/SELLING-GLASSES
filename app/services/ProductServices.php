@@ -238,4 +238,15 @@ public function getSearchSuggestions($keyword) {
 
     return $this->productModel->searchProducts($searchKeyword);
 }
+public function getDiscountedProducts() {
+    return $this->productModel->getDiscountedProducts() ?: [];
+}
+
+public function getActivePromotions() {
+    return $this->productModel->getActivePromotions() ?: [];
+}
+
+public function getProductsByPromotion($promotionId) {
+    return $this->productModel->getProductsByPromotion($promotionId) ?: [];
+}
 }

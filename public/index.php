@@ -163,6 +163,16 @@ switch ($url) {
     case 'search-products':
         $productController->search();
         break;
+    case 'get-discounted-products':
+        $productController->getDiscountedProducts();
+        exit();
+
+    case 'get-active-promotions':
+        $productController->getActivePromotions();
+        exit();
+    case 'get-products-by-promotion':
+        $productController->getProductsByPromotion();
+        exit();
     case 'get-all-products':
         $productController->index();
         break;

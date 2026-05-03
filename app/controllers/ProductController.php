@@ -214,4 +214,29 @@ class ProductController {
         ]);
         exit();
     }
+    public function getDiscountedProducts() {
+    header('Content-Type: application/json; charset=utf-8');
+    $data = $this->productService->getDiscountedProducts();
+    echo json_encode(['success' => true, 'data' => $data]);
+    exit();
+}
+
+public function getActivePromotions() {
+    header('Content-Type: application/json; charset=utf-8');
+    $data = $this->productService->getActivePromotions();
+    echo json_encode(['success' => true, 'data' => $data]);
+    exit();
+}
+
+public function getProductsByPromotion() {
+    header('Content-Type: application/json; charset=utf-8');
+    $promotionId = isset($_GET['promotionId']) ? (int)$_GET['promotionId'] : 0;
+    if (!$promotionId) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu promotionId']);
+        exit();
+    }
+    $data = $this->productService->getProductsByPromotion($promotionId);
+    echo json_encode(['success' => true, 'data' => $data]);
+    exit();
+}
 }

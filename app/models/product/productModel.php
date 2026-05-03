@@ -178,4 +178,61 @@ public function searchProducts($keyword) {
     $stmt->execute([$keyword, $keyword]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+// Lấy tất cả sản phẩm đang giảm giá
+public function getDiscountedProducts() {
+    $sql = "SELECT p.productId, p.name, p.imagePath, p.description,
+                c.name as categoryName,
+                MIN(v.price) as minPrice,
+                MIN(v.original_price) as minOriginalPrice,
+                ROUND((1 - MIN(v.price) / MIN(v.original_price)) * 100) as discountPercent,
+                pp.promotionId,
+                pr.name as promotionName,
+                pr.discountType,
+                pr.discount as promotionDiscount
+            FROM product p
+            INNER JOIN promotion_product pp ON p.productId = pp.productId
+            INNER JOIN promotion pr ON pp.promotionId = pr.promotionId
+            LEFT JOIN product_variant v ON p.productId = v.productId
+            LEFT JOIN category c ON p.categoryId = c.categoryId
+            WHERE pr.status = 1
+              AND CURDATE() BETWEEN pr.startDate AND pr.endDate
+              AND v.original_price IS NOT NULL
+              AND v.price < v.original_price
+            GROUP BY p.productId
+            ORDER BY discountPercent DESC";
+    return $this->queryAll($sql);
+}
+
+// Lấy tất cả khuyến mãi đang hoạt động
+public function getActivePromotions() {
+    $sql = "SELECT pr.promotionId, pr.name, pr.discount, pr.discountType,
+                pr.startDate, pr.endDate,
+                COUNT(pp.productId) as productCount
+            FROM promotion pr
+            LEFT JOIN promotion_product pp ON pr.promotionId = pp.promotionId
+            WHERE pr.status = 1
+              AND CURDATE() BETWEEN pr.startDate AND pr.endDate
+            GROUP BY pr.promotionId
+            ORDER BY pr.endDate ASC";
+    return $this->queryAll($sql);
+}
+
+// Lấy sản phẩm theo promotionId
+public function getProductsByPromotion($promotionId) {
+    $sql = "SELECT p.productId, p.name, p.imagePath, p.description,
+                c.name as categoryName,
+                MIN(v.price) as minPrice,
+                MIN(v.original_price) as minOriginalPrice,
+                ROUND((1 - MIN(v.price) / MIN(v.original_price)) * 100) as discountPercent
+            FROM product p
+            INNER JOIN promotion_product pp ON p.productId = pp.productId
+            LEFT JOIN product_variant v ON p.productId = v.productId
+            LEFT JOIN category c ON p.categoryId = c.categoryId
+            WHERE pp.promotionId = :promotionId
+              AND v.original_price IS NOT NULL
+              AND v.price < v.original_price
+            GROUP BY p.productId
+            ORDER BY discountPercent DESC";
+    return $this->queryAll($sql, [':promotionId' => $promotionId]);
+}
 }
