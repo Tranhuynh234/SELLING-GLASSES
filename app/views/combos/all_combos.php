@@ -1,460 +1,164 @@
-<?php
+<?php include_once __DIR__ . "/../layout/header.php"; ?>
 
-require_once __DIR__ . '/../models/product/comboModel.php';
-require_once __DIR__ . '/../entities/product/Combo.php';
+<main class="bg-stone-50 min-h-screen pt-[120px] pb-20">
+    <div class="max-w-7xl mx-auto px-6">
 
-/** Xử lý tất cả request liên quan đến combo */
-class ComboController
-{
-    protected $comboModel;
-    protected $staffId;
+        <nav class="flex text-sm text-stone-500 mb-8">
+            <a href="/SELLING-GLASSES/public/home" class="hover:text-amber-700">Trang chủ</a>
+            <span class="mx-2">/</span>
+            <span class="text-stone-900 font-medium">Combo</span>
+        </nav>
 
-    public function __construct()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        
-        $this->comboModel = new ComboModel();
-        $this->staffId = $_SESSION['user']['staffId'] ?? $_SESSION['user']['userId'] ?? null;
-    }
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h1 class="text-4xl font-bold text-stone-900 mb-2">Combo Ưu Đãi</h1>
+                <p class="text-stone-500">Tiết kiệm hơn khi mua combo gọng kính & tròng kính chính hãng.</p>
+            </div>
+            <span class="text-sm font-medium text-stone-400 uppercase tracking-widest">
+                <?php echo count($combos); ?> Combo
+            </span>
+        </div>
 
-    /** Kiểm tra quyền staff/manager */
-    private function checkAuth() {
-        if (!isset($_SESSION['user'])) {
-            error_log("ComboController::checkAuth - No session user");
-            echo json_encode(['success' => false, 'error' => 'Unauthorized']);
-            exit();
-        }
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
 
-        $position = $_SESSION['user']['position'] ?? null;
-        $role = $_SESSION['user']['role'] ?? null;
+            <?php if (!empty($combos)): ?>
+            <?php foreach ($combos as $combo): ?>
+            <div class="group flex flex-col">
+                <div class="aspect-square rounded-[32px] overflow-hidden bg-stone-200 mb-6 relative shadow-sm">
+                    <?php if ($combo->imagePath): ?>
+                    <img src="/SELLING-GLASSES/public/assets/images/products/<?php echo $combo->imagePath; ?>"
+                        alt="<?php echo htmlspecialchars($combo->name); ?>"
+                        class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <?php else: ?>
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-stone-200">
+                        <i class="fa-solid fa-box-open text-5xl text-stone-400"></i>
+                    </div>
+                    <?php endif; ?>
 
-        error_log("ComboController::checkAuth - role: $role, position: $position");
+                    <div
+                        class="absolute top-4 left-4 bg-amber-600/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white">
+                        COMBO
+                    </div>
 
-        // Chỉ staff/manager mới được tạo/sửa combo
-        if ($role !== 'staff' || !in_array($position, ['manager', 'sales'])) {
-            error_log("ComboController::checkAuth - Access denied for role=$role, position=$position");
-            echo json_encode(['success' => false, 'error' => "Forbidden - chỉ staff được phép (role=$role, position=$position)"]);
-            exit();
-        }
-    }
-
-    /** Hiển thị trang danh sách combo (cho khách hàng) */
-    public function index()
-    {
-        try {
-            $combos = $this->comboModel->getAll(true, 100, 0);
-
-            $viewPath = __DIR__ . '/../views/combos/all_combos.php';
-            if (file_exists($viewPath)) {
-                include $viewPath;
-            } else {
-                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
-            }
-            exit();
-        } catch (\Exception $e) {
-            echo "Lỗi: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /** Hiển thị trang chi tiết combo (cho khách hàng) */
-    public function detail()
-    {
-        try {
-            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
-            if (!$comboId) {
-                echo "Lỗi: Thiếu ID combo";
-                exit();
-            }
-
-            $combo = $this->comboModel->getById($comboId);
-
-            if (!$combo) {
-                echo "Lỗi: Combo không tồn tại";
-                exit();
-            }
-
-            $viewPath = __DIR__ . '/../views/combos/combo-detail.php';
-            if (file_exists($viewPath)) {
-                include $viewPath;
-            } else {
-                echo "Lỗi: Không tìm thấy file giao diện chi tiết combo.";
-            }
-            exit();
-        } catch (\Exception $e) {
-            echo "Lỗi: " . $e->getMessage();
-            exit();
-        }
-    }
-
-    /** API: Lấy danh sách combo */
-    public function getCombos()
-    {
-        try {
-            $onlyActive = isset($_GET['active']) ? $_GET['active'] !== '0' : true;
-            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
-            $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-
-            $combos = $this->comboModel->getAll($onlyActive, $limit, $offset);
-
-            $data = array_map(function ($combo) {
-                return [
-                    'comboId' => $combo->comboId,
-                    'name' => $combo->name,
-                    'description' => $combo->description,
-                    'imagePath' => $combo->imagePath,
-                    'price' => $combo->price,
-                    'isActive' => (bool)$combo->isActive,
-                    'createdAt' => $combo->createdAt,
-                    'items' => $combo->items
-                ];
-            }, $combos);
-
-            echo json_encode(['success' => true, 'data' => $data]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    /** API: Lấy chi tiết combo */
-    public function getCombo()
-    {
-        try {
-            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
-            if (!$comboId) {
-                echo json_encode(['success' => false, 'error' => 'Thiếu ID combo']);
-                return;
-            }
-
-            $combo = $this->comboModel->getById($comboId);
-
-            if (!$combo) {
-                echo json_encode(['success' => false, 'error' => 'Combo không tồn tại']);
-                return;
-            }
-
-            echo json_encode([
-                'success' => true,
-                'data' => [
-                    'comboId' => $combo->comboId,
-                    'name' => $combo->name,
-                    'description' => $combo->description,
-                    'imagePath' => $combo->imagePath,
-                    'price' => $combo->price,
-                    'isActive' => (bool)$combo->isActive,
-                    'items' => $combo->items
-                ]
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    public function createCombo()
-    {
-        try {
-            // Kiểm tra quyền
-            $this->checkAuth();
-
-            // Hỗ trợ cả FormData và JSON
-            $input = [];
-            if (!empty($_POST)) {
-                $input = $_POST;
-                // Parse JSON string từ products
-                if (!empty($_POST['products']) && is_string($_POST['products'])) {
-                    $input['products'] = json_decode($_POST['products'], true);
-                }
-            } else {
-                $input = json_decode(file_get_contents('php://input'), true);
-            }
-
-            // Validate input
-            if (!$input || empty($input['name'])) {
-                echo json_encode(['success' => false, 'error' => 'Tên combo bắt buộc']);
-                return;
-            }
-
-            if (!isset($input['price']) || $input['price'] < 0) {
-                echo json_encode(['success' => false, 'error' => 'Giá combo không hợp lệ']);
-                return;
-            }
-
-            if (empty($input['products']) || !is_array($input['products'])) {
-                echo json_encode(['success' => false, 'error' => 'Combo phải có ít nhất một sản phẩm']);
-                return;
-            }
-
-            // Xử lý upload hình ảnh
-            $imagePath = null;
-            if (!empty($_FILES['comboImage'])) {
-                $file = $_FILES['comboImage'];
-                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                
-                if (!in_array($ext, $allowed)) {
-                    echo json_encode(['success' => false, 'error' => 'Chỉ hỗ trợ ảnh JPG, PNG, GIF, WEBP']);
-                    return;
-                }
-
-                if ($file['size'] > 5 * 1024 * 1024) { // 5MB
-                    echo json_encode(['success' => false, 'error' => 'Ảnh không được vượt quá 5MB']);
-                    return;
-                }
-
-                // Tạo thư mục nếu chưa có
-                $uploadDir = __DIR__ . '/../../public/assets/images/products/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-
-                // Tạo tên file duy nhất
-                $imageName = 'combo_' . time() . '_' . uniqid() . '.' . $ext;
-                $imagePath = $imageName;
-                $uploadPath = $uploadDir . $imageName;
-
-                if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                    echo json_encode(['success' => false, 'error' => 'Lỗi tải ảnh lên']);
-                    return;
-                }
-            }
-
-            // Tạo entity
-            $combo = new Combo(
-                $input['name'],
-                (float)$input['price'],
-                $input['description'] ?? null,
-                $imagePath,
-                (bool)($input['isActive'] ?? true),
-                $this->staffId
-            );
-
-            // Tạo combo
-            $comboId = $this->comboModel->create($combo, $input['products']);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Tạo combo thành công',
-                'comboId' => $comboId
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    public function updateCombo()
-    {
-        try {
-            // Kiểm tra quyền
-            $this->checkAuth();
-
-            // Hỗ trợ cả FormData và JSON
-            $input = [];
-            if (!empty($_POST)) {
-                $input = $_POST;
-                // Parse JSON string từ products
-                if (!empty($_POST['products']) && is_string($_POST['products'])) {
-                    $input['products'] = json_decode($_POST['products'], true);
-                }
-            } else {
-                $input = json_decode(file_get_contents('php://input'), true);
-            }
-
-            error_log("updateCombo input: " . json_encode($input));
-            error_log("updateCombo _POST: " . json_encode($_POST));
-            error_log("updateCombo _FILES: " . json_encode($_FILES ? array_keys($_FILES) : []));
-
-            if (!$input || empty($input['comboId'])) {
-                echo json_encode(['success' => false, 'error' => 'Thiếu ID combo']);
-                return;
-            }
-
-            $comboId = (int)$input['comboId'];
-
-            // Kiểm tra combo tồn tại
-            if (!$this->comboModel->exists($comboId)) {
-                echo json_encode(['success' => false, 'error' => 'Combo không tồn tại']);
-                return;
-            }
-
-            // Chuẩn bị data cập nhật
-            $data = [];
-            if (isset($input['name'])) {
-                $data['name'] = $input['name'];
-            }
-            if (isset($input['price'])) {
-                $data['price'] = (float)$input['price'];
-            }
-            if (isset($input['description'])) {
-                $data['description'] = $input['description'];
-            }
-            if (isset($input['isActive'])) {
-
-                $isActive = $input['isActive'];
-                if (is_string($isActive)) {
-                    $data['isActive'] = ($isActive === '1' || strtolower($isActive) === 'true') ? 1 : 0;
-                } else {
-                    $data['isActive'] = $isActive ? 1 : 0;
-                }
-                error_log("updateCombo isActive conversion: " . var_export($isActive, true) . " -> " . $data['isActive']);
-            }
-
-            // Xử lý upload hình ảnh mới (nếu có)
-            if (!empty($_FILES['comboImage'])) {
-                $file = $_FILES['comboImage'];
-                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                
-                if (!in_array($ext, $allowed)) {
-                    echo json_encode(['success' => false, 'error' => 'Chỉ hỗ trợ ảnh JPG, PNG, GIF, WEBP']);
-                    return;
-                }
-
-                if ($file['size'] > 5 * 1024 * 1024) { // 5MB
-                    echo json_encode(['success' => false, 'error' => 'Ảnh không được vượt quá 5MB']);
-                    return;
-                }
-
-                // Tạo thư mục nếu chưa có
-                $uploadDir = __DIR__ . '/../../public/assets/images/products/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-
-                // Xóa ảnh cũ nếu tồn tại
-                $oldCombo = $this->comboModel->getById($comboId);
-                if ($oldCombo && $oldCombo->imagePath) {
-                    $oldImagePath = $uploadDir . $oldCombo->imagePath;
-                    if (file_exists($oldImagePath)) {
-                        unlink($oldImagePath);
+                    <?php 
+                    // Tính tổng giá sản phẩm lẻ để hiện % tiết kiệm
+                    $totalItemPrice = 0;
+                    if (!empty($combo->items)) {
+                        foreach ($combo->items as $item) {
+                            $totalItemPrice += (float)($item['price'] ?? 0) * (int)($item['quantity'] ?? 1);
+                        }
                     }
+                    $saved = $totalItemPrice - (float)$combo->price;
+                    if ($totalItemPrice > 0 && $saved > 0):
+                        $savedPercent = round(($saved / $totalItemPrice) * 100);
+                    ?>
+                    <div
+                        class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        -<?php echo $savedPercent; ?>%
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="space-y-2 px-2 flex-grow">
+                    <h3 class="font-bold text-xl text-stone-900 group-hover:text-amber-700 transition">
+                        <?php echo htmlspecialchars($combo->name); ?>
+                    </h3>
+                    <p class="text-stone-500 text-sm line-clamp-2">
+                        <?php echo htmlspecialchars($combo->description ?? 'Combo tiết kiệm'); ?>
+                    </p>
+
+                    <!-- Danh sách sản phẩm trong combo -->
+                    <?php if (!empty($combo->items)): ?>
+                    <div class="flex flex-wrap gap-1 pt-1">
+                        <?php foreach (array_slice($combo->items, 0, 3) as $item): ?>
+                        <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full">
+                            <?php echo htmlspecialchars($item['productName'] ?? 'Sản phẩm'); ?>
+                        </span>
+                        <?php endforeach; ?>
+                        <?php if (count($combo->items) > 3): ?>
+                        <span class="text-[10px] bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full">
+                            +<?php echo count($combo->items) - 3; ?> khác
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <div class="flex flex-col">
+                            <span class="text-amber-700 font-black text-lg">
+                                <?php echo number_format($combo->price, 0, ',', '.'); ?>đ
+                            </span>
+                            <?php if ($totalItemPrice > 0 && $saved > 0): ?>
+                            <span class="text-stone-400 text-xs line-through">
+                                <?php echo number_format($totalItemPrice, 0, ',', '.'); ?>đ
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                        <button class="add-combo-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
+                            data-combo-id="<?php echo $combo->comboId; ?>">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <a href="/SELLING-GLASSES/public/combo-detail?id=<?php echo $combo->comboId; ?>"
+                    class="block mt-4 text-center py-3 border border-stone-200 rounded-2xl text-sm font-bold hover:bg-stone-900 hover:text-white transition uppercase tracking-widest">
+                    Chi tiết combo
+                </a>
+            </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <div class="col-span-full py-20 text-center">
+                <i class="fa-solid fa-box-open text-4xl text-stone-300 mb-4"></i>
+                <p class="text-stone-500 italic">Chưa có combo nào.</p>
+            </div>
+            <?php endif; ?>
+
+        </div>
+
+    </div>
+</main>
+
+<?php include_once __DIR__ . "/../layout/footer.php"; ?>
+
+<!-- Essential Scripts -->
+<script src="/SELLING-GLASSES/public/assets/js/main.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/cart.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/home.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/chatbox.js"></script>
+<script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý click nút thêm combo vào giỏ hàng
+        const addComboButtons = document.querySelectorAll('.add-combo-to-cart-quick');
+        
+        addComboButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const comboId = this.getAttribute('data-combo-id');
+                
+                if (typeof addComboToCart === 'function') {
+                    addComboToCart(comboId, 1);
+                } else {
+                    // Fallback: gọi API trực tiếp
+                    fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ comboId: comboId, quantity: 1 })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Đã thêm combo vào giỏ hàng!');
+                            if (typeof updateCartCount === 'function') updateCartCount();
+                        } else {
+                            alert(data.error || 'Không thể thêm vào giỏ hàng');
+                        }
+                    })
+                    .catch(() => alert('Vui lòng đăng nhập để thêm vào giỏ hàng'));
                 }
-
-                // Tạo tên file duy nhất
-                $imageName = 'combo_' . time() . '_' . uniqid() . '.' . $ext;
-                $uploadPath = $uploadDir . $imageName;
-
-                if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                    echo json_encode(['success' => false, 'error' => 'Lỗi tải ảnh lên']);
-                    return;
-                }
-
-                $data['imagePath'] = $imageName;
-            }
-
-            $products = $input['products'] ?? [];
-
-            error_log("updateCombo products: " . json_encode($products));
-            error_log("updateCombo products is_array: " . (is_array($products) ? 'true' : 'false'));
-            error_log("updateCombo products count: " . count($products));
-            error_log("updateCombo data to update: " . json_encode($data));
-
-            // Kiểm tra combo phải có ít nhất một sản phẩm
-            if (empty($products) || !is_array($products)) {
-                error_log("updateCombo FAILED - products invalid");
-                echo json_encode(['success' => false, 'error' => 'Combo phải có ít nhất một sản phẩm']);
-                return;
-            }
-
-            // Cập nhật
-            error_log("updateCombo - calling model->update with comboId=$comboId");
-            $this->comboModel->update($comboId, $data, $products);
-            
-            error_log("updateCombo SUCCESS");
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Cập nhật combo thành công'
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    /** API: Xóa combo (soft delete - mềm) */
-    public function deleteCombo()
-    {
-        try {
-            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
-            if (!$comboId) {
-                echo json_encode(['success' => false, 'error' => 'Thiếu ID combo']);
-                return;
-            }
-
-            if (!$this->comboModel->exists($comboId)) {
-                echo json_encode(['success' => false, 'error' => 'Combo không tồn tại']);
-                return;
-            }
-
-            // Soft delete (đánh dấu deletedAt)
-            $this->comboModel->softDelete($comboId);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Xóa combo thành công'
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    /** API: Khôi phục combo bị xóa */
-    public function restoreCombo()
-    {
-        try {
-            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
-            if (!$comboId) {
-                echo json_encode(['success' => false, 'error' => 'Thiếu ID combo']);
-                return;
-            }
-
-            $this->comboModel->restore($comboId);
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Khôi phục combo thành công'
-            ]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    /**  API: Tìm combo theo tên */
-    public function searchCombos()
-    {
-        header('Content-Type: application/json; charset=utf-8');
-
-        try {
-            $name = isset($_GET['name']) ? $_GET['name'] : '';
-
-            if (empty($name)) {
-                echo json_encode(['success' => false, 'error' => 'Nhập tên combo để tìm']);
-                return;
-            }
-
-            $combos = $this->comboModel->searchByName($name);
-
-            $data = array_map(function ($combo) {
-                return [
-                    'comboId' => $combo->comboId,
-                    'name' => $combo->name,
-                    'description' => $combo->description,
-                    'price' => $combo->price,
-                    'imagePath' => $combo->imagePath,
-                    'isActive' => $combo->isActive,
-                    'createdAt' => $combo->createdAt,
-                    'items' => $combo->items
-                ];
-            }, $combos);
-
-            echo json_encode(['success' => true, 'data' => $data]);
-        } catch (\Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-        }
-    }
-}
+            });
+        });
+    });
+</script>
