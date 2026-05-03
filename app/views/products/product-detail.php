@@ -83,7 +83,7 @@
                     updateCartCount(totalQty);
                 }
             })
-            .catch(err => console.log('Cart load error:', err));
+            .catch(err => {});
         }
     });
 </script>

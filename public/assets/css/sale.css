@@ -931,6 +931,45 @@ tr:hover td {
   border: none !important;
 }
 
+/* BẢNG ĐƠN KÍNH */
+.prescription-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prescription-table th {
+  background-color: var(--lens-gold);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.prescription-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.prescription-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.prescription-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.prescription-table .info-value {
+  font-weight: 600;
+  color: var(--lens-dark);
+}
+
 /* CHAT LIÊN HỆ VỚI KHÁCH HÀNG  */
 /* TRẠNG THÁI ẨN */
 .chat-hidden {

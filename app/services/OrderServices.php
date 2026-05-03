@@ -34,23 +34,33 @@ class OrderService {
         $data['status'] = 'Pending';
         $data['totalPrice'] = $data['totalPrice'] ?? 0;
 
-        // --- PHẦN SỬA ĐỔI: PHÂN LOẠI ĐƠN HÀNG ---
-        // 1. Kiểm tra nếu có dữ liệu độ kính trong session
-        if (!empty($_SESSION['prescription_data'])) {
-            $data['order_type'] = 'prescription';
-        } 
-        // 2. Kiểm tra nếu phía Frontend gửi lên flag xác nhận là hàng đặt trước
-        // (Lưu ý: Bạn cần đảm bảo bên sale.js khi gửi request có kèm biến isPreorder)
-        elseif (isset($data['isPreorder']) && ($data['isPreorder'] == 'true' || $data['isPreorder'] == 1)) {
+        // PHÂN LOẠI ĐƠN HÀNG DỰA TRÊN STOCK VÀ LENS COST
+        $db = Database::connect();
+        $hasOutOfStock = false;
+        $hasPrescription = ($data['lensCost'] ?? 0) > 0;
+
+        // Kiểm tra stock của từng item trong cart
+        $cart = $_SESSION['cart'] ?? [];
+        foreach ($cart as $item) {
+            if (isset($item['variantId']) && $item['variantId']) {
+                // Kiểm tra stock của product variant
+                $stmt = $db->prepare("SELECT stock FROM product_variant WHERE variantId = ?");
+                $stmt->execute([$item['variantId']]);
+                $variant = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$variant || $variant['stock'] <= 0) {
+                    $hasOutOfStock = true;
+                    break;
+                }
+            }
+        }
+
+        if ($hasOutOfStock) {
             $data['order_type'] = 'pre_order';
-        } 
-        // 3. Mặc định là hàng có sẵn
-        else {
+        } elseif ($hasPrescription) {
+            $data['order_type'] = 'prescription';
+        } else {
             $data['order_type'] = 'ready_stock';
         }
-        // ---------------------------------------
-
-        $db = Database::connect();
 
         try {
             $db->beginTransaction();
@@ -83,15 +93,19 @@ class OrderService {
                     $p = $_SESSION['prescription_data'];
 
                     $pres = new Prescription();
-                    $pres->userId = $p['userId'] ?? ($_SESSION['user']['userId'] ?? null);
+                    $pres->orderId = $orderId;
+                    $pres->userId = null;
                     $pres->orderItemId = $orderItemId;
                     $pres->leftEye = $p['leftEye'];
                     $pres->rightEye = $p['rightEye'];
                     $pres->leftPD = $p['leftPD'];
                     $pres->rightPD = $p['rightPD'];
                     $pres->imagePath = $p['imagePath'];
+                    $pres->status = 'Pending';
+
                     $pres->save($db);
-                    // unset($_SESSION['prescription_data']);
+                } else {
+                    // No prescription data in session
                 }
             }
 
@@ -283,5 +297,177 @@ class OrderService {
     public function getConversationList() {
         $data = $this->orderModel->getAllCustomerFromOrders();
         return ["success" => true, "data" => $data];
+    }
+
+    // LẤY DANH SÁCH ĐƠN HÀNG CÓ ĐƠN KÍNH (PRESCRIPTION)
+    public function getPrescriptionOrders($status = 'all') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        try {
+            $db = Database::connect();
+
+            $sql = "SELECT 
+                        o.orderId,
+                        o.orderDate,
+                        o.status,
+                        o.totalPrice,
+                        u.name AS cust_name,
+                        u.email AS cust_email,
+                        u.phone AS cust_phone,
+                        pr.prescriptionId,
+                        pr.leftEye,
+                        pr.rightEye,
+                        pr.leftPD,
+                        pr.rightPD,
+                        pr.imagePath AS prescriptionImagePath,
+                        COALESCE(pr.status, 'Pending') AS prescriptionStatus
+                    FROM orders o
+                    JOIN customers c ON o.customerId = c.customerId
+                    JOIN users u ON c.userId = u.userId
+                    JOIN prescription pr ON o.orderId = pr.orderId 
+                        AND pr.prescriptionId = (
+                            SELECT MAX(p.prescriptionId) FROM prescription p 
+                            WHERE p.orderId = o.orderId
+                        )
+                    WHERE o.order_type = 'prescription'";
+
+            if ($status !== 'all') {
+                $prescriptionStatus = '';
+                switch (strtolower($status)) {
+                    case 'pending':
+                        $prescriptionStatus = 'Pending';
+                        break;
+                    case 'processing':
+                        $prescriptionStatus = 'Confirmed';
+                        break;
+                    case 'completed':
+                        $prescriptionStatus = 'Completed';
+                        break;
+                }
+                if ($prescriptionStatus) {
+                    $sql .= " AND COALESCE(pr.status, 'Pending') = :status";
+                }
+            }
+            
+            $sql .= " ORDER BY o.orderDate DESC";
+            
+            $stmt = $db->prepare($sql);
+            if ($status !== 'all' && isset($prescriptionStatus)) {
+                $stmt->bindParam(':status', $prescriptionStatus);
+            }
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            return ["success" => true, "data" => $data];
+        } catch (Exception $e) {
+            error_log("Lỗi getPrescriptionOrders: " . $e->getMessage());
+            return ["success" => false, "message" => $e->getMessage(), "data" => []];
+        }
+    }
+
+    // LẤY CHI TIẾT PRESCRIPTION THEO ORDER ID
+    public function getPrescriptionDetail($orderId) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        try {
+            $db = Database::connect();
+
+            $sql = "SELECT 
+                        o.orderId,
+                        o.orderDate,
+                        o.status,
+                        o.totalPrice,
+                        u.name AS cust_name,
+                        u.email AS cust_email,
+                        u.phone AS cust_phone,
+                        pr.prescriptionId,
+                        pr.leftEye,
+                        pr.rightEye,
+                        pr.leftPD,
+                        pr.rightPD,
+                        pr.imagePath AS prescriptionImagePath,
+                        COALESCE(pr.status, 'Pending') AS prescriptionStatus
+                    FROM orders o
+                    JOIN customers c ON o.customerId = c.customerId
+                    JOIN users u ON c.userId = u.userId
+                    JOIN prescription pr ON o.orderId = pr.orderId
+                    WHERE o.orderId = ? AND o.order_type = 'prescription'";
+
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$orderId]);
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return ["success" => true, "data" => $data];
+        } catch (Exception $e) {
+            error_log("Lỗi getPrescriptionDetail: " . $e->getMessage());
+            return ["success" => false, "message" => $e->getMessage(), "data" => []];
+        }
+    }
+
+    // CẬP NHẬT TRẠNG THÁI PRESCRIPTION
+    public function updatePrescriptionStatus($prescriptionId, $status) {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        try {
+            $db = Database::connect();
+
+            // Bắt đầu transaction
+            $db->beginTransaction();
+
+            // Cập nhật trạng thái prescription
+            $sql = "UPDATE prescription SET status = ? WHERE prescriptionId = ?";
+            $stmt = $db->prepare($sql);
+            $result = $stmt->execute([$status, $prescriptionId]);
+
+            if (!$result) {
+                throw new Exception("Không thể cập nhật trạng thái prescription");
+            }
+
+            // Đồng bộ trạng thái đơn hàng cho prescription orders
+            // Lấy orderId từ prescription
+            $getOrderSql = "SELECT pr.orderId FROM prescription pr WHERE pr.prescriptionId = ?";
+            $getOrderStmt = $db->prepare($getOrderSql);
+            $getOrderStmt->execute([$prescriptionId]);
+            $orderData = $getOrderStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($orderData && $orderData['orderId']) {
+                $orderId = $orderData['orderId'];
+
+                // Kiểm tra xem order này có phải prescription type không
+                $checkOrderSql = "SELECT order_type FROM orders WHERE orderId = ?";
+                $checkOrderStmt = $db->prepare($checkOrderSql);
+                $checkOrderStmt->execute([$orderId]);
+                $orderInfo = $checkOrderStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($orderInfo && $orderInfo['order_type'] === 'prescription') {
+                    $orderStatus = null;
+                    if ($status === 'Confirmed') {
+                        $orderStatus = 'Confirmed';
+                    } elseif ($status === 'Completed') {
+                        $orderStatus = 'Processing'; // Chuyển giao vận chuyển
+                    }
+
+                    if ($orderStatus) {
+                        $updateOrderSql = "UPDATE orders SET status = ? WHERE orderId = ?";
+                        $updateOrderStmt = $db->prepare($updateOrderSql);
+                        $updateOrderStmt->execute([$orderStatus, $orderId]);
+                    }
+                }
+            }
+
+            $db->commit();
+            return ["success" => true, "message" => "Cập nhật trạng thái thành công"];
+
+        } catch (Exception $e) {
+            $db->rollBack();
+            error_log("Lỗi updatePrescriptionStatus: " . $e->getMessage());
+            return ["success" => false, "message" => $e->getMessage()];
+        }
     }
 }

@@ -15,10 +15,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnDashboard = $id("menu-dashboard");
   const btnOrders = $id("menu-orders");
   const btnPreorder = $id("menu-preorder");
-  const btnPrescription = $id("menu-prescription");
   const btnComplaints = $id("menu-complaints");
   const allSections = $qa(".dashboard-body");
   const allMenuItems = $qa(".menu-item");
+  const orderModalBodyContainer = $id("orderDetailModal")?.querySelector(
+    ".modal-body.order-details-container",
+  );
+  const defaultOrderModalBodyHtml = orderModalBodyContainer?.innerHTML || null;
 
   /* CÁC HÀM HỖ TRỢ  */
   const switchPage = (pageId, activeBtn) => {
@@ -56,12 +59,123 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const syncOrderUI = (status, isContacted) => {
+  // Hàm render thông tin prescription
+  const renderPrescriptionInfo = (prescription) => {
+    let leftEyeData = {};
+    let rightEyeData = {};
+    try {
+      leftEyeData = JSON.parse(prescription.leftEye || "{}");
+      rightEyeData = JSON.parse(prescription.rightEye || "{}");
+    } catch (e) {
+      console.error("Error parsing prescription data:", e);
+    }
+
+    return `
+      <hr style="border-top: 1px solid #000000; margin: 20px 0;">
+      <div class="info-group">
+        <p class="group-label">THÔNG TIN ĐƠN KÍNH</p>
+        <div class="table-container">
+          <table class="prescription-table">
+            <thead>
+              <tr>
+                <th>Thông số</th>
+                <th>Mắt trái</th>
+                <th>Mắt phải</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Sphere (SPH)</strong></td>
+                <td class="info-value">${leftEyeData.sph || "N/A"}</td>
+                <td class="info-value">${rightEyeData.sph || "N/A"}</td>
+              </tr>
+              <tr>
+                <td><strong>Cylinder (CYL)</strong></td>
+                <td class="info-value">${leftEyeData.cyl || "N/A"}</td>
+                <td class="info-value">${rightEyeData.cyl || "N/A"}</td>
+              </tr>
+              <tr>
+                <td><strong>Axis</strong></td>
+                <td class="info-value">${leftEyeData.axis || "N/A"}</td>
+                <td class="info-value">${rightEyeData.axis || "N/A"}</td>
+              </tr>
+              <tr>
+                <td><strong>Add</strong></td>
+                <td class="info-value">${leftEyeData.add || "N/A"}</td>
+                <td class="info-value">${rightEyeData.add || "N/A"}</td>
+              </tr>
+              <tr>
+                <td><strong>PD</strong></td>
+                <td class="info-value">${prescription.leftPD || "N/A"}</td>
+                <td class="info-value">${prescription.rightPD || "N/A"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        ${
+          prescription.prescriptionImagePath
+            ? `
+          <div style="margin-top: 20px;">
+            <strong>Ảnh đơn kính:</strong>
+            <div style="margin-top: 10px;">
+              <img src="/SELLING-GLASSES/public/assets/images/${prescription.prescriptionImagePath}"
+                   alt="Prescription Image"
+                   style="max-width: 100%; border-radius: 8px; border: 1px solid #ddd;">
+            </div>
+          </div>
+        `
+            : ""
+        }
+      </div>
+    `;
+  };
+
+  const syncOrderUI = (
+    status,
+    isContacted,
+    orderType = null,
+    prescriptionData = null,
+  ) => {
     const btnConfirm = $q(".btn-confirm-order");
     const btnLogistic = $q(".btn-logistic-order");
     if (!btnConfirm || !btnLogistic) return;
+
+    // Ẩn tất cả nút trước
     btnConfirm.classList.add("hidden");
     btnLogistic.classList.add("hidden");
+
+    // Logic riêng cho đơn prescription
+    if (orderType === "prescription" && prescriptionData) {
+      const prescriptionStatus = (
+        prescriptionData.prescriptionStatus || "Pending"
+      )
+        .toString()
+        .trim()
+        .toLowerCase();
+
+      if (prescriptionStatus === "pending") {
+        btnConfirm.classList.remove("hidden");
+        btnConfirm.innerHTML =
+          '<span><i class="fas fa-check-circle"></i> Xác nhận đơn kính</span><i class="fas fa-chevron-right"></i>';
+        btnConfirm.onclick = () =>
+          confirmPrescription(prescriptionData.prescriptionId);
+      } else if (prescriptionStatus === "confirmed") {
+        btnConfirm.classList.remove("hidden");
+        btnConfirm.innerHTML =
+          '<span><i class="fas fa-check"></i> Hoàn thành đơn kính</span><i class="fas fa-chevron-right"></i>';
+        btnConfirm.onclick = () =>
+          completePrescription(prescriptionData.prescriptionId);
+      }
+      return;
+    }
+
+    // Đối với đơn prescription cũ (không có prescriptionData): ẩn tất cả nút thao tác
+    // Thao tác sẽ được thực hiện từ mục Prescription
+    if (orderType === "prescription") {
+      return; // Không hiển thị nút nào
+    }
+
+    // Logic bình thường cho đơn khác
     if (status === "Pending" && Number(isContacted) === 1)
       btnConfirm.classList.remove("hidden");
     else if (status === "Confirmed") btnLogistic.classList.remove("hidden");
@@ -353,6 +467,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // XÁC NHẬN PRESCRIPTION
+  window.confirmPrescription = async (prescriptionId) => {
+    if (!confirm("Bạn có chắc chắn muốn xác nhận đơn kính này?")) return;
+
+    try {
+      const result = await ajaxJson(
+        "/SELLING-GLASSES/public/index.php?url=update-prescription-status",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `prescriptionId=${prescriptionId}&status=Confirmed`,
+        },
+      );
+
+      if (result.success) {
+        alert("Đã xác nhận đơn kính thành công!");
+        // Refresh danh sách orders nếu đang ở trang orders
+        if (
+          $id("orders-page") &&
+          !$id("orders-page").classList.contains("hidden")
+        ) {
+          fetchOrders("all");
+        }
+        // Đóng modal
+        bootstrap.Modal.getInstance($id("orderDetailModal")).hide();
+      } else {
+        alert("Lỗi: " + (result.message || "Không thể xác nhận đơn kính"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi xác nhận prescription:", error);
+      alert("Lỗi kết nối máy chủ!");
+    }
+  };
+
+  // HOÀN THÀNH PRESCRIPTION
+  window.completePrescription = async (prescriptionId) => {
+    if (!confirm("Bạn có chắc chắn muốn đánh dấu đơn kính này đã hoàn thành?"))
+      return;
+
+    try {
+      const result = await ajaxJson(
+        "/SELLING-GLASSES/public/index.php?url=update-prescription-status",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `prescriptionId=${prescriptionId}&status=Completed`,
+        },
+      );
+
+      if (result.success) {
+        alert("Đã hoàn thành đơn kính thành công!");
+        // Refresh danh sách orders nếu đang ở trang orders
+        if (
+          $id("orders-page") &&
+          !$id("orders-page").classList.contains("hidden")
+        ) {
+          fetchOrders("all");
+        }
+        // Đóng modal
+        bootstrap.Modal.getInstance($id("orderDetailModal")).hide();
+      } else {
+        alert("Lỗi: " + (result.message || "Không thể hoàn thành đơn kính"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi hoàn thành prescription:", error);
+      alert("Lỗi kết nối máy chủ!");
+    }
+  };
+
   /* SỰ KIỆN UI */
   btnDashboard?.addEventListener("click", async () => {
     switchPage("dashboard-page", btnDashboard);
@@ -366,10 +549,6 @@ document.addEventListener("DOMContentLoaded", () => {
     switchPage("preorder-page", btnPreorder);
     fetchPreorders("All");
   });
-  btnPrescription?.addEventListener("click", () => {
-    switchPage("prescription-page", btnPrescription);
-    // Chưa có API riêng cho Prescription
-  });
   btnComplaints?.addEventListener("click", () => {
     switchPage("complaint-page", btnComplaints);
     fetchComplaints("all");
@@ -380,11 +559,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Lọc Preorder:", status),
   );
 
-  setupFilterEvents("prescription-page", (status) =>
-    console.log("Lọc Prescription:", status),
-  );
-
-  setupSearchTable("search-prescription", "prescription-list");
   setupFilterEvents("complaint-page", fetchComplaints);
 
   btnToggle?.addEventListener("click", () =>
@@ -416,13 +590,22 @@ document.addEventListener("DOMContentLoaded", () => {
   window.viewOrderDetail = async (orderId, requestContext = null) => {
     window.currentOrderId = orderId;
     window.currentRequestContext = requestContext;
+    const orderModalEl = $id("orderDetailModal");
+    if (!orderModalEl) return;
+
+    const restoreContainer = orderModalEl.querySelector(
+      ".modal-body.order-details-container",
+    );
+    if (defaultOrderModalBodyHtml && restoreContainer) {
+      restoreContainer.innerHTML = defaultOrderModalBodyHtml;
+    }
+
     const custName = $id("custName");
     const custPhone = $id("custPhone");
     const custAddress = $id("custAddress");
     const modalBody = $id("orderDetailBody");
     const modalTitle = $id("orderDetailTitle");
-    const orderModalEl = $id("orderDetailModal");
-    if (!orderModalEl) return;
+
     bootstrap.Modal.getOrCreateInstance(orderModalEl).show();
     modalTitle &&
       (modalTitle.innerText = `Chi tiết đơn hàng #${orderId}${requestContext ? ` - ${requestContext.request_type === "complaint" ? "Khiếu nại" : "Đổi trả"}` : ""}`);
@@ -440,7 +623,28 @@ document.addEventListener("DOMContentLoaded", () => {
         custName && (custName.innerText = detail.cust_name || "N/A");
         custPhone && (custPhone.innerText = detail.cust_phone || "N/A");
         custAddress && (custAddress.innerText = detail.cust_address || "N/A");
-        syncOrderUI(detail.status, detail.is_contacted);
+
+        // Nếu là đơn prescription, load thêm thông tin prescription
+        let prescriptionData = null;
+        if (detail.order_type === "prescription") {
+          try {
+            const prescriptionResult = await ajaxJson(
+              `/SELLING-GLASSES/public/index.php?url=get-prescription-detail&orderId=${orderId}`,
+            );
+            if (prescriptionResult.success && prescriptionResult.data?.length) {
+              prescriptionData = prescriptionResult.data[0];
+            }
+          } catch (error) {
+            console.error("Lỗi khi tải thông tin prescription:", error);
+          }
+        }
+
+        syncOrderUI(
+          detail.status,
+          detail.is_contacted,
+          detail.order_type,
+          prescriptionData,
+        );
         modalBody.innerHTML = renderRows(result.data, (item) => {
           const isCombo = item.itemType === "combo" || item.comboId;
           const badgeHtml = isCombo
@@ -458,6 +662,15 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>`;
         });
         renderComplaintRequestPanel(requestContext);
+
+        // Nếu là đơn prescription, thêm thông tin prescription
+        if (prescriptionData) {
+          const prescriptionHtml = renderPrescriptionInfo(prescriptionData);
+          const mainPanel = modalBody.closest(".main-panel");
+          if (mainPanel) {
+            mainPanel.insertAdjacentHTML("beforeend", prescriptionHtml);
+          }
+        }
       } else {
         modalBody &&
           (modalBody.innerHTML = `<tr><td colspan="5" class="text-center py-4">Không tìm thấy dữ liệu.</td></tr>`);
@@ -870,7 +1083,11 @@ document.addEventListener("DOMContentLoaded", () => {
         `/SELLING-GLASSES/public/index.php?url=get-order-detail&orderId=${window.currentOrderId}`,
       );
       if (result.success && result.data?.length)
-        syncOrderUI(result.data[0].status, result.data[0].is_contacted);
+        syncOrderUI(
+          result.data[0].status,
+          result.data[0].is_contacted,
+          result.data[0].order_type,
+        );
     }
     isFetchingChat = false;
   }, 3000);

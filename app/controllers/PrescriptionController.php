@@ -132,4 +132,13 @@ class PrescriptionController {
             exit;
         }
     }
+
+    public function getPrescriptionSession() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        $price = isset($_SESSION['prescription_total']) ? $_SESSION['prescription_total'] : 0;
+        
+        echo json_encode(['price' => $price]);
+        exit();
+    }
 }
