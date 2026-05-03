@@ -203,6 +203,11 @@ switch ($url) {
     case "get-order-detail":
         $orderController->getOrderDetail();
         exit();
+
+    case "get-prescription-detail":
+        $orderController->getPrescriptionDetail();
+        exit();
+
         // chuyen thay file 
     case "get-complaints":
         $returnController->getComplaints();
