@@ -722,8 +722,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     requestBox.classList.remove("hidden");
-    requestTypeLabel.innerText =
-      requestContext.request_type === "complaint" ? "Khiếu nại" : "Đổi trả";
+
+    // Define return reasons
+    const returnReasons = [
+      "Sản phẩm bị nứt, vỡ gọng/tròng",
+      "Giao sai mẫu kính/màu sắc",
+      "Sau thông số độ cận/viễn",
+      "Đeo không vừa (quá rộng/chật)",
+    ];
+    const isReturnReason = returnReasons.includes(requestContext.reason);
+
+    requestTypeLabel.innerText = isReturnReason ? "Đổi trả" : "Khiếu nại";
     requestReason.innerText = requestContext.reason || "-";
     requestNote.innerText = requestContext.note || "-";
     requestStaffLabel.innerText =
@@ -743,16 +752,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (requestContext.status === "Pending") {
       requestButton.classList.remove("hidden");
-      requestButton.innerHTML =
-        requestContext.request_type === "complaint"
-          ? '<i class="fas fa-check"></i> Chấp nhận Khiếu nại'
-          : '<i class="fas fa-undo"></i> Xác nhận Trả hàng';
-      requestButton.onclick = () =>
-        processComplaintRequest(
-          requestContext.returnId,
-          requestContext.orderId,
-          requestContext.request_type,
-        );
+      if (isReturnReason) {
+        requestButton.innerHTML =
+          '<i class="fas fa-undo"></i> Xác nhận Trả hàng';
+        requestButton.onclick = () =>
+          processComplaintRequest(
+            requestContext.returnId,
+            requestContext.orderId,
+            "approve_return",
+          );
+      } else {
+        requestButton.innerHTML =
+          '<i class="fas fa-check"></i> Chấp nhận Khiếu nại';
+        requestButton.onclick = () =>
+          processComplaintRequest(
+            requestContext.returnId,
+            requestContext.orderId,
+            "resolve",
+          );
+      }
     } else {
       requestButton.classList.add("hidden");
     }
@@ -821,6 +839,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await ajaxJson(
         "/SELLING-GLASSES/public/index.php?url=get-conversation-list",
       );
+
+      // Set unread_count = 0 for the currently chatting order (mark as read)
+      if (result.success && Array.isArray(result.data)) {
+        result.data.forEach((item) => {
+          if (item.orderId == window.chattingOrderId) {
+            item.unread_count = 0;
+          }
+        });
+      }
+
       const conversationHtml =
         result.success && result.data?.length
           ? renderRows(result.data, (item) => {
@@ -913,16 +941,12 @@ document.addEventListener("DOMContentLoaded", () => {
       await window.loadConversationList();
   };
 
-  window.processComplaintRequest = async function (
-    returnId,
-    orderId,
-    requestType,
-  ) {
+  window.processComplaintRequest = async function (returnId, orderId, action) {
     if (
       !confirm(
-        requestType === "complaint"
-          ? "Xác nhận chấp nhận khiếu nại và hủy đơn này?"
-          : "Xác nhận trả hàng và cập nhật đơn này về trạng thái Trả hàng?",
+        action === "approve_return"
+          ? "Xác nhận trả hàng và cập nhật đơn này về trạng thái Trả hàng?"
+          : "Xác nhận chấp nhận khiếu nại và hủy đơn này?",
       )
     ) {
       return;
@@ -931,10 +955,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const formData = new FormData();
       formData.append("returnId", returnId);
-      formData.append(
-        "action",
-        requestType === "complaint" ? "resolve" : "approve_return",
-      );
+      formData.append("action", action);
       const result = await ajaxJson(
         "/SELLING-GLASSES/public/index.php?url=process-complaint-request",
         { method: "POST", body: formData },
@@ -942,6 +963,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (result.success) {
         alert("Cập nhật thành công.");
+
+        // Cập nhật trạng thái đơn hàng
+        const newOrderStatus =
+          action === "approve_return" ? "Returned" : "Cancelled";
+        try {
+          const updateStatusFormData = new FormData();
+          updateStatusFormData.append("orderId", orderId);
+          updateStatusFormData.append("status", newOrderStatus);
+          const updateResult = await ajaxJson(
+            "/SELLING-GLASSES/public/index.php?url=update-order-status",
+            { method: "POST", body: updateStatusFormData },
+          );
+          if (!updateResult.success) {
+            console.error(
+              "Lỗi cập nhật trạng thái đơn hàng:",
+              updateResult.message,
+            );
+          }
+        } catch (updateError) {
+          console.error("Lỗi cập nhật trạng thái đơn hàng:", updateError);
+        }
+
         fetchComplaints(
           document.querySelector("#complaint-page .filter-tab.active")?.dataset
             .status || "all",
@@ -954,7 +997,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ...window.currentRequestContext,
             status: "Completed",
             label_status:
-              requestType === "complaint" ? "Đã giải quyết" : "Thành công",
+              action === "approve_return" ? "Thành công" : "Đã giải quyết",
           };
           renderComplaintRequestPanel(window.currentRequestContext);
           await viewOrderDetail(orderId, window.currentRequestContext);
@@ -1009,7 +1052,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ĐÓNG CHAT */
-  window.closeChat = () => $id("chat-wrapper")?.classList.add("chat-hidden");
+  window.closeChat = () => {
+    $id("chat-wrapper")?.classList.add("chat-hidden");
+    window.chattingOrderId = null; // Reset to allow badge updates for other conversations
+  };
 
   /* TẢI LỊCH SỬ CHAT  */
   async function loadChatHistory(orderId) {
@@ -1078,6 +1124,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     isFetchingChat = true;
     await loadChatHistory(window.chattingOrderId);
+    if (typeof window.loadConversationList === "function") {
+      await window.loadConversationList(); // Update badge for new messages
+    }
     if (window.currentOrderId == window.chattingOrderId) {
       const result = await ajaxJson(
         `/SELLING-GLASSES/public/index.php?url=get-order-detail&orderId=${window.currentOrderId}`,
