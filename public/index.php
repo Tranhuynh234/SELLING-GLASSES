@@ -135,6 +135,10 @@ switch ($url) {
         $prescriptionController->store();
         exit();
 
+    case "update-prescription-status":
+        $orderController->updatePrescriptionStatus();
+        exit();
+
     case "get-prescription-session":
         if (session_status() === PHP_SESSION_NONE) session_start();
         
