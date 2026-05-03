@@ -22,6 +22,7 @@ class ComboController
     /** Kiểm tra quyền staff/manager */
     private function checkAuth() {
         if (!isset($_SESSION['user'])) {
+            error_log("ComboController::checkAuth - No session user");
             echo json_encode(['success' => false, 'error' => 'Unauthorized']);
             exit();
         }
@@ -29,9 +30,62 @@ class ComboController
         $position = $_SESSION['user']['position'] ?? null;
         $role = $_SESSION['user']['role'] ?? null;
 
+        error_log("ComboController::checkAuth - role: $role, position: $position");
+
         // Chỉ staff/manager mới được tạo/sửa combo
         if ($role !== 'staff' || !in_array($position, ['manager', 'sales'])) {
+            error_log("ComboController::checkAuth - Access denied for role=$role, position=$position");
             echo json_encode(['success' => false, 'error' => "Forbidden - chỉ staff được phép (role=$role, position=$position)"]);
+            exit();
+        }
+    }
+
+    /** Hiển thị trang danh sách combo (cho khách hàng) */
+    public function index()
+    {
+        try {
+            $combos = $this->comboModel->getAll(true, 100, 0);
+
+            $viewPath = __DIR__ . '/../views/combos/all_combos.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện tại " . $viewPath;
+            }
+            exit();
+        } catch (\Exception $e) {
+            echo "Lỗi: " . $e->getMessage();
+            exit();
+        }
+    }
+
+    /** Hiển thị trang chi tiết combo (cho khách hàng) */
+    public function detail()
+    {
+        try {
+            $comboId = isset($_GET['id']) ? (int)$_GET['id'] : null;
+
+            if (!$comboId) {
+                echo "Lỗi: Thiếu ID combo";
+                exit();
+            }
+
+            $combo = $this->comboModel->getById($comboId);
+
+            if (!$combo) {
+                echo "Lỗi: Combo không tồn tại";
+                exit();
+            }
+
+            $viewPath = __DIR__ . '/../views/combos/combo-detail.php';
+            if (file_exists($viewPath)) {
+                include $viewPath;
+            } else {
+                echo "Lỗi: Không tìm thấy file giao diện chi tiết combo.";
+            }
+            exit();
+        } catch (\Exception $e) {
+            echo "Lỗi: " . $e->getMessage();
             exit();
         }
     }
@@ -209,6 +263,10 @@ class ComboController
                 $input = json_decode(file_get_contents('php://input'), true);
             }
 
+            error_log("updateCombo input: " . json_encode($input));
+            error_log("updateCombo _POST: " . json_encode($_POST));
+            error_log("updateCombo _FILES: " . json_encode($_FILES ? array_keys($_FILES) : []));
+
             if (!$input || empty($input['comboId'])) {
                 echo json_encode(['success' => false, 'error' => 'Thiếu ID combo']);
                 return;
@@ -241,6 +299,7 @@ class ComboController
                 } else {
                     $data['isActive'] = $isActive ? 1 : 0;
                 }
+                error_log("updateCombo isActive conversion: " . var_export($isActive, true) . " -> " . $data['isActive']);
             }
 
             // Xử lý upload hình ảnh mới (nếu có)
@@ -288,14 +347,23 @@ class ComboController
 
             $products = $input['products'] ?? [];
 
+            error_log("updateCombo products: " . json_encode($products));
+            error_log("updateCombo products is_array: " . (is_array($products) ? 'true' : 'false'));
+            error_log("updateCombo products count: " . count($products));
+            error_log("updateCombo data to update: " . json_encode($data));
+
             // Kiểm tra combo phải có ít nhất một sản phẩm
             if (empty($products) || !is_array($products)) {
+                error_log("updateCombo FAILED - products invalid");
                 echo json_encode(['success' => false, 'error' => 'Combo phải có ít nhất một sản phẩm']);
                 return;
             }
 
             // Cập nhật
+            error_log("updateCombo - calling model->update with comboId=$comboId");
             $this->comboModel->update($comboId, $data, $products);
+            
+            error_log("updateCombo SUCCESS");
 
             echo json_encode([
                 'success' => true,
