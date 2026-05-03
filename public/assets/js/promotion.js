@@ -1,5 +1,4 @@
-const PROMO_API_URL =
-  "http://localhost:8088/SELLING-GLASSES/public/promotion-index";
+const PROMO_API_URL = "/SELLING-GLASSES/public/promotion-index";
 const PROMO_ITEMS_PER_PAGE = 5;
 
 let currentSearchName = "";
@@ -266,14 +265,11 @@ async function addPromotion() {
   };
 
   try {
-    const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/public/promotion-create",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      },
-    );
+    const response = await fetch("/SELLING-GLASSES/public/promotion-create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
     const result = await response.json();
 
@@ -322,7 +318,7 @@ async function openApplyModal(promoId) {
 
   try {
     const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/public/get-all-products?format=json",
+      "/SELLING-GLASSES/public/get-all-products?format=json",
     );
     const result = await response.json();
 
@@ -355,13 +351,10 @@ async function submitApplyPromotion() {
   productIds.forEach((id) => formData.append("productIds[]", id));
 
   try {
-    const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/public/apply-promotion",
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
+    const response = await fetch("/SELLING-GLASSES/public/apply-promotion", {
+      method: "POST",
+      body: formData,
+    });
 
     const result = await response.json();
     if (result.success) {
@@ -386,7 +379,7 @@ async function openCancelModal(promoId) {
 
   try {
     const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/public/get-all-products?format=json",
+      "/SELLING-GLASSES/public/get-all-products?format=json",
     );
     const result = await response.json();
 
@@ -425,13 +418,10 @@ async function submitCancelPromotion() {
   productIds.forEach((id) => formData.append("productIds[]", id));
 
   try {
-    const response = await fetch(
-      "http://localhost:8088/SELLING-GLASSES/public/cancel-promotion",
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
+    const response = await fetch("/SELLING-GLASSES/public/cancel-promotion", {
+      method: "POST",
+      body: formData,
+    });
 
     const result = await response.json();
     if (result.success) {
@@ -454,19 +444,19 @@ function closeCancelModal() {
 }
 // === tìm kiếm sản phẩm ====
 // Lưu trữ ID đã chọn cho 2 mục riêng biệt
-//let searchTimer;
+let promoSearchTimer;
 let selectedToApply = [];
 let selectedToCancel = [];
 
 function handleSearch(keyword, containerId) {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(async () => {
+  clearTimeout(promoSearchTimer);
+  promoSearchTimer = setTimeout(async () => {
     const container = document.getElementById(containerId);
     // Không xóa innerHTML ngay để tránh giật lag, chỉ hiện thông báo nhỏ nếu cần
 
     try {
       const response = await fetch(
-        `http://localhost:8088/SELLING-GLASSES/public/search-products?query=${encodeURIComponent(keyword)}`,
+        `/SELLING-GLASSES/public/search-products?query=${encodeURIComponent(keyword)}`,
       );
       const result = await response.json();
 
