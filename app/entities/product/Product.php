@@ -11,6 +11,7 @@ class Product {
     public $categoryId;
     public $imagePath;
     public $staffId;
+    public $original_price;
 
     public function __construct($data = []) {
         $this->productId = $data['productId'] ?? null;
@@ -24,5 +25,6 @@ class Product {
         $this->categoryId = $data['categoryId'] ?? null;
         $this->imagePath = $data['imagePath'] ?? null;
         $this->staffId = $data['staffId'] ?? null;
+        $this->original_price = $data['original_price'] ?? null;
     }
 }

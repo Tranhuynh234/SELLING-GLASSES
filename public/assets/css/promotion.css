@@ -1,57 +1,375 @@
-#promoPagination {
+/* Cột Thông tin (Giống cột Họ Tên/Liên hệ) */
+.user-info,
+.contact-info {
   display: flex;
-  justify-content: left;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.user-name,
+.promo-value {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+}
+
+.user-email,
+.promo-date {
+  font-size: 12px;
+  color: #7f8c8d; /* Màu xám mờ giống ảnh 2 */
+}
+
+.promo-value {
+  color: #e67e22; /* Màu cam cho mức giảm giá nổi bật */
+}
+
+/* Badge trạng thái */
+.role-badge {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.badge-active {
+  background-color: #e67e22; /* Cam giống 'Nhân viên' */
+  color: white;
+}
+
+.badge-inactive {
+  background-color: #7f8c8d; /* Xám giống 'Khách hàng' */
+  color: white;
+}
+
+/* Nút bấm nhỏ xinh */
+.action-btns {
+  display: flex;
   gap: 8px;
-  margin-top: 20px;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.promo-page-btn {
-  width: 38px;
-  height: 38px;
+.btn-edit-small,
+.btn-delete-small {
+  padding: 4px 8px;
+  border-radius: 4px;
   border: none;
-  border-radius: 8px;
-  background: #f3f4f6;
+  font-size: 12px;
+  color: white;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.promo-page-btn:hover {
-  background: #e67e22;
-  color: white;
+.btn-edit-small {
+  background-color: #f39c12;
+}
+.btn-delete-small {
+  background-color: #e74c3c;
+}
+/* Container bao quanh để đẩy phân trang sang trái giống ảnh 2 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 25px;
+  padding-left: 20px;
 }
 
-.promo-page-btn.active {
-  background: #e67e22;
-  color: white;
+#promo-pagination-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Kiểu dáng chung cho nút số và nút điều hướng */
+#promo-pagination-container .page-num,
+#promo-pagination-container .page-nav {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #eee;
+  background-color: #fff;
+  color: #666;
+  border-radius: 6px; /* Bo góc nhẹ giống ảnh 2 */
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* Nút khi đang ở trang hiện tại (Màu cam chủ đạo) */
+#promo-pagination-container .page-num.active {
+  background-color: #e67e22; /* Màu cam giống trang User */
+  color: #fff;
+  border-color: #e67e22;
   font-weight: bold;
 }
-/* ====== áp dụng ======= */
-/* Nút áp dụng kiểu bo tròn gradient */
-.btn-apply {
-  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+
+/* Hiệu ứng khi di chuột qua */
+#promo-pagination-container .page-num:hover:not(.active),
+#promo-pagination-container .page-nav:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #e67e22;
+  color: #e67e22;
+}
+
+/* Trạng thái nút bị vô hiệu hóa (vị trí đầu/cuối) */
+#promo-pagination-container .page-nav:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+  background-color: #fcfcfc;
+}
+
+/* Icon trong nút điều hướng */
+#promo-pagination-container .page-nav i {
+  font-size: 12px;
+}
+/* =======  tìm kiếm */
+/* Khung bao ngoài ô input */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Định dạng icon tìm kiếm nằm bên trong */
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #999;
+  font-size: 14px;
+  pointer-events: none; /* Để không cản trở khi click vào input */
+}
+
+/* Định dạng ô input */
+#searchPromo {
+  width: 280px;
+  padding: 10px 15px 10px 35px; /* Padding trái rộng hơn để nhường chỗ cho icon */
+  border: 1px solid #e0e0e0;
+  border-radius: 25px; /* Bo tròn hoàn toàn hai đầu */
+  font-size: 14px;
+  color: #333;
+  background-color: #fff;
+  outline: none;
+  transition: all 0.3s ease;
+  /* Đổ bóng nhẹ phía dưới */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+/* Chỉnh màu chữ placeholder */
+#searchPromo::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+/* modal sửa promotion  */
+/* Nền tối mờ phía sau */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Card Modal trắng sữa mềm mại */
+/* Overlay che phủ toàn màn hình */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px; /* Tránh chạm mép màn hình trên mobile */
+}
+
+/* Card Modal - Fix chiều cao để mất scrollbar */
+.modal-content.modern-ui {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 550px;
+  max-height: 95vh; /* Không bao giờ vượt quá chiều cao màn hình */
+  overflow-y: auto; /* Chỉ hiện scroll nếu màn hình quá nhỏ */
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f0f0f0;
+}
+
+/* Ẩn scrollbar cho Chrome/Safari */
+.modal-content.modern-ui::-webkit-scrollbar {
+  display: none;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  color: #e67e22;
+}
+
+/* Ô nhập liệu */
+.input-group {
+  margin-bottom: 18px;
+}
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon-input {
+  position: absolute;
+  left: 15px;
+  color: #e67e22;
+  font-size: 1rem;
+  pointer-events: none; /* Icon không cản trở click */
+}
+
+.input-wrapper input,
+.input-wrapper select {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1.5px solid #edf2f7;
+  border-radius: 12px;
+  background: #f8fafc; /* Màu nền nhạt như ảnh mẫu */
+  font-size: 0.95rem;
+  color: #333;
+  transition: all 0.2s;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+  border-color: #e67e22;
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.1);
+}
+
+.input-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 5px;
+}
+
+/* Buttons */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-modern-cancel {
+  background: #f1f5f9;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #64748b;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-modern-confirm {
+  background: #e67e22;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.25);
+}
+
+.btn-modern-confirm:hover {
+  background: #d35400;
+  transform: translateY(-1px);
+}
+/* === áp dụng cho sản phẩm */
+/* Style cho nút Áp dụng ở từng dòng */
+.btn-apply-small {
+  background-color: #27ae60; /* Màu xanh lá đồng bộ */
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 30px;
-  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 5px;
 }
 
-.btn-apply:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(37, 117, 252, 0.3);
-  opacity: 0.9;
+.btn-apply-small:hover {
+  background-color: #219150;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(39, 174, 96, 0.3);
 }
 
-/* Badge trạng thái cho chuyên nghiệp */
-.bg-success {
-  background-color: #28a745;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  text-transform: uppercase;
+/* Đảm bảo các nút trên một hàng không bị nhảy dòng */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+/* === tìm kiếm ==  */
+/* Container bọc ngoài input để căn chỉnh lề */
+.search-container {
+  padding: 10px 20px;
+  background: #fff;
+}
+
+.product-search-input {
+  width: 100%;
+  padding: 12px 15px 12px 40px; /* Chừa khoảng trống bên trái cho icon */
+  border: 2px solid #edf2f7;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23a0aec0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>');
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  outline: none;
+}
+
+.product-search-input:focus {
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+  background-color: #fff;
 }

@@ -6,6 +6,7 @@ class ProductVariant {
     public $price;
     public $stock;
     public $productId;
+    public $original_price;
 
     public function __construct($data = []) {
         $this->variantId = $data['variantId'] ?? null;
@@ -14,5 +15,6 @@ class ProductVariant {
         $this->price = $data['price'] ?? null;
         $this->stock = $data['stock'] ?? null;
         $this->productId = $data['productId'] ?? null;
+        $this->original_price = $data['original_price'] ?? null;
     }
 }

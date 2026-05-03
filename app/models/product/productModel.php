@@ -25,7 +25,7 @@ class ProductModel extends BaseModel {
         return $products;
     }
     
-   public function getProducts($limit, $offset) {
+public function getProducts($limit, $offset) {
     $sql = "SELECT
                 p.*,
                 pv.variantId,
@@ -56,7 +56,7 @@ class ProductModel extends BaseModel {
         $products[] = new Product($row);
     }
     return $products;
-   }
+}
 
 
    // CRUD SẢN PHẨM 
@@ -169,4 +169,13 @@ public function addProduct($data) {
         $result = $this->queryOne($sql);
         return $result['total'];
     }
+public function searchProducts($keyword) {
+    $sql = "SELECT productId, name, price FROM product
+            WHERE name LIKE ? OR productId LIKE ? 
+            LIMIT 50";
+    
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$keyword, $keyword]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 }

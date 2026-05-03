@@ -15,7 +15,7 @@
                 <p class="text-stone-500">Tiết kiệm hơn khi mua combo gọng kính & tròng kính chính hãng.</p>
             </div>
             <span class="text-sm font-medium text-stone-400 uppercase tracking-widest">
-                <?php echo count($combos); ?> Combo
+
             </span>
         </div>
 
@@ -30,7 +30,8 @@
                         alt="<?php echo htmlspecialchars($combo->name); ?>"
                         class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                     <?php else: ?>
-                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-stone-200">
+                    <div
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-stone-200">
                         <i class="fa-solid fa-box-open text-5xl text-stone-400"></i>
                     </div>
                     <?php endif; ?>
@@ -94,7 +95,8 @@
                             </span>
                             <?php endif; ?>
                         </div>
-                        <button class="add-combo-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
+                        <button
+                            class="add-combo-to-cart-quick w-10 h-10 rounded-full bg-stone-900 text-white flex items-center justify-center hover:bg-amber-700 transition shadow-lg"
                             data-combo-id="<?php echo $combo->comboId; ?>">
                             <i class="fa-solid fa-plus"></i>
                         </button>
@@ -129,23 +131,28 @@
 <script src="/SELLING-GLASSES/public/assets/js/auth.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý click nút thêm combo vào giỏ hàng
-        const addComboButtons = document.querySelectorAll('.add-combo-to-cart-quick');
-        
-        addComboButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const comboId = this.getAttribute('data-combo-id');
-                
-                if (typeof addComboToCart === 'function') {
-                    addComboToCart(comboId, 1);
-                } else {
-                    // Fallback: gọi API trực tiếp
-                    fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý click nút thêm combo vào giỏ hàng
+    const addComboButtons = document.querySelectorAll('.add-combo-to-cart-quick');
+
+    addComboButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const comboId = this.getAttribute('data-combo-id');
+
+            if (typeof addComboToCart === 'function') {
+                addComboToCart(comboId, 1);
+            } else {
+                // Fallback: gọi API trực tiếp
+                fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ comboId: comboId, quantity: 1 })
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            comboId: comboId,
+                            quantity: 1
+                        })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -157,8 +164,8 @@
                         }
                     })
                     .catch(() => alert('Vui lòng đăng nhập để thêm vào giỏ hàng'));
-                }
-            });
+            }
         });
     });
+});
 </script>

@@ -1,281 +1,523 @@
-// Đợi DOM load xong rồi gán sự kiện
+const PROMO_API_URL =
+  "http://localhost:8088/SELLING-GLASSES/public/promotion-index";
+const PROMO_ITEMS_PER_PAGE = 5;
+
+let currentSearchName = "";
+let debounceTimer;
+
 document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.querySelector(
-    'input[placeholder="Tìm kiếm..."]',
-  );
-
-  if (searchInput) {
-    let typingTimer;
-    const doneTypingInterval = 400; // Đợi 0.4s sau khi ngừng gõ mới gọi API (Debounce)
-
-    searchInput.addEventListener("input", function () {
-      clearTimeout(typingTimer);
-      const value = this.value.trim();
-
-      typingTimer = setTimeout(() => {
-        promoPage = 1; // Reset về trang 1 khi tìm kiếm mới
-        loadPromotions(value);
-      }, doneTypingInterval);
-    });
+  const searchInput = document.getElementById("searchPromo");
+  if (document.getElementById("promotion-list-body")) {
+    loadPromotions();
   }
 
-  // Gọi lần đầu để load toàn bộ dữ liệu
-  loadPromotions();
-});
-let promoPage = 1;
-const promoLimit = 6;
-
-function loadPromotions(keyword = "") {
-  const tableBody = document.getElementById("promoTable");
-  if (!tableBody) return;
-
-  // 1. Tạo URL khớp với Backend (keyword, status, page, limit)
-  const url = `/SELLING-GLASSES/public/index.php?url=promotion-search&keyword=${encodeURIComponent(keyword)}&status=active&page=${promoPage}&limit=${promoLimit}&format=json`;
-
-  fetch(url)
-    .then((res) => res.json())
-    .then((res) => {
-      // Kiểm tra cấu trúc res.data.data như trong Thunder Client của bạn
-      if (res.success && res.data && res.data.data) {
-        const promotions = res.data.data;
-        let html = "";
-
-        if (promotions.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="5" class="text-center">Không tìm thấy mã nào với từ khóa "${keyword}"</td></tr>`;
-          renderPromoPagination(0);
-          return;
-        }
-
-        // 2. Render dữ liệu vào bảng
-        promotions.forEach((p, index) => {
-          const stt = (promoPage - 1) * promoLimit + (index + 1);
-          html += `
-                        <tr>
-                            <td class="text-center">${stt}</td>
-                            <td><strong>${p.name}</strong></td>
-                            <td class="text-center" style="color: #f39c12; font-weight: bold;">
-                                ${parseFloat(p.discount).toFixed(2)}%
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-success">${p.status}</span>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn-apply" onclick="applyPromotion('${p.promotionId}')">
-                                    <i class="fas fa-check-circle"></i> Áp dụng
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-        });
-
-        tableBody.innerHTML = html;
-
-        // 3. Cập nhật phân trang dựa trên res.data.total từ Backend
-        renderPromoPagination(res.data.total);
-      }
-    })
-    .catch((err) => {
-      console.error("Lỗi Fetch:", err);
-      tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Lỗi kết nối server</td></tr>`;
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      currentSearchName = e.target.value.trim();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        loadPromotions(1);
+      }, 300);
     });
+  }
+});
+
+async function loadPromotions(page = 1) {
+  try {
+    const response = await fetch(
+      `${PROMO_API_URL}?page=${page}&name=${encodeURIComponent(currentSearchName)}`,
+    );
+    const result = await response.json();
+    if (result.success) {
+      renderPromotionTable(result);
+      renderPromoPagination(result.totalPages, result.page);
+    }
+  } catch (error) {
+    console.error("Lỗi kết nối khuyến mãi:", error);
+  }
 }
 
-function changePromoPage(page) {
-  promoPage = page;
-  loadPromotions();
+function renderPromotionTable(apiResponse) {
+  const tableBody = document.getElementById("promotion-list-body");
+  if (!tableBody) return;
+  tableBody.innerHTML = "";
+
+  if (apiResponse.data.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 20px;">Không tìm thấy chương trình khuyến mãi nào.</td></tr>`;
+    return;
+  }
+
+  apiResponse.data.forEach((promo, index) => {
+    const discountVal = parseFloat(promo.discount);
+    const displayDiscount =
+      promo.discountType === "percent"
+        ? `${discountVal}%`
+        : `${new Intl.NumberFormat("vi-VN").format(discountVal)} VNĐ`;
+
+    const statusText = promo.status === 1 ? "Đang chạy" : "Tạm dừng";
+    const statusClass = promo.status === 1 ? "badge-active" : "badge-inactive";
+    const stt = (apiResponse.page - 1) * PROMO_ITEMS_PER_PAGE + (index + 1);
+
+    const row = `
+            <tr>
+                <td class="text-center">${stt}</td>
+                <td>
+                    <div class="user-info">
+                        <span class="user-name">${promo.name}</span>
+                        <span class="user-email">ID: #PROMO${promo.promotionId}</span>
+                    </div>
+                </td>
+                <td>
+                    <div class="contact-info">
+                        <span class="promo-value">${displayDiscount}</span>
+                        <span class="promo-date">${formatPromoDate(promo.startDate)} - ${formatPromoDate(promo.endDate)}</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <span class="role-badge ${statusClass}">${statusText}</span>
+                </td>
+                <td class="text-center">
+                    <div class="action-btns">
+                        <button class="btn-edit-small" onclick="editPromo(${promo.promotionId})">
+                            <i class="fas fa-edit"></i> Sửa
+                        </button>
+                        <button class="btn-delete-small" onclick="deletePromo(${promo.promotionId})">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                        <button class="btn-apply-small" onclick="openApplyModal('${promo.promotionId}')">
+                            <i class="fas fa-check-circle"></i> Áp dụng
+                        </button>
+                        <button class="btn-cancel-small" onclick="openCancelModal('${promo.promotionId}')" style="background-color: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                          <i class="fas fa-times-circle"></i> Hủy KM
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    tableBody.insertAdjacentHTML("beforeend", row);
+  });
 }
 
-function renderPromoPagination(total) {
-  const container = document.getElementById("promoPagination");
+function formatPromoDate(dateString) {
+  if (!dateString) return "";
+  const [year, month, day] = dateString.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function renderPromoPagination(totalPages, currentPage) {
+  const container = document.getElementById("promo-pagination-container");
   if (!container) return;
-
-  const totalPages = Math.ceil((total || 0) / promoLimit);
-
-  if (totalPages <= 1) {
+  if (totalPages <= 0) {
     container.innerHTML = "";
     return;
   }
 
   let html = "";
-
-  // Nút TRƯỚC (Previous) - Chỉ hiện hoặc active khi không ở trang 1
   html += `
-    <button 
-      class="promo-page-btn ${promoPage === 1 ? "disabled" : ""}" 
-      onclick="${promoPage > 1 ? `changePromoPage(${promoPage - 1})` : ""}"
-    >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-  `;
-
-  // Vòng lặp các con số trang
-  for (let i = 1; i <= totalPages; i++) {
-    html += `
-      <button 
-        class="promo-page-btn ${i === promoPage ? "active" : ""}" 
-        onclick="changePromoPage(${i})"
-      >
-        ${i}
-      </button>
+        <button class="page-nav" ${currentPage === 1 ? "disabled" : ""} 
+                onclick="${currentPage > 1 ? `loadPromotions(${currentPage - 1})` : ""}">
+            <i class="fas fa-chevron-left"></i>
+        </button>
     `;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<button class="page-num ${i === currentPage ? "active" : ""}" onclick="loadPromotions(${i})">${i}</button>`;
   }
 
-  // Nút SAU (Next) - Chỉ hiện hoặc active khi chưa tới trang cuối
   html += `
-    <button 
-      class="promo-page-btn ${promoPage === totalPages ? "disabled" : ""}" 
-      onclick="${promoPage < totalPages ? `changePromoPage(${promoPage + 1})` : ""}"
-    >
-      <i class="fas fa-chevron-right"></i>
-    </button>
-  `;
-
+        <button class="page-nav" ${currentPage === totalPages ? "disabled" : ""} 
+                onclick="${currentPage < totalPages ? `loadPromotions(${currentPage + 1})` : ""}">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    `;
   container.innerHTML = html;
 }
 
-// ==========================
-// Apply Promotion Modal + API
-// ==========================
-let currentApplyPromotionId = null;
-let selectedApplyProducts = new Set();
-let allApplyProducts = [];
+async function editPromo(id) {
+  try {
+    const editUrl = PROMO_API_URL.replace("promotion-index", "promotion-edit");
+    const response = await fetch(`${editUrl}?id=${id}`);
+    const result = await response.json();
 
-function openApplyModal(promotionId, promoName) {
-  currentApplyPromotionId = promotionId;
-  selectedApplyProducts.clear();
+    if (result.success) {
+      const promo = result.data;
+      document.getElementById("edit_promotionId").value = promo.promotionId;
+      document.getElementById("edit_name_promotion").value = promo.name;
+      document.getElementById("edit_discount").value = promo.discount;
+      document.getElementById("edit_discountType").value = promo.discountType;
+      document.getElementById("edit_startDate").value = promo.startDate;
+      document.getElementById("edit_endDate").value = promo.endDate;
+      document.getElementById("edit_status").value = promo.status;
 
-  // Build modal content
-  const html = `
-    <div style="text-align: left;">
-      <div style="margin-bottom:12px; font-weight:700; font-size:16px;">🔎 Tìm sản phẩm:</div>
-      <input id="promoApplySearch" placeholder="Nhập tên sản phẩm..." style="width:100%; padding:8px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
-      <div id="promoApplyList" style="max-height:320px; overflow:auto; border:1px solid #f0f0f0; border-radius:6px; padding:8px;">
-        <div style="text-align:center; color:#888;">Đang tải danh sách...</div>
-      </div>
-    </div>
-  `;
-
-  Swal.fire({
-    title: `Áp dụng: ${promoName}`,
-    html,
-    showCancelButton: true,
-    showConfirmButton: true,
-    confirmButtonText: "✓ Áp dụng",
-    cancelButtonText: "Hủy",
-    width: 600,
-    didOpen: () => {
-      // Load products
-      loadProductsForApply();
-
-      const input = document.getElementById("promoApplySearch");
-      input.addEventListener("input", (e) =>
-        filterApplyList(e.target.value.trim()),
-      );
-    },
-  }).then((res) => {
-    if (res.isConfirmed) {
-      const productIds = Array.from(selectedApplyProducts);
-      if (productIds.length === 0) {
-        Swal.fire("Lỗi", "Vui lòng chọn ít nhất một sản phẩm", "error");
-        return;
-      }
-
-      applyPromotionToProducts(currentApplyPromotionId, productIds);
+      document.getElementById("modalEditPromotion").style.display = "flex";
+    } else {
+      alert("Không tìm thấy dữ liệu!");
     }
-  });
+  } catch (error) {
+    console.error("Lỗi Fetch edit:", error);
+  }
 }
 
-function loadProductsForApply() {
-  const listEl = document.getElementById("promoApplyList");
-  if (!listEl) return;
+async function saveUpdatePromotion() {
+  const id = document.getElementById("edit_promotionId").value;
+  const name = document.getElementById("edit_name_promotion").value;
+  const discount = document.getElementById("edit_discount").value;
+  const discountType = document.getElementById("edit_discountType").value;
+  const startDate = document.getElementById("edit_startDate").value;
+  const endDate = document.getElementById("edit_endDate").value;
+  const status = document.getElementById("edit_status").value;
 
-  fetch("/SELLING-GLASSES/public/index.php?url=get-all-products&format=json")
-    .then((r) => r.json())
-    .then((res) => {
-      if (!res.success || !Array.isArray(res.data)) {
-        listEl.innerHTML =
-          '<div style="color:red; text-align:center;">Không thể tải danh sách sản phẩm</div>';
-        return;
-      }
-
-      allApplyProducts = res.data;
-      renderApplyList(allApplyProducts);
-    })
-    .catch((err) => {
-      console.error("Load products error", err);
-      listEl.innerHTML =
-        '<div style="color:red; text-align:center;">Lỗi khi tải sản phẩm</div>';
-    });
-}
-
-function renderApplyList(products) {
-  const listEl = document.getElementById("promoApplyList");
-  if (!listEl) return;
-
-  if (!products.length) {
-    listEl.innerHTML =
-      '<div style="text-align:center; color:#666;">Không có sản phẩm</div>';
+  if (!name || !discount || !startDate || !endDate) {
+    alert("Vui lòng điền đầy đủ thông tin!");
     return;
   }
 
-  const html = products
-    .map((p) => {
-      const price =
-        p.price !== undefined ? Number(p.price).toLocaleString() + "đ" : "0đ";
-      return `
-      <label style="display:flex; align-items:center; gap:10px; padding:8px; border-bottom:1px solid #f5f5f5;">
-        <input type="checkbox" data-pid="${p.productId}" onchange="toggleApplyProduct(this)">
-        <div style="flex:1;">
-          <div style="font-weight:600">${escapeHtml(p.name)}</div>
-          <div style="color:#888; font-size:12px">Giá hiện tại: ${price}</div>
-        </div>
-      </label>
-    `;
-    })
-    .join("\n");
+  if (new Date(startDate) > new Date(endDate)) {
+    alert("Ngày bắt đầu không được sau ngày kết thúc!");
+    return;
+  }
 
-  listEl.innerHTML = html;
-}
+  const data = {
+    promotionId: id,
+    name: name,
+    discount: discount,
+    discountType: discountType,
+    startDate: startDate,
+    endDate: endDate,
+    status: status,
+  };
 
-function toggleApplyProduct(checkbox) {
-  const pid = Number(checkbox.dataset.pid);
-  if (checkbox.checked) selectedApplyProducts.add(pid);
-  else selectedApplyProducts.delete(pid);
-}
+  try {
+    const updateUrl = PROMO_API_URL.replace(
+      "promotion-index",
+      "promotion-update",
+    );
 
-function filterApplyList(keyword) {
-  const filtered = allApplyProducts.filter((p) =>
-    p.name.toLowerCase().includes(keyword.toLowerCase()),
-  );
-  renderApplyList(filtered);
-}
-
-function applyPromotionToProducts(promotionId, productIds) {
-  fetch("/SELLING-GLASSES/public/index.php?url=promotion-apply", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ promotionId, productIds }),
-  })
-    .then((r) => r.json())
-    .then((res) => {
-      if (res.success) {
-        Swal.fire("Thành công", "Áp dụng khuyến mãi thành công", "success");
-        loadPromotions();
-      } else {
-        Swal.fire("Lỗi", res.message || "Áp dụng thất bại", "error");
-      }
-    })
-    .catch((err) => {
-      console.error("Apply error", err);
-      Swal.fire("Lỗi", "Không thể kết nối server", "error");
+    const response = await fetch(updateUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Cập nhật khuyến mãi thành công!");
+      closeModalPromotion();
+      loadPromotions();
+    } else {
+      alert("Lỗi: " + result.message);
+    }
+  } catch (error) {
+    console.error("Lỗi kết nối API:", error);
+    alert("Không thể kết nối đến máy chủ!");
+  }
 }
 
-function escapeHtml(text) {
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+function closeModalPromotion() {
+  document.getElementById("modalEditPromotion").style.display = "none";
+}
+
+async function deletePromo(id) {
+  if (
+    !confirm(`Bạn có chắc chắn muốn xóa mã khuyến mãi #PROMO${id} này không?`)
+  )
+    return;
+
+  try {
+    const deleteUrl = PROMO_API_URL.replace(
+      "promotion-index",
+      "promotion-delete",
+    );
+    const response = await fetch(`${deleteUrl}?id=${id}`);
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Xóa thành công!");
+      loadPromotions();
+    } else {
+      alert("Không thể xóa: " + (result.message || "Lỗi hệ thống"));
+    }
+  } catch (error) {
+    console.error("Lỗi xóa:", error);
+  }
+}
+
+async function addPromotion() {
+  const name = document.getElementById("add_name").value;
+  const discount = document.getElementById("add_discount").value;
+  const discountType = document.getElementById("add_discountType").value;
+  const startDate = document.getElementById("add_startDate").value;
+  const endDate = document.getElementById("add_endDate").value;
+  const status = document.getElementById("add_status").value;
+
+  if (!name || !discount || !startDate || !endDate) {
+    alert("Vui lòng điền đầy đủ thông tin!");
+    return;
+  }
+
+  const data = {
+    name: name,
+    discount: discount,
+    discountType: discountType,
+    startDate: startDate,
+    endDate: endDate,
+    status: status,
+  };
+
+  try {
+    const response = await fetch(
+      "http://localhost:8088/SELLING-GLASSES/public/promotion-create",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Tạo khuyến mãi mới thành công!");
+      closeAddModal();
+      loadPromotions(); // Đã sửa loadModal() thành loadPromotions()
+      const form = document.getElementById("formAddPromotion");
+      if (form) form.reset();
+    } else {
+      alert("Lỗi: " + result.message);
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+    alert("Không thể kết nối đến máy chủ!");
+  }
+}
+
+function openAddModal() {
+  document.getElementById("addPromotionModal").style.display = "flex";
+}
+
+function openAddPromotionModal() {
+  const modal = document.getElementById("addPromotionModal");
+  if (modal) {
+    modal.style.display = "flex";
+    const form = document.getElementById("formAddPromotion");
+    if (form) form.reset();
+  }
+}
+
+function closeAddModal() {
+  const modal = document.getElementById("addPromotionModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+// ap dụng mã khuyến mãi cho sản phẩm
+let currentPromoIdForApply = null; // Biến lưu ID khuyến mãi đang thao tác
+
+async function openApplyModal(promoId) {
+  currentPromoIdForApply = promoId;
+  selectedToApply = []; // Reset mảng chọn mỗi lần mở mới (hoặc giữ lại tùy ý bạn)
+  const productContainer = document.getElementById("product_list_container");
+  productContainer.innerHTML = `<div class="text-center">Đang tải danh sách sản phẩm...</div>`;
+
+  try {
+    const response = await fetch(
+      "http://localhost:8088/SELLING-GLASSES/public/get-all-products?format=json",
+    );
+    const result = await response.json();
+
+    if (result.success) {
+      // Thay vì dùng innerHTML += ..., hãy gọi hàm render chung để đồng bộ mảng selected
+      renderProductList(result.data, "product_list_container");
+      document.getElementById("applyPromotionModal").style.display = "flex";
+    }
+  } catch (error) {
+    console.error("Lỗi Fetch:", error);
+    productContainer.innerHTML = `<div style="color: red; padding: 10px;">${error.message}</div>`;
+  }
+}
+
+function closeApplyModal() {
+  document.getElementById("applyPromotionModal").style.display = "none";
+}
+async function submitApplyPromotion() {
+  // Thay vì quét checkbox trên giao diện, hãy dùng trực tiếp mảng đã lưu
+  const productIds = selectedToApply;
+
+  if (productIds.length === 0) {
+    alert("Vui lòng chọn ít nhất một sản phẩm!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("promotionId", currentPromoIdForApply);
+  // Gửi toàn bộ ID trong mảng lưu trữ
+  productIds.forEach((id) => formData.append("productIds[]", id));
+
+  try {
+    const response = await fetch(
+      "http://localhost:8088/SELLING-GLASSES/public/apply-promotion",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    const result = await response.json();
+    if (result.success) {
+      alert(`Áp dụng thành công cho ${productIds.length} sản phẩm!`);
+      selectedToApply = []; // Xóa bộ nhớ đệm sau khi thành công
+      closeApplyModal();
+      loadPromotions();
+    } else {
+      alert("Lỗi: " + result.message);
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+  }
+}
+// hủy áp dụng mã khuyến mãi cho sản phẩm
+// Hàm mở Modal Hủy
+async function openCancelModal(promoId) {
+  currentPromoIdForApply = promoId;
+  selectedToCancel = []; // Reset mảng chọn khi mở modal mới
+  const container = document.getElementById("product_list_cancel_container");
+  container.innerHTML = `<div class="text-center">Đang tải danh sách sản phẩm...</div>`;
+
+  try {
+    const response = await fetch(
+      "http://localhost:8088/SELLING-GLASSES/public/get-all-products?format=json",
+    );
+    const result = await response.json();
+
+    if (result.success) {
+      // Dùng hàm render chung để đồng bộ với mảng selectedToCancel
+      renderProductList(result.data, "product_list_cancel_container");
+      document.getElementById("cancelPromotionModal").style.display = "flex";
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+    container.innerHTML = `<div style="color: red; padding: 10px;">Lỗi tải dữ liệu</div>`;
+  }
+}
+
+// Hàm gửi yêu cầu Hủy lên Server
+async function submitCancelPromotion() {
+  // Lấy trực tiếp từ mảng lưu trữ thay vì quét DOM
+  const productIds = selectedToCancel;
+
+  if (productIds.length === 0) {
+    alert("Vui lòng chọn ít nhất một sản phẩm để hủy!");
+    return;
+  }
+
+  if (
+    !confirm(
+      `Bạn có chắc chắn muốn hủy khuyến mãi cho ${productIds.length} sản phẩm đã chọn?`,
+    )
+  ) {
+    return;
+  }
+
+  const formData = new FormData();
+  // Gửi ID khuyến mãi hiện tại (nếu backend cần)
+  formData.append("promotionId", currentPromoIdForApply);
+  productIds.forEach((id) => formData.append("productIds[]", id));
+
+  try {
+    const response = await fetch(
+      "http://localhost:8088/SELLING-GLASSES/public/cancel-promotion",
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
+
+    const result = await response.json();
+    if (result.success) {
+      alert(result.message);
+      selectedToCancel = []; // Xóa bộ nhớ đệm sau khi thành công
+      closeCancelModal();
+      loadPromotions();
+    } else {
+      alert("Lỗi: " + result.message);
+    }
+  } catch (error) {
+    console.error("Lỗi:", error);
+    alert("Không thể kết nối đến máy chủ!");
+  }
+}
+
+// hàm đóng modal hủy
+function closeCancelModal() {
+  document.getElementById("cancelPromotionModal").style.display = "none";
+}
+// === tìm kiếm sản phẩm ====
+// Lưu trữ ID đã chọn cho 2 mục riêng biệt
+//let searchTimer;
+let selectedToApply = [];
+let selectedToCancel = [];
+
+function handleSearch(keyword, containerId) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    const container = document.getElementById(containerId);
+    // Không xóa innerHTML ngay để tránh giật lag, chỉ hiện thông báo nhỏ nếu cần
+
+    try {
+      const response = await fetch(
+        `http://localhost:8088/SELLING-GLASSES/public/search-products?query=${encodeURIComponent(keyword)}`,
+      );
+      const result = await response.json();
+
+      if (result.success) {
+        renderProductList(result.data, containerId);
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+    }
+  }, 300);
+}
+
+function renderProductList(products, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  // Xác định đang dùng mảng nào và class nào
+  const isCancel = containerId === "product_list_cancel_container";
+  const currentArray = isCancel ? selectedToCancel : selectedToApply;
+  const checkboxClass = isCancel
+    ? "cancel-product-checkbox"
+    : "apply-product-checkbox";
+
+  products.forEach((product) => {
+    const isChecked = currentArray.includes(product.productId.toString())
+      ? "checked"
+      : "";
+
+    const html = `
+            <div class="product-item d-flex align-items-center p-2 border-bottom">
+                <input type="checkbox" class="${checkboxClass} me-3" 
+                       value="${product.productId}" ${isChecked}
+                       onchange="toggleSelection(this, '${containerId}')">
+                <div>
+                    <div class="fw-bold">${product.name}</div>
+                    <small class="text-muted">Mã: #${product.productId} - ${new Intl.NumberFormat("vi-VN").format(product.price)}đ</small>
+                </div>
+            </div>
+        `;
+    container.insertAdjacentHTML("beforeend", html);
+  });
+}
+
+function toggleSelection(checkbox, containerId) {
+  const isCancel = containerId === "product_list_cancel_container";
+  let targetArray = isCancel ? selectedToCancel : selectedToApply;
+
+  if (checkbox.checked) {
+    if (!targetArray.includes(checkbox.value)) targetArray.push(checkbox.value);
+  } else {
+    const index = targetArray.indexOf(checkbox.value);
+    if (index > -1) targetArray.splice(index, 1);
+  }
 }
