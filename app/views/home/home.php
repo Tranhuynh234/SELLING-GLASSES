@@ -134,7 +134,202 @@
          <?php endif; ?>
      </div>
  </section>
+ <!-- SECTION KHUYẾN MÃI -->
+ <section id="khuyen-mai" class="py-20 px-6 max-w-7xl mx-auto scroll-mt-[104px]">
+     <div class="flex justify-between items-end mb-10">
+         <div>
+             <span class="text-amber-700 font-bold text-sm tracking-widest uppercase">Ưu đãi hôm nay</span>
+             <h2 class="text-4xl font-bold mt-1">Khuyến Mãi Đang Diễn Ra</h2>
+         </div>
+         <a href="/SELLING-GLASSES/public/get-all-products"
+             class="text-amber-700 font-bold flex items-center gap-2 group">
+             Xem tất cả <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+         </a>
+     </div>
 
+     <div id="promotion-banners" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+         <div class="col-span-3 text-center text-stone-400 py-8">Đang tải khuyến mãi...</div>
+     </div>
+
+     <div id="discounted-products-section">
+         <h3 class="text-2xl font-bold mb-6 text-stone-800">Sản Phẩm Đang Giảm Giá</h3>
+         <div id="discounted-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+             <div class="col-span-4 text-center text-stone-400 py-8">Đang tải...</div>
+         </div>
+     </div>
+ </section>
+
+ <!-- MODAL SẢN PHẨM THEO KHUYẾN MÃI -->
+ <div id="promotionModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+     <div class="bg-white rounded-[32px] max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+         <div
+             class="sticky top-0 bg-white border-b border-stone-100 p-6 flex justify-between items-center rounded-t-[32px]">
+             <div>
+                 <h2 id="modalPromoTitle" class="text-2xl font-bold"></h2>
+                 <p id="modalPromoMeta" class="text-sm text-stone-400 mt-1"></p>
+             </div>
+             <button onclick="closePromotionModal()" class="text-stone-400 hover:text-stone-600 text-2xl">
+                 <i class="fa-solid fa-times"></i>
+             </button>
+         </div>
+         <div class="p-8">
+             <div id="modalPromoProducts" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                 <div class="col-span-3 text-center py-8 text-stone-400">Đang tải...</div>
+             </div>
+         </div>
+     </div>
+ </div>
+
+ <script>
+function escHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function loadPromotionSection() {
+    try {
+        const promoRes = await fetch('/SELLING-GLASSES/public/get-active-promotions');
+        const promoData = await promoRes.json();
+        renderPromotionBanners(promoData.data || []);
+
+        const discRes = await fetch('/SELLING-GLASSES/public/get-discounted-products');
+        const discData = await discRes.json();
+        renderDiscountedProducts(discData.data || []);
+    } catch (e) {
+        document.getElementById('promotion-banners').innerHTML =
+            '<div class="col-span-3 text-center text-stone-400 py-8">Hiện chưa có khuyến mãi nào.</div>';
+        document.getElementById('discounted-products-grid').innerHTML =
+            '<div class="col-span-4 text-center text-stone-400 py-8">Hiện chưa có sản phẩm giảm giá.</div>';
+    }
+}
+
+function renderPromotionBanners(promotions) {
+    const el = document.getElementById('promotion-banners');
+    if (!promotions.length) {
+        el.innerHTML =
+            '<div class="col-span-3 text-center text-stone-400 py-8">Hiện chưa có chương trình khuyến mãi nào đang diễn ra.</div>';
+        return;
+    }
+    const colors = ['bg-amber-700', 'bg-stone-800', 'bg-orange-600'];
+    el.innerHTML = promotions.map((p, i) => {
+        const endDate = new Date(p.endDate);
+        const daysLeft = Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24));
+        const discLabel = p.discountType === 'percent' ? `Giảm ${p.discount}%` :
+            `Giảm ${Number(p.discount).toLocaleString('vi-VN')}đ`;
+        return `
+        <div class="cursor-pointer ${colors[i % colors.length]} text-white rounded-[32px] p-8 flex flex-col justify-between min-h-[180px] hover:scale-[1.02] transition-transform"
+             onclick="openPromotionModal(${p.promotionId}, '${escHtml(p.name)}', '${discLabel}', '${p.endDate}')">
+            <div>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">${discLabel}</span>
+                <h3 class="text-2xl font-bold mt-4 leading-tight">${escHtml(p.name)}</h3>
+                <p class="text-white/70 text-sm mt-1">${p.productCount} sản phẩm áp dụng</p>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <span class="text-white/80 text-sm">Còn ${daysLeft > 0 ? daysLeft + ' ngày' : 'hôm nay'}</span>
+                <span class="bg-white text-stone-900 text-sm font-bold px-4 py-2 rounded-full">Xem ngay →</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderDiscountedProducts(products) {
+    const el = document.getElementById('discounted-products-grid');
+    if (!products.length) {
+        el.innerHTML =
+            '<div class="col-span-4 text-center text-stone-400 py-8">Hiện chưa có sản phẩm giảm giá nào.</div>';
+        return;
+    }
+    el.innerHTML = products.slice(0, 8).map(p => {
+        const img = p.imagePath ? `/SELLING-GLASSES/public/assets/images/products/${p.imagePath}` :
+            '/SELLING-GLASSES/public/assets/images/thumbnail1.jpg';
+        const priceFmt = Number(p.minPrice).toLocaleString('vi-VN');
+        const origFmt = Number(p.minOriginalPrice).toLocaleString('vi-VN');
+        return `
+        <div class="group flex flex-col bg-white rounded-[28px] border border-stone-100 overflow-hidden shadow-sm hover:shadow-md transition">
+            <a href="/SELLING-GLASSES/public/detail?id=${p.productId}" class="block relative">
+                <div class="aspect-square bg-stone-100 overflow-hidden">
+                    <img src="${img}" alt="${escHtml(p.name)}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                </div>
+                <span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-${p.discountPercent}%</span>
+            </a>
+            <div class="p-5 flex flex-col flex-grow">
+                <a href="/SELLING-GLASSES/public/detail?id=${p.productId}">
+                    <h3 class="font-bold text-stone-800 hover:text-amber-700 transition mb-1 line-clamp-2">${escHtml(p.name)}</h3>
+                </a>
+                <p class="text-xs text-stone-400 mb-3">${escHtml(p.categoryName || '')}</p>
+                <div class="mt-auto">
+                    <div class="flex items-baseline gap-2 mb-3">
+                        <span class="text-amber-700 font-black text-lg">${priceFmt}đ</span>
+                        <span class="text-stone-400 text-sm line-through">${origFmt}đ</span>
+                    </div>
+                  <button onclick="window.location.href='/SELLING-GLASSES/public/detail?id=${p.productId}'"
+    class="w-full py-2.5 border border-stone-800 rounded-xl font-bold text-sm group-hover:bg-stone-800 group-hover:text-white transition">
+    Xem & Thêm vào giỏ
+</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function openPromotionModal(promotionId, name, discLabel, endDate) {
+    document.getElementById('promotionModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modalPromoTitle').textContent = name;
+    const end = new Date(endDate);
+    const daysLeft = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
+    document.getElementById('modalPromoMeta').textContent =
+        `${discLabel} · Kết thúc: ${end.toLocaleDateString('vi-VN')} (còn ${daysLeft > 0 ? daysLeft + ' ngày' : 'hôm nay'})`;
+    document.getElementById('modalPromoProducts').innerHTML =
+        '<div class="col-span-3 text-center py-8 text-stone-400">Đang tải...</div>';
+
+    try {
+        const res = await fetch(`/SELLING-GLASSES/public/get-products-by-promotion?promotionId=${promotionId}`);
+        const data = await res.json();
+        const products = data.data || [];
+        if (!products.length) {
+            document.getElementById('modalPromoProducts').innerHTML =
+                '<div class="col-span-3 text-center py-8 text-stone-400">Không có sản phẩm trong chương trình này.</div>';
+            return;
+        }
+        document.getElementById('modalPromoProducts').innerHTML = products.map(p => {
+            const img = p.imagePath ? `/SELLING-GLASSES/public/assets/images/products/${p.imagePath}` :
+                '/SELLING-GLASSES/public/assets/images/thumbnail1.jpg';
+            const priceFmt = Number(p.minPrice).toLocaleString('vi-VN');
+            const origFmt = p.minOriginalPrice ? Number(p.minOriginalPrice).toLocaleString('vi-VN') : null;
+            return `
+            <div class="group flex flex-col border border-stone-100 rounded-2xl overflow-hidden hover:shadow-md transition">
+                <a href="/SELLING-GLASSES/public/detail?id=${p.productId}" onclick="closePromotionModal()" class="relative block">
+                    <div class="aspect-square bg-stone-100 overflow-hidden">
+                        <img src="${img}" alt="${escHtml(p.name)}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    </div>
+                    ${p.discountPercent ? `<span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-${p.discountPercent}%</span>` : ''}
+                </a>
+                <div class="p-4">
+                    <a href="/SELLING-GLASSES/public/detail?id=${p.productId}" onclick="closePromotionModal()">
+                        <h4 class="font-bold text-stone-800 hover:text-amber-700 transition text-sm mb-2 line-clamp-2">${escHtml(p.name)}</h4>
+                    </a>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-amber-700 font-black">${priceFmt}đ</span>
+                        ${origFmt ? `<span class="text-stone-400 text-xs line-through">${origFmt}đ</span>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        document.getElementById('modalPromoProducts').innerHTML =
+            '<div class="col-span-3 text-center py-8 text-stone-400">Lỗi tải dữ liệu.</div>';
+    }
+}
+
+function closePromotionModal() {
+    document.getElementById('promotionModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+document.getElementById('promotionModal').addEventListener('click', function(e) {
+    if (e.target === this) closePromotionModal();
+});
+document.addEventListener('DOMContentLoaded', loadPromotionSection);
+ </script>
  <section id="combo-section" class="py-20 px-6 max-w-7xl mx-auto scroll-mt-[104px]">
      <div
          class="bg-[#8B4513] rounded-[40px] p-12 text-white flex flex-col md:flex-row items-center justify-between mb-16 relative overflow-hidden">
@@ -155,37 +350,40 @@
      </div>
      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
          <?php if (!empty($combos)): ?>
-             <?php foreach ($combos as $index => $combo): ?>
-                 <?php $isHottest = ($index === 0); ?>
-                 <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
-                     
-                     <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
-                         <img src="/SELLING-GLASSES/public/assets/images/products/<?php echo htmlspecialchars($combo->imagePath ?? 'combo_default.jpg'); ?>" 
-                              alt="<?php echo htmlspecialchars($combo->name); ?>"
-                              class="w-full h-full object-cover">
-                     </div>
-                     <div class="flex items-center gap-2 mb-3">
-                         <span class="text-amber-700 font-bold text-xs uppercase">COMBO (<?php echo count($combo->items ?? []); ?> SP)</span>
-                     </div>
-                     <h3 class="font-bold text-lg mb-2"><?php echo htmlspecialchars($combo->name); ?></h3>
-                     <p class="text-stone-400 text-xs mb-4 line-clamp-2">
-                         <?php echo htmlspecialchars($combo->description ?? ''); ?>
-                     </p>
-                     <p class="text-amber-700 font-bold text-xl mb-6">
-                         <?php echo number_format($combo->price ?? 0, 0, ',', '.'); ?>đ
-                     </p>
-                     <div class="flex gap-3">
-                         <button onclick="openComboModal(<?php echo htmlspecialchars(json_encode(['id' => $combo->comboId, 'name' => $combo->name, 'description' => $combo->description, 'price' => $combo->price, 'imagePath' => $combo->imagePath, 'items' => $combo->items ?? []])); ?>)" class="flex-1 py-3 border border-stone-800 rounded-xl font-bold text-stone-800 hover:bg-stone-50 transition">
-                             Chi tiết
-                         </button>
-                         <button onclick="event.stopPropagation(); window.addComboToCart(<?php echo $combo->comboId; ?>)" class="flex-1 py-3 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
-                             Thêm vào giỏ
-                         </button>
-                     </div>
-                 </div>
-             <?php endforeach; ?>
+         <?php foreach ($combos as $index => $combo): ?>
+         <?php $isHottest = ($index === 0); ?>
+         <div class="bg-white rounded-[32px] p-8 border border-stone-100 text-center shadow-sm">
+
+             <div class="h-48 bg-stone-100 rounded-2xl mb-6 flex items-center justify-center overflow-hidden">
+                 <img src="/SELLING-GLASSES/public/assets/images/products/<?php echo htmlspecialchars($combo->imagePath ?? 'combo_default.jpg'); ?>"
+                     alt="<?php echo htmlspecialchars($combo->name); ?>" class="w-full h-full object-cover">
+             </div>
+             <div class="flex items-center gap-2 mb-3">
+                 <span class="text-amber-700 font-bold text-xs uppercase">COMBO
+                     (<?php echo count($combo->items ?? []); ?> SP)</span>
+             </div>
+             <h3 class="font-bold text-lg mb-2"><?php echo htmlspecialchars($combo->name); ?></h3>
+             <p class="text-stone-400 text-xs mb-4 line-clamp-2">
+                 <?php echo htmlspecialchars($combo->description ?? ''); ?>
+             </p>
+             <p class="text-amber-700 font-bold text-xl mb-6">
+                 <?php echo number_format($combo->price ?? 0, 0, ',', '.'); ?>đ
+             </p>
+             <div class="flex gap-3">
+                 <button
+                     onclick="openComboModal(<?php echo htmlspecialchars(json_encode(['id' => $combo->comboId, 'name' => $combo->name, 'description' => $combo->description, 'price' => $combo->price, 'imagePath' => $combo->imagePath, 'items' => $combo->items ?? []])); ?>)"
+                     class="flex-1 py-3 border border-stone-800 rounded-xl font-bold text-stone-800 hover:bg-stone-50 transition">
+                     Chi tiết
+                 </button>
+                 <button onclick="event.stopPropagation(); window.addComboToCart(<?php echo $combo->comboId; ?>)"
+                     class="flex-1 py-3 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
+                     Thêm vào giỏ
+                 </button>
+             </div>
+         </div>
+         <?php endforeach; ?>
          <?php else: ?>
-             <p class="col-span-3 text-center text-stone-400 py-10">Đang cập nhật combo...</p>
+         <p class="col-span-3 text-center text-stone-400 py-10">Đang cập nhật combo...</p>
          <?php endif; ?>
      </div>
  </section>
@@ -233,19 +431,19 @@
                  </li>
              </ul>
              <div class="relative inline-block mt-8">
-                    <button id="btn-start-tryon"
-                        class="px-10 py-4 bg-amber-600 rounded-full font-bold shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:bg-amber-500 transition">
-                        Bắt đầu thử kính ngay
-                    </button>
+                 <button id="btn-start-tryon"
+                     class="px-10 py-4 bg-amber-600 rounded-full font-bold shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:bg-amber-500 transition">
+                     Bắt đầu thử kính ngay
+                 </button>
 
-                    <div id="tryon-controls" class="hidden absolute left-full top-1/2 -translate-y-1/2 ml-4">
-                            <button onclick="toggleBunny()" 
-                                class="px-4 py-2 bg-pink-500 rounded-lg text-white font-bold flex items-center gap-2">
-                                <i class="fa-solid fa-paw"></i>
-                                Bunny
-                            </button>
-                        </div>
-                </div>
+                 <div id="tryon-controls" class="hidden absolute left-full top-1/2 -translate-y-1/2 ml-4">
+                     <button onclick="toggleBunny()"
+                         class="px-4 py-2 bg-pink-500 rounded-lg text-white font-bold flex items-center gap-2">
+                         <i class="fa-solid fa-paw"></i>
+                         Bunny
+                     </button>
+                 </div>
+             </div>
              <!--  DANH SÁCH CHỌN KÍNH (ẨN BAN ĐẦU) -->
              <div id="glasses-selector" class="mt-6 flex flex-wrap gap-3 hidden">
                  <button onclick="changeGlasses('Square')"
@@ -272,7 +470,7 @@
                      class="px-4 py-2 bg-white text-black rounded-lg font-bold hover:bg-gray-200 transition">
                      Cat-eye
                  </button>
-                
+
              </div>
          </div>
      </div>
@@ -319,34 +517,37 @@
          </h2>
          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
              <?php if (!empty($reviews) && is_array($reviews)): ?>
-                 <?php foreach ($reviews as $review): ?>
-                     <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100">
-                         <div class="text-amber-500 mb-4">
-                             <?php 
+             <?php foreach ($reviews as $review): ?>
+             <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100">
+                 <div class="text-amber-500 mb-4">
+                     <?php 
                              $rating = isset($review['rating']) ? intval($review['rating']) : 5;
                              for ($i = 0; $i < 5; $i++): 
                              ?>
-                                 <i class="fa-solid fa-star" style="<?= $i < $rating ? '' : 'opacity: 0.3;' ?>"></i>
-                             <?php endfor; ?>
-                         </div>
-                         <p class="text-stone-600 italic mb-8">
-                             "<?php echo htmlspecialchars($review['comment'] ?? 'Sản phẩm rất tốt!'); ?>"
-                         </p>
-                         <div class="flex items-center gap-4">
-                             <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center" style="color: white; background: linear-gradient(135deg, #d97706 0%, #ea580c 100%); font-weight: bold;">
-                                 <?php echo strtoupper(substr($review['customerName'] ?? 'User', 0, 1)); ?>
-                             </div>
-                             <div>
-                                 <p class="font-bold"><?php echo htmlspecialchars($review['customerName'] ?? 'Khách hàng'); ?></p>
-                                 <p class="text-xs text-stone-400"><?php echo date('d/m/Y', strtotime($review['createdDate'] ?? date('Y-m-d'))); ?></p>
-                             </div>
-                         </div>
-                     </div>
-                 <?php endforeach; ?>
-             <?php else: ?>
-                 <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100 md:col-span-3 text-center">
-                     <p class="text-stone-600">Chưa có đánh giá nào. Hãy mua sản phẩm và chia sẻ trải nghiệm của bạn!</p>
+                     <i class="fa-solid fa-star" style="<?= $i < $rating ? '' : 'opacity: 0.3;' ?>"></i>
+                     <?php endfor; ?>
                  </div>
+                 <p class="text-stone-600 italic mb-8">
+                     "<?php echo htmlspecialchars($review['comment'] ?? 'Sản phẩm rất tốt!'); ?>"
+                 </p>
+                 <div class="flex items-center gap-4">
+                     <div class="w-12 h-12 bg-stone-200 rounded-full flex items-center justify-center"
+                         style="color: white; background: linear-gradient(135deg, #d97706 0%, #ea580c 100%); font-weight: bold;">
+                         <?php echo strtoupper(substr($review['customerName'] ?? 'User', 0, 1)); ?>
+                     </div>
+                     <div>
+                         <p class="font-bold"><?php echo htmlspecialchars($review['customerName'] ?? 'Khách hàng'); ?>
+                         </p>
+                         <p class="text-xs text-stone-400">
+                             <?php echo date('d/m/Y', strtotime($review['createdDate'] ?? date('Y-m-d'))); ?></p>
+                     </div>
+                 </div>
+             </div>
+             <?php endforeach; ?>
+             <?php else: ?>
+             <div class="bg-stone-50 p-8 rounded-[32px] border border-stone-100 md:col-span-3 text-center">
+                 <p class="text-stone-600">Chưa có đánh giá nào. Hãy mua sản phẩm và chia sẻ trải nghiệm của bạn!</p>
+             </div>
              <?php endif; ?>
          </div>
      </div>
@@ -392,7 +593,8 @@
  <!-- Combo Detail Modal -->
  <div id="comboModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
      <div class="bg-white rounded-[32px] max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-         <div class="sticky top-0 bg-white border-b border-stone-100 p-6 flex justify-between items-center rounded-t-[32px]">
+         <div
+             class="sticky top-0 bg-white border-b border-stone-100 p-6 flex justify-between items-center rounded-t-[32px]">
              <h2 class="text-2xl font-bold">Chi tiết Combo</h2>
              <button onclick="closeComboModal()" class="text-stone-400 hover:text-stone-600 text-2xl">
                  <i class="fa-solid fa-times"></i>
@@ -407,13 +609,15 @@
                  <div class="flex flex-col justify-between">
                      <div>
                          <div class="mb-3">
-                             <span id="modalComboLabel" class="text-amber-700 font-bold text-xs uppercase">COMBO (0 SP)</span>
+                             <span id="modalComboLabel" class="text-amber-700 font-bold text-xs uppercase">COMBO (0
+                                 SP)</span>
                          </div>
                          <h3 id="modalComboName" class="text-3xl font-bold mb-4"></h3>
                          <p id="modalComboDescription" class="text-stone-600 text-base mb-6 leading-relaxed"></p>
                          <p id="modalComboPrice" class="text-amber-700 font-bold text-3xl mb-8"></p>
                      </div>
-                     <button onclick="addModalComboToCart()" class="w-full py-4 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
+                     <button onclick="addModalComboToCart()"
+                         class="w-full py-4 bg-amber-700 text-white rounded-xl font-bold hover:bg-amber-800 transition">
                          Thêm vào giỏ
                      </button>
                  </div>
@@ -430,30 +634,33 @@
  </div>
 
  <script>
-     let currentCombo = null;
+let currentCombo = null;
 
-     function openComboModal(comboData) {
-         currentCombo = comboData;
-         
-         // Populate modal with combo data
-         document.getElementById('modalComboImage').src = '/SELLING-GLASSES/public/assets/images/products/' + comboData.imagePath;
-         document.getElementById('modalComboName').textContent = comboData.name;
-         document.getElementById('modalComboDescription').textContent = comboData.description || 'Không có mô tả';
-         document.getElementById('modalComboPrice').textContent = new Intl.NumberFormat('vi-VN').format(comboData.price) + 'đ';
-         document.getElementById('modalComboLabel').textContent = 'COMBO (' + (comboData.items ? comboData.items.length : 0) + ' SP)';
-         
-         // Populate items
-         const itemsContainer = document.getElementById('modalComboItems');
-         itemsContainer.innerHTML = '';
-         
-         if (comboData.items && comboData.items.length > 0) {
-             comboData.items.forEach(item => {
-                 const itemEl = document.createElement('div');
-                 itemEl.className = 'flex items-center gap-3 p-3 bg-stone-50 rounded-lg';
-                 const imgSrc = item.imagePath 
-                     ? '/SELLING-GLASSES/public/assets/images/products/' + item.imagePath 
-                     : '/SELLING-GLASSES/public/assets/images/thumbnail1.jpg';
-                 itemEl.innerHTML = `
+function openComboModal(comboData) {
+    currentCombo = comboData;
+
+    // Populate modal with combo data
+    document.getElementById('modalComboImage').src = '/SELLING-GLASSES/public/assets/images/products/' + comboData
+        .imagePath;
+    document.getElementById('modalComboName').textContent = comboData.name;
+    document.getElementById('modalComboDescription').textContent = comboData.description || 'Không có mô tả';
+    document.getElementById('modalComboPrice').textContent = new Intl.NumberFormat('vi-VN').format(comboData.price) +
+        'đ';
+    document.getElementById('modalComboLabel').textContent = 'COMBO (' + (comboData.items ? comboData.items.length :
+        0) + ' SP)';
+
+    // Populate items
+    const itemsContainer = document.getElementById('modalComboItems');
+    itemsContainer.innerHTML = '';
+
+    if (comboData.items && comboData.items.length > 0) {
+        comboData.items.forEach(item => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'flex items-center gap-3 p-3 bg-stone-50 rounded-lg';
+            const imgSrc = item.imagePath ?
+                '/SELLING-GLASSES/public/assets/images/products/' + item.imagePath :
+                '/SELLING-GLASSES/public/assets/images/thumbnail1.jpg';
+            itemEl.innerHTML = `
                      <img src="${imgSrc}" alt="${item.productName || 'Sản phẩm'}" 
                           class="w-12 h-12 rounded-lg object-cover border border-stone-200"
                           onerror="this.src='/SELLING-GLASSES/public/assets/images/thumbnail1.jpg'">
@@ -463,58 +670,58 @@
                      </div>
                      <p class="text-amber-700 font-bold">${item.price ? new Intl.NumberFormat('vi-VN').format(item.price) + 'đ' : ''}</p>
                  `;
-                 itemsContainer.appendChild(itemEl);
-             });
-         } else {
-             itemsContainer.innerHTML = '<p class="text-stone-400 text-center py-4">Không có sản phẩm trong combo</p>';
-         }
-         
-         // Show modal
-         document.getElementById('comboModal').classList.remove('hidden');
-         document.body.style.overflow = 'hidden';
-     }
+            itemsContainer.appendChild(itemEl);
+        });
+    } else {
+        itemsContainer.innerHTML = '<p class="text-stone-400 text-center py-4">Không có sản phẩm trong combo</p>';
+    }
 
-     function closeComboModal() {
-         document.getElementById('comboModal').classList.add('hidden');
-         document.body.style.overflow = 'auto';
-         currentCombo = null;
-     }
+    // Show modal
+    document.getElementById('comboModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
 
-     function addModalComboToCart() {
-         if (currentCombo && currentCombo.id) {
-             // Gọi trực tiếp window.addComboToCart từ cart.js
-             if (typeof window.addComboToCart === 'function') {
-                 window.addComboToCart(currentCombo.id);
-             } else {
-                 // Fallback nếu cart.js chưa load
-                 const formData = new FormData();
-                 formData.append('comboId', currentCombo.id);
-                 formData.append('quantity', 1);
-                 fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
-                     method: 'POST',
-                     body: formData,
-                     credentials: 'include'
-                 })
-                 .then(r => r.json())
-                 .then(data => {
-                     if (data.success) {
-                         alert('Đã thêm combo "' + currentCombo.name + '" vào giỏ hàng!');
-                     } else {
-                         alert('Lỗi: ' + (data.message || 'Không thể thêm combo'));
-                     }
-                 })
-                 .catch(() => alert('Lỗi kết nối server'));
-             }
-             closeComboModal();
-         }
-     }
+function closeComboModal() {
+    document.getElementById('comboModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    currentCombo = null;
+}
 
-     // Close modal when clicking outside
-     document.getElementById('comboModal').addEventListener('click', function(e) {
-         if (e.target === this) {
-             closeComboModal();
-         }
-     });
+function addModalComboToCart() {
+    if (currentCombo && currentCombo.id) {
+        // Gọi trực tiếp window.addComboToCart từ cart.js
+        if (typeof window.addComboToCart === 'function') {
+            window.addComboToCart(currentCombo.id);
+        } else {
+            // Fallback nếu cart.js chưa load
+            const formData = new FormData();
+            formData.append('comboId', currentCombo.id);
+            formData.append('quantity', 1);
+            fetch('/SELLING-GLASSES/public/add-combo-to-cart', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Đã thêm combo "' + currentCombo.name + '" vào giỏ hàng!');
+                    } else {
+                        alert('Lỗi: ' + (data.message || 'Không thể thêm combo'));
+                    }
+                })
+                .catch(() => alert('Lỗi kết nối server'));
+        }
+        closeComboModal();
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('comboModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeComboModal();
+    }
+});
  </script>
 
  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
