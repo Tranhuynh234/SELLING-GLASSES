@@ -23,8 +23,9 @@ require_once "../app/controllers/ComboController.php";
 $conn = Database::connect();
 
 // tạo controller
+//Yen them
 $authController = new AuthController();
-$productController = new ProductController(); 
+$productController = new ProductController(); //Yen them
 $orderController = new OrderController();
 $promotionController = new PromotionController();
 $staffController = new StaffController();
@@ -106,6 +107,7 @@ switch ($url) {
         exit();
 
     case "update-prescription":
+        // Chỉ cho phép khách hàng đã đăng nhập cập nhật đơn kính của họ
         $userController->updatePrescription();
         exit();
 
@@ -124,17 +126,25 @@ switch ($url) {
         exit();
     // --- PRESCRIPTION ---
     case "prescription":
+        // Hiển thị giao diện nhập đơn kính
         $prescriptionController->create(); 
         exit();
 
     case "prescription-store":
+        // Xử lý lưu dữ liệu đơn kính (POST)
         $prescriptionController->store();
         exit();
 
     case "get-prescription-session":
-    $prescriptionController->getPrescriptionSession();
-    exit();
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        // Nếu tồn tại thì trả về giá, không thì trả về 0
+        $price = isset($_SESSION['prescription_total']) ? $_SESSION['prescription_total'] : 0;
+        
+        echo json_encode(['price' => $price]);
+        exit();
 
+    // --- PHẦN QUẢN LÝ CỦA YẾN ---
     // --- CATEGORY ---
     case 'get-all-categories':
         $productController->getAllCategories();
@@ -173,25 +183,13 @@ switch ($url) {
     case 'update-variant':
         $productController->updateVariant($variantId);
         break;
-
+    // ==== trân =========
     case "create-order":
         $orderController->create();
         break;
 
     case "get-orders-by-status":
         $orderController->getByStatus();
-        exit();
-
-    case "get-prescription-orders":
-        $orderController->getPrescriptionOrders();
-        exit();
-
-    case "get-prescription-detail":
-        $orderController->getPrescriptionDetail();
-        exit();
-
-    case "update-prescription-status":
-        $orderController->updatePrescriptionStatus();
         exit();
 
     case "update-order-status":
@@ -205,7 +203,7 @@ switch ($url) {
     case "get-order-detail":
         $orderController->getOrderDetail();
         exit();
-
+        // chuyen thay file 
     case "get-complaints":
         $returnController->getComplaints();
         exit();
@@ -216,7 +214,7 @@ switch ($url) {
     case 'request-return':
         $returnController->requestReturn();
         break;
-
+// ===============
     case "contact-customer":
         $orderController->contactCustomer();
         exit();
@@ -293,6 +291,14 @@ switch ($url) {
         exit();
 
     // --- Combo Module ---
+    case 'all-combos':
+        $comboController->index();
+        exit();
+
+    case 'combo-detail':
+        $comboController->detail();
+        exit();
+
     case 'get-combos':
         $comboController->getCombos();
         exit();
